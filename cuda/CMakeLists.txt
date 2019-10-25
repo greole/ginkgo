@@ -65,6 +65,7 @@ target_sources(ginkgo_cuda
     PRIVATE
         base/exception.cpp
         base/executor.cpp
+        base/memory_space.cpp
         base/version.cpp
         components/precision_conversion.cu
         components/prefix_sum.cu
