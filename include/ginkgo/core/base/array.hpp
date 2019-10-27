@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/exception.hpp>
 #include <ginkgo/core/base/exception_helpers.hpp>
 #include <ginkgo/core/base/executor.hpp>
+#include <ginkgo/core/base/memory_space.hpp>
 #include <ginkgo/core/base/types.hpp>
 #include <ginkgo/core/base/utils.hpp>
 
@@ -112,6 +113,7 @@ public:
      */
     Array() noexcept
         : num_elems_(0),
+          mem_space_(nullptr),
           data_(nullptr, default_deleter{nullptr}),
           exec_(nullptr)
     {}
@@ -123,7 +125,8 @@ public:
      */
     Array(std::shared_ptr<const Executor> exec) noexcept
         : num_elems_(0),
-          data_(nullptr, default_deleter{exec}),
+          mem_space_(exec->get_mem_space()),
+          data_(nullptr, default_deleter{mem_space_}),
           exec_(std::move(exec))
     {}
 
@@ -136,11 +139,12 @@ public:
      */
     Array(std::shared_ptr<const Executor> exec, size_type num_elems)
         : num_elems_(num_elems),
-          data_(nullptr, default_deleter{exec}),
+          mem_space_(exec->get_mem_space()),
+          data_(nullptr, default_deleter{mem_space_}),
           exec_(std::move(exec))
     {
         if (num_elems > 0) {
-            data_.reset(exec_->alloc<value_type>(num_elems));
+            data_.reset(mem_space_->alloc<value_type>(num_elems));
         }
     }
 
@@ -165,7 +169,10 @@ public:
     template <typename DeleterType>
     Array(std::shared_ptr<const Executor> exec, size_type num_elems,
           value_type *data, DeleterType deleter)
-        : num_elems_{num_elems}, data_(data, deleter), exec_{exec}
+        : num_elems_{num_elems},
+          mem_space_(exec->get_mem_space()),
+          data_(data, deleter),
+          exec_{exec}
     {}
 
     /**
@@ -180,7 +187,7 @@ public:
      */
     Array(std::shared_ptr<const Executor> exec, size_type num_elems,
           value_type *data)
-        : Array(exec, num_elems, data, default_deleter{exec})
+        : Array(exec, num_elems, data, default_deleter{exec->get_mem_space()})
     {}
 
     /**
@@ -323,8 +330,9 @@ public:
             GKO_ENSURE_COMPATIBLE_BOUNDS(other.get_num_elems(),
                                          this->num_elems_);
         }
-        exec_->copy_from(other.get_executor().get(), other.get_num_elems(),
-                         other.get_const_data(), this->get_data());
+        exec_->get_mem_space()->copy_from(
+            other->get_mem_space().get_executor().get(), other.get_num_elems(),
+            other.get_const_data(), this->get_data());
         return *this;
     }
 
@@ -472,7 +480,7 @@ public:
 
         if (num_elems > 0 && this->is_owning()) {
             num_elems_ = num_elems;
-            data_.reset(exec_->alloc<value_type>(num_elems));
+            data_.reset(exec_->get_mem_space()->alloc<value_type>(num_elems));
         } else {
             this->clear();
         }
@@ -557,6 +565,7 @@ private:
         std::unique_ptr<value_type[], std::function<void(value_type[])>>;
 
     size_type num_elems_;
+    std::shared_ptr<const MemorySpace> mem_space_;
     data_manager data_;
     std::shared_ptr<const Executor> exec_;
 };
