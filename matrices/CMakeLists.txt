@@ -3,3 +3,4 @@ configure_file("${Ginkgo_SOURCE_DIR}/matrices/config.hpp.in"
 
 configure_file("test/ani1.mtx" "${Ginkgo_BINARY_DIR}/matrices/test/ani1.mtx")
 configure_file("test/ani4.mtx" "${Ginkgo_BINARY_DIR}/matrices/test/ani4.mtx")
+configure_file("test/1138_bus.mtx" "${Ginkgo_BINARY_DIR}/matrices/test/1138_bus.mtx")
