@@ -126,7 +126,7 @@ void CudaMemorySpace::raw_copy_to(const HipMemorySpace *src,
     GKO_ASSERT_NO_CUDA_ERRORS(cudaMemcpyPeer(
         dest_ptr, this->device_id_, src_ptr, src->get_device_id(), num_bytes));
 #else
-    GKO_NOT_SUPPORTED(CudaMemorySpace);
+    GKO_NOT_SUPPORTED(this);
 #endif
 }
 
@@ -139,7 +139,7 @@ void CudaUVMSpace::raw_copy_to(const HipMemorySpace *src, size_type num_bytes,
     GKO_ASSERT_NO_CUDA_ERRORS(cudaMemcpyPeer(
         dest_ptr, this->device_id_, src_ptr, src->get_device_id(), num_bytes));
 #else
-    GKO_NOT_SUPPORTED(CudaUVMSpace);
+    GKO_NOT_SUPPORTED(this);
 #endif
 }
 
