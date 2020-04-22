@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "core/matrix/hybrid_kernels.hpp"
 #include "core/matrix/sellp_kernels.hpp"
 #include "core/matrix/sparsity_csr_kernels.hpp"
+#include "core/multigrid/amgx_pgm_kernels.hpp"
 #include "core/preconditioner/isai_kernels.hpp"
 #include "core/preconditioner/jacobi_kernels.hpp"
 #include "core/solver/bicg_kernels.hpp"
@@ -949,6 +950,25 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
 
 
 }  // namespace par_ilut_factorization
+
+
+// TODO (script:amgx_pgm): adapt this block as needed
+namespace amgx_pgm {
+
+
+template <typename ValueType, typename IndexType>
+GKO_DECLARE_AMGX_PGM_RESTRICT_APPLY_KERNEL(ValueType, IndexType)
+GKO_NOT_COMPILED(GKO_HOOK_MODULE);
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_AMGX_PGM_RESTRICT_APPLY_KERNEL);
+
+template <typename ValueType, typename IndexType>
+GKO_DECLARE_AMGX_PGM_PROLONGATE_APPLY_KERNEL(ValueType, IndexType)
+GKO_NOT_COMPILED(GKO_HOOK_MODULE);
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_AMGX_PGM_PROLONGATE_APPLY_KERNEL);
+
+}  // namespace amgx_pgm
 
 
 namespace set_all_statuses {
