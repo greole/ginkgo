@@ -34,8 +34,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define GKO_CORE_BASE_COARSEFINE_HPP_
 
 
+#include <functional>
 #include <memory>
-
 
 #include <ginkgo/core/base/lin_op.hpp>
 #include <ginkgo/core/matrix/dense.hpp>
@@ -70,8 +70,8 @@ public:
         GKO_ASSERT_EQ(coarse_dim_, x->get_size()[0]);
         GKO_ASSERT_EQUAL_COLS(b, x);
         auto exec = this->get_executor();
-        this->restrict_apply_impl(make_temporary_clone(exec, b).get(),
-                                  make_temporary_clone(exec, x).get());
+        this->restrict_apply_(make_temporary_clone(exec, b).get(),
+                              make_temporary_clone(exec, x).get());
     };
     // x = x + P * b
     void prolongate_applyadd(const LinOp *b, LinOp *x) const
@@ -80,8 +80,8 @@ public:
         GKO_ASSERT_EQ(fine_dim_, x->get_size()[0]);
         GKO_ASSERT_EQUAL_COLS(b, x);
         auto exec = this->get_executor();
-        this->prolongate_applyadd_impl(make_temporary_clone(exec, b).get(),
-                                       make_temporary_clone(exec, x).get());
+        this->prolongate_applyadd_(make_temporary_clone(exec, b).get(),
+                                   make_temporary_clone(exec, x).get());
     }
 
 protected:
@@ -92,8 +92,9 @@ protected:
     {
         coarse_->apply(alpha, b, beta, x);
     }
-    virtual void restrict_apply_impl(const LinOp *b, LinOp *x) const = 0;
-    virtual void prolongate_applyadd_impl(const LinOp *b, LinOp *x) const = 0;
+    // virtual void restrict_apply_impl(const LinOp *b, LinOp *x) const = 0;
+    // virtual void prolongate_applyadd_impl(const LinOp *b, LinOp *x) const =
+    // 0;
     void set_coarse_fine(std::shared_ptr<const LinOp> coarse,
                          size_type fine_dim)
     {
@@ -106,6 +107,8 @@ protected:
     {}
 
 private:
+    std::function<void(const LinOp *, LinOp *)> restrict_apply_;
+    std::function<void(const LinOp *, LinOp *)> prolongate_applyadd_;
     std::shared_ptr<const LinOp> coarse_{};
     size_type fine_dim_;
     size_type coarse_dim_;
