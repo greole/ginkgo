@@ -59,12 +59,42 @@ GKO_REGISTER_OPERATION(prolongate_applyadd, amgx_pgm::prolongate_applyadd);
 
 
 template <typename ValueType, typename IndexType>
-void AmgxPgm<ValueType, IndexType>::generate() GKO_NOT_IMPLEMENTED;
-// {
-// extract diagnol
-// compute agg
-// get coarse
-// }
+void AmgxPgm<ValueType, IndexType>::generate()
+{
+    // Extract diagonal elements
+    int num_unagg;
+    int num_prevunagg;
+    const auto num = this->system_matrix_->get_size()[0];
+    Array<ValueType> diag(this->get_executor(), num);
+    Array<IndexType> strongest_neighbor(this->get_executor(), num);
+    Array<IndexType> agg(this->get_executor(), num);
+    const auto amgxpgm_op =
+        as<AmgxPgmOp<ValueType, IndexType>>(this->system_matrix_.get());
+    amgxpgm_op->extract_diag(diag);
+    IndexType num_assign;
+    for (int i = 0; i < parameters_.max_iterations; i++) {
+        // Find the strongest neighbor of each row
+        amgxpgm_op->find_strongest_neighbor(diag, agg, strongest_neighbor);
+        // Match edges
+        // this->make_match_edge(num, agg, strongest_neighbor);
+        // Get the numUnAssign
+        // num_assign = this->check_count(agg);
+        // no new match or all match, the ratio of numUnAssign is lower than
+        // parameter
+        if (num_assign == 0) {
+            break;
+        }
+    }
+    // Handle the unassign
+    while (num_assign != 0) {
+        amgxpgm_op->assign_to_exist_agg(diag, agg);
+        // this->check_count(agg);
+    }
+    // Renumber the index
+    // this->make_renumber(agg, num, num_agg);
+    amgxpgm_op->amgx_pgm_generate(agg);
+    // this->set_coarse_fine();
+}
 
 template <typename ValueType, typename IndexType>
 void restrict_apply_impl(const LinOp *b, LinOp *x) GKO_NOT_IMPLEMENTED;

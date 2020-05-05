@@ -95,12 +95,17 @@ protected:
     // virtual void restrict_apply_impl(const LinOp *b, LinOp *x) const = 0;
     // virtual void prolongate_applyadd_impl(const LinOp *b, LinOp *x) const =
     // 0;
-    void set_coarse_fine(std::shared_ptr<const LinOp> coarse,
-                         size_type fine_dim)
+    void set_coarse_fine(
+        std::shared_ptr<const LinOp> coarse,
+        std::function<void(const LinOp *, LinOp *)> restrict_func,
+        std::function<void(const LinOp *, LinOp *)> prolongate_func,
+        size_type fine_dim)
     {
         coarse_ = coarse;
         fine_dim_ = fine_dim;
         coarse_dim_ = coarse->get_size()[0];
+        restrict_apply_ = restrict_func;
+        prolongate_applyadd_ = prolongate_func;
     }
     explicit CoarseFine(std::shared_ptr<const Executor> exec)
         : EnableLinOp<CoarseFine>(exec)
@@ -112,6 +117,19 @@ private:
     std::shared_ptr<const LinOp> coarse_{};
     size_type fine_dim_;
     size_type coarse_dim_;
+};
+
+template <typename ValueType, typename IndexType>
+class AmgxPgmOp {
+public:
+    virtual void extract_diag(Array<ValueType> &diag) const = 0;
+    virtual void find_strongest_neighbor(
+        const Array<ValueType> &diag, Array<IndexType> &agg,
+        Array<IndexType> &strongest_neighbor) const = 0;
+    virtual void assign_to_exist_agg(const Array<ValueType> &diag,
+                                     Array<IndexType> &agg) const = 0;
+    virtual std::unique_ptr<LinOp> amgx_pgm_generate(
+        const Array<IndexType> &agg) const = 0;
 };
 
 

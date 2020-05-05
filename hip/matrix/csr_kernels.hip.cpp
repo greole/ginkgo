@@ -654,14 +654,15 @@ void advanced_spgemm(std::shared_ptr<const HipExecutor> exec,
         auto vbeta = exec->copy_val_to_host(beta->get_const_values());
         auto total_nnz = c_nnz + d->get_num_stored_elements();
         auto nnz_per_row = total_nnz / m;
-        select_spgeam(spgeam_kernels(),
-                      [&](int compiled_subwarp_size) {
-                          return compiled_subwarp_size >= nnz_per_row ||
-                                 compiled_subwarp_size == config::warp_size;
-                      },
-                      syn::value_list<int>(), syn::type_list<>(), exec, valpha,
-                      c_tmp_row_ptrs, c_tmp_col_idxs, c_tmp_vals, vbeta,
-                      d_row_ptrs, d_col_idxs, d_vals, c);
+        select_spgeam(
+            spgeam_kernels(),
+            [&](int compiled_subwarp_size) {
+                return compiled_subwarp_size >= nnz_per_row ||
+                       compiled_subwarp_size == config::warp_size;
+            },
+            syn::value_list<int>(), syn::type_list<>(), exec, valpha,
+            c_tmp_row_ptrs, c_tmp_col_idxs, c_tmp_vals, vbeta, d_row_ptrs,
+            d_col_idxs, d_vals, c);
     } else {
         GKO_NOT_IMPLEMENTED;
     }
@@ -1140,6 +1141,43 @@ void is_sorted_by_column_index(
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
     GKO_DECLARE_CSR_IS_SORTED_BY_COLUMN_INDEX);
+
+
+template <typename ValueType, typename IndexType>
+void extract_diag(std::shared_ptr<const HipExecutor> exec,
+                  const matrix::Csr<ValueType, IndexType> *source,
+                  Array<ValueType> &diag)
+{
+    GKO_NOT_IMPLEMENTED;
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_DECLARE_CSR_EXTRACT_DIAG);
+
+
+template <typename ValueType, typename IndexType>
+void find_strongest_neighbor(std::shared_ptr<const HipExecutor> exec,
+                             const matrix::Csr<ValueType, IndexType> *source,
+                             const Array<ValueType> &diag,
+                             Array<IndexType> &agg,
+                             Array<IndexType> &strongest_neighbor)
+{
+    GKO_NOT_IMPLEMENTED;
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_CSR_FIND_STRONGEST_NEIGHBOR);
+
+
+template <typename ValueType, typename IndexType>
+void assign_to_exist_agg(std::shared_ptr<const HipExecutor> exec,
+                         const matrix::Csr<ValueType, IndexType> *source,
+                         const Array<ValueType> &diag, Array<IndexType> &agg)
+{
+    GKO_NOT_IMPLEMENTED;
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_CSR_ASSIGN_TO_EXIST_AGG);
 
 
 }  // namespace csr

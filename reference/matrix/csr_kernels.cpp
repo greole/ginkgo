@@ -841,6 +841,132 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
     GKO_DECLARE_CSR_IS_SORTED_BY_COLUMN_INDEX);
 
 
+template <typename ValueType, typename IndexType>
+void extract_diag(std::shared_ptr<const ReferenceExecutor> exec,
+                  const matrix::Csr<ValueType, IndexType> *source,
+                  Array<ValueType> &diag)
+{
+    const auto dim_size = source->get_size();
+    const auto row_ptrs = source->get_const_row_ptrs();
+    const auto col_idxs = source->get_const_col_idxs();
+    const auto vals = source->get_const_values();
+    auto diag_val = diag.get_data();
+    for (IndexType i = 0; i < dim_size[0]; i++) {
+        for (auto j = row_ptrs[i]; j < row_ptrs[i + 1]; j++) {
+            if (col_idxs[j] == i) {
+                diag_val[i] = vals[j];
+                break;
+            }
+        }
+    }
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_DECLARE_CSR_EXTRACT_DIAG);
+
+
+template <typename ValueType, typename IndexType>
+void find_strongest_neighbor(std::shared_ptr<const ReferenceExecutor> exec,
+                             const matrix::Csr<ValueType, IndexType> *source,
+                             const Array<ValueType> &diag,
+                             Array<IndexType> &agg,
+                             Array<IndexType> &strongest_neighbor)
+{
+    const auto row_ptrs = source->get_const_row_ptrs();
+    const auto col_idxs = source->get_const_col_idxs();
+    const auto vals = source->get_const_values();
+    auto max_weight_unagg = zero<remove_complex<ValueType>>();
+    auto max_weight_agg = zero<remove_complex<ValueType>>();
+    IndexType strongest_unagg = -1;
+    IndexType strongest_agg = -1;
+    for (size_type row = 0; row < agg.get_num_elems(); row++) {
+        if (agg.get_const_data()[row] == -1) {
+            for (auto j = row_ptrs[row]; j < row_ptrs[row + 1]; j++) {
+                auto weight = zero<remove_complex<ValueType>>();
+                auto col = col_idxs[j];
+                if (col == row) {
+                    continue;
+                }
+                // Handle the unsymmetric values cases
+                for (auto trans_col = row_ptrs[col];
+                     trans_col < row_ptrs[col + 1]; trans_col++) {
+                    if (col_idxs[trans_col] == row) {
+                        weight = 0.5 * (abs(vals[j]) + abs(vals[trans_col])) /
+                                 max(abs(diag.get_const_data()[row]),
+                                     abs(diag.get_const_data()[col]));
+                        break;
+                    }
+                }
+
+                if (agg.get_const_data()[col] == -1 &&
+                    (weight > max_weight_unagg ||
+                     (weight == max_weight_unagg && col > strongest_unagg))) {
+                    max_weight_unagg = weight;
+                    strongest_unagg = col;
+                } else if (agg.get_const_data()[col] != -1 &&
+                           (weight > max_weight_agg ||
+                            (weight == max_weight_agg &&
+                             col > strongest_agg))) {
+                    max_weight_agg = weight;
+                    strongest_agg = col;
+                }
+
+                if (strongest_unagg == -1 && strongest_agg != -1) {
+                    // all neighbor is agg, connect to the strongest agg
+                    agg.get_data()[row] = agg.get_data()[strongest_agg];
+                } else if (strongest_unagg != -1) {
+                    // set the strongest neighbor in the unagg group
+                    strongest_neighbor.get_data()[row] = strongest_unagg;
+                } else {
+                    // no neighbor
+                    strongest_neighbor.get_data()[row] = row;
+                }
+            }
+        }
+    }
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_CSR_FIND_STRONGEST_NEIGHBOR);
+
+
+template <typename ValueType, typename IndexType>
+void assign_to_exist_agg(std::shared_ptr<const ReferenceExecutor> exec,
+                         const matrix::Csr<ValueType, IndexType> *source,
+                         const Array<ValueType> &diag, Array<IndexType> &agg)
+{
+    const auto row_ptrs = source->get_const_row_ptrs();
+    const auto col_idxs = source->get_const_col_idxs();
+    const auto vals = source->get_const_values();
+    const auto diag_vals = diag.get_const_data();
+    auto max_weight_agg = zero<remove_complex<ValueType>>();
+    IndexType strongest_agg = -1;
+    for (IndexType row = 0; row < agg.get_num_elems(); row++) {
+        for (auto idx = row_ptrs[row]; idx < row_ptrs[row + 1]; idx++) {
+            auto col = col_idxs[idx];
+            if (col == row) {
+                break;
+            }
+            auto weight =
+                abs(vals[idx]) / max(abs(diag_vals[row]), abs(diag_vals[col]));
+            if (agg.get_const_data()[col] != -1 &&
+                (weight > max_weight_agg ||
+                 (weight == max_weight_agg && col > strongest_agg))) {
+                max_weight_agg = weight;
+                strongest_agg = col;
+            }
+        }
+        if (strongest_agg != -1) {
+            agg.get_data()[row] = agg.get_const_data()[strongest_agg];
+        } else {
+            agg.get_data()[row] = row;
+        }
+    }
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_CSR_ASSIGN_TO_EXIST_AGG);
+
+
 }  // namespace csr
 }  // namespace reference
 }  // namespace kernels

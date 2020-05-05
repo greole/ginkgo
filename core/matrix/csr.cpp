@@ -76,6 +76,9 @@ GKO_REGISTER_OPERATION(calculate_nonzeros_per_row,
 GKO_REGISTER_OPERATION(sort_by_column_index, csr::sort_by_column_index);
 GKO_REGISTER_OPERATION(is_sorted_by_column_index,
                        csr::is_sorted_by_column_index);
+GKO_REGISTER_OPERATION(extract_diag, csr::extract_diag);
+GKO_REGISTER_OPERATION(find_strongest_neighbor, csr::find_strongest_neighbor);
+GKO_REGISTER_OPERATION(assign_to_exist_agg, csr::assign_to_exist_agg);
 
 
 }  // namespace csr
@@ -453,6 +456,42 @@ bool Csr<ValueType, IndexType>::is_sorted_by_column_index() const
     bool is_sorted;
     exec->run(csr::make_is_sorted_by_column_index(this, &is_sorted));
     return is_sorted;
+}
+
+
+template <typename ValueType, typename IndexType>
+void Csr<ValueType, IndexType>::extract_diag(Array<ValueType> &diag) const
+{
+    auto exec = this->get_executor();
+    exec->run(csr::make_extract_diag(this, diag));
+}
+
+
+template <typename ValueType, typename IndexType>
+void Csr<ValueType, IndexType>::find_strongest_neighbor(
+    const Array<ValueType> &diag, Array<IndexType> &agg,
+    Array<IndexType> &strongest_neighbor) const
+{
+    auto exec = this->get_executor();
+    exec->run(
+        csr::make_find_strongest_neighbor(this, diag, agg, strongest_neighbor));
+}
+
+
+template <typename ValueType, typename IndexType>
+void Csr<ValueType, IndexType>::assign_to_exist_agg(
+    const Array<ValueType> &diag, Array<IndexType> &agg) const
+{
+    auto exec = this->get_executor();
+    exec->run(csr::make_assign_to_exist_agg(this, diag, agg));
+}
+
+
+template <typename ValueType, typename IndexType>
+std::unique_ptr<LinOp> Csr<ValueType, IndexType>::amgx_pgm_generate(
+    const Array<IndexType> &agg) const
+{
+    GKO_NOT_IMPLEMENTED;
 }
 
 
