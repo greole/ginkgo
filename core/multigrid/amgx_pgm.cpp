@@ -53,7 +53,9 @@ namespace amgx_pgm {
 
 GKO_REGISTER_OPERATION(restrict_apply, amgx_pgm::restrict_apply);
 GKO_REGISTER_OPERATION(prolongate_applyadd, amgx_pgm::prolongate_applyadd);
-
+GKO_REGISTER_OPERATION(match_edge, amgx_pgm::match_edge);
+GKO_REGISTER_OPERATION(count_unagg, amgx_pgm::count_unagg);
+GKO_REGISTER_OPERATION(renumber, amgx_pgm::renumber);
 
 }  // namespace amgx_pgm
 
@@ -64,6 +66,7 @@ void AmgxPgm<ValueType, IndexType>::generate()
     // Extract diagonal elements
     int num_unagg;
     int num_prevunagg;
+    auto exec = this->get_executor();
     const auto num = this->system_matrix_->get_size()[0];
     Array<ValueType> diag(this->get_executor(), num);
     Array<IndexType> strongest_neighbor(this->get_executor(), num);
@@ -76,9 +79,9 @@ void AmgxPgm<ValueType, IndexType>::generate()
         // Find the strongest neighbor of each row
         amgxpgm_op->find_strongest_neighbor(diag, agg, strongest_neighbor);
         // Match edges
-        // this->make_match_edge(num, agg, strongest_neighbor);
+        exec->run(amgx_pgm::make_match_edge(agg, strongest_neighbor));
         // Get the numUnAssign
-        // num_assign = this->check_count(agg);
+        exec->run(amgx_pgm::make_count_unagg(agg, &num_assign));
         // no new match or all match, the ratio of numUnAssign is lower than
         // parameter
         if (num_assign == 0) {
@@ -88,10 +91,10 @@ void AmgxPgm<ValueType, IndexType>::generate()
     // Handle the unassign
     while (num_assign != 0) {
         amgxpgm_op->assign_to_exist_agg(diag, agg);
-        // this->check_count(agg);
+        exec->run(amgx_pgm::make_count_unagg(agg, &num_assign));
     }
     // Renumber the index
-    // this->make_renumber(agg, num, num_agg);
+    exec->run(amgx_pgm::make_renumber(agg));
     amgxpgm_op->amgx_pgm_generate(agg);
     // this->set_coarse_fine();
 }
