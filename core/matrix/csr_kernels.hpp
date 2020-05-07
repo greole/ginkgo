@@ -184,6 +184,12 @@ namespace kernels {
                              const Array<ValueType> &diag,                    \
                              Array<IndexType> &agg)
 
+#define GKO_DECLARE_CSR_AMGX_PGM_GENERATE(ValueType, IndexType)             \
+    void amgx_pgm_generate(std::shared_ptr<const DefaultExecutor> exec,     \
+                           const matrix::Csr<ValueType, IndexType> *source, \
+                           const Array<IndexType> &agg,                     \
+                           matrix::Csr<ValueType, IndexType> *coarse)
+
 #define GKO_DECLARE_ALL_AS_TEMPLATES                                         \
     template <typename ValueType, typename IndexType>                        \
     GKO_DECLARE_CSR_SPMV_KERNEL(ValueType, IndexType);                       \
@@ -230,7 +236,9 @@ namespace kernels {
     template <typename ValueType, typename IndexType>                        \
     GKO_DECLARE_CSR_FIND_STRONGEST_NEIGHBOR(ValueType, IndexType);           \
     template <typename ValueType, typename IndexType>                        \
-    GKO_DECLARE_CSR_ASSIGN_TO_EXIST_AGG(ValueType, IndexType)
+    GKO_DECLARE_CSR_ASSIGN_TO_EXIST_AGG(ValueType, IndexType);               \
+    template <typename ValueType, typename IndexType>                        \
+    GKO_DECLARE_CSR_AMGX_PGM_GENERATE(ValueType, IndexType)
 
 
 namespace omp {

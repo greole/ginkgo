@@ -1180,6 +1180,19 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
     GKO_DECLARE_CSR_ASSIGN_TO_EXIST_AGG);
 
 
+template <typename ValueType, typename IndexType>
+void amgx_pgm_generate(std::shared_ptr<const HipExecutor> exec,
+                       const matrix::Csr<ValueType, IndexType> *source,
+                       const Array<IndexType> &agg,
+                       matrix::Csr<ValueType, IndexType> *coarse)
+{
+    GKO_NOT_IMPLEMENTED;
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_CSR_AMGX_PGM_GENERATE);
+
+
 }  // namespace csr
 }  // namespace hip
 }  // namespace kernels

@@ -810,7 +810,7 @@ public:
     void assign_to_exist_agg(const Array<ValueType> &diag,
                              Array<IndexType> &agg) const override;
     std::unique_ptr<LinOp> amgx_pgm_generate(
-        const Array<IndexType> &agg) const override;
+        const size_type num_agg, const Array<IndexType> &agg) const override;
 
 protected:
     /**

@@ -99,8 +99,8 @@ GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_COUNT_UNAGG_KERNEL);
 
 
 template <typename IndexType>
-void renumber(std::shared_ptr<const HipExecutor> exec,
-              Array<IndexType> &agg) GKO_NOT_IMPLEMENTED;
+void renumber(std::shared_ptr<const HipExecutor> exec, Array<IndexType> &agg,
+              size_type *num_agg) GKO_NOT_IMPLEMENTED;
 
 GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_RENUMBER_KERNEL);
 

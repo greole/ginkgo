@@ -73,7 +73,7 @@ namespace amgx_pgm {
 
 #define GKO_DECLARE_AMGX_PGM_RENUMBER_KERNEL(_itype)           \
     void renumber(std::shared_ptr<const DefaultExecutor> exec, \
-                  Array<_itype> &agg)
+                  Array<_itype> &agg, size_type *num_agg)
 
 
 #define GKO_DECLARE_ALL_AS_TEMPLATES                                    \

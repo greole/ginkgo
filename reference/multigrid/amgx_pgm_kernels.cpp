@@ -140,7 +140,7 @@ GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_COUNT_UNAGG_KERNEL);
 
 template <typename IndexType>
 void renumber(std::shared_ptr<const ReferenceExecutor> exec,
-              Array<IndexType> &agg)
+              Array<IndexType> &agg, size_type *num_agg)
 {
     const auto num = agg.get_num_elems();
     Array<IndexType> agg_map(exec, num);
@@ -153,6 +153,7 @@ void renumber(std::shared_ptr<const ReferenceExecutor> exec,
     for (size_type i = 0; i < num; i++) {
         agg_vals[i] = agg_map_vals[agg_vals[i]];
     }
+    *num_agg = agg_map_vals[num - 1];
 }
 
 GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_RENUMBER_KERNEL);

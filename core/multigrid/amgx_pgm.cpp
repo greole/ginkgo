@@ -93,9 +93,10 @@ void AmgxPgm<ValueType, IndexType>::generate()
         amgxpgm_op->assign_to_exist_agg(diag, agg);
         exec->run(amgx_pgm::make_count_unagg(agg, &num_assign));
     }
+    size_type num_agg;
     // Renumber the index
-    exec->run(amgx_pgm::make_renumber(agg));
-    amgxpgm_op->amgx_pgm_generate(agg);
+    exec->run(amgx_pgm::make_renumber(agg, &num_agg));
+    amgxpgm_op->amgx_pgm_generate(num_agg, agg);
     // this->set_coarse_fine();
 }
 
