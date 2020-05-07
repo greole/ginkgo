@@ -86,13 +86,6 @@ public:
         return system_matrix_;
     }
 
-    /**
-     * Returns the krylov dimension.
-     *
-     * @return the krylov dimension
-     */
-    size_type get_krylov_dim() const { return krylov_dim_; }
-
     GKO_CREATE_FACTORY_PARAMETERS(parameters, Factory)
     {
         /**
@@ -121,6 +114,9 @@ public:
     };
     GKO_ENABLE_LIN_OP_FACTORY(Gmres, parameters, Factory);
     GKO_ENABLE_BUILD_METHOD(Factory);
+    GKO_ENABLE_SET_GET_PARAMETERS(
+        stop_criterion_factory, std::shared_ptr<const stop::CriterionFactory>);
+    GKO_ENABLE_SET_GET_PARAMETERS(krylov_dim, size_type);
 
 protected:
     void apply_impl(const LinOp *b, LinOp *x) const override;
