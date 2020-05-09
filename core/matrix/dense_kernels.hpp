@@ -215,6 +215,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace dense {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace dense
+}  // namespace mpi
+
+
 namespace cuda {
 namespace dense {
 

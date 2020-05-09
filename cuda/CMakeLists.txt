@@ -120,6 +120,16 @@ target_link_libraries(ginkgo_cuda PRIVATE ${CUDA_RUNTIME_LIBS} ${CUBLAS} ${CUSPA
 # Need to link against ginkgo_hip for the `raw_copy_to(HipExecutor ...)` method
 target_link_libraries(ginkgo_cuda PUBLIC ginkgo_hip)
 
+if (GINKGO_HAVE_METIS)
+  target_link_libraries(ginkgo_cuda PUBLIC METIS::METIS)
+  # target_include_directories(ginkgo_cuda PRIVATE ${METIS_INCLUDE_DIR})
+endif()
+
+if (GINKGO_HAVE_HWLOC)
+  target_link_libraries(ginkgo_cuda PRIVATE ${HWLOC_hwloc_LIBRARY})
+  target_include_directories(ginkgo_cuda PRIVATE ${HWLOC_hwloc.h_DIRS})
+endif()
+
 cas_target_cuda_architectures(ginkgo_cuda
     ARCHITECTURES ${GINKGO_CUDA_ARCHITECTURES}
     UNSUPPORTED "20" "21")

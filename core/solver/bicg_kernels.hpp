@@ -124,6 +124,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace hip
 
 
+namespace mpi {
+namespace bicg {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace bicg
+}  // namespace mpi
+
+
 #undef GKO_DECLARE_ALL_AS_TEMPLATES
 
 

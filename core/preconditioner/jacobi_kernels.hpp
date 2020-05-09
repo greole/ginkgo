@@ -123,6 +123,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace jacobi {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace jacobi
+}  // namespace mpi
+
+
 namespace cuda {
 namespace jacobi {
 

@@ -391,6 +391,7 @@ GKO_ATTRIBUTES constexpr bool operator!=(precision_reduction x,
  */
 #define GKO_ENABLE_FOR_ALL_EXECUTORS(_enable_macro) \
     _enable_macro(OmpExecutor, omp);                \
+    _enable_macro(MpiExecutor, mpi);                \
     _enable_macro(HipExecutor, hip);                \
     _enable_macro(CudaExecutor, cuda)
 

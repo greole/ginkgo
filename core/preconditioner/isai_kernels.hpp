@@ -101,6 +101,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace hip
 
 
+namespace mpi {
+namespace isai {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace isai
+}  // namespace mpi
+
+
 #undef GKO_DECLARE_ALL_AS_TEMPLATES
 
 

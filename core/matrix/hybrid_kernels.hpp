@@ -77,6 +77,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace hybrid {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace hybrid
+}  // namespace mpi
+
+
 namespace cuda {
 namespace hybrid {
 

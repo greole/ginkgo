@@ -20,6 +20,7 @@ stages:
   BUILD_REFERENCE: "ON"
   BUILD_OMP: "OFF"
   BUILD_CUDA: "OFF"
+  BUILD_MPI: "OFF"
   BUILD_HIP: "OFF"
   CXX_FLAGS: ""
   EXTRA_CMAKE_FLAGS: ""
@@ -55,7 +56,7 @@ stages:
         ${CUDA_ARCH_STR} ${CUDA_HOST_STR}
         -DGINKGO_DEVEL_TOOLS=OFF -DGINKGO_BUILD_REFERENCE=${BUILD_REFERENCE}
         -DGINKGO_BUILD_OMP=${BUILD_OMP} -DGINKGO_BUILD_CUDA=${BUILD_CUDA}
-        -DGINKGO_BUILD_HIP=${BUILD_HIP}
+        -DGINKGO_BUILD_HIP=${BUILD_HIP} -DGINKGO_BUILD_MPI=${BUILD_MPI}
         -DGINKGO_BUILD_TESTS=ON -DGINKGO_BUILD_EXAMPLES=ON
     - make -j${NUM_CORES}
   dependencies: []
@@ -79,7 +80,7 @@ stages:
         ${CUDA_ARCH_STR} ${CUDA_HOST_STR}
         -DGINKGO_DEVEL_TOOLS=OFF -DGINKGO_BUILD_REFERENCE=${BUILD_REFERENCE}
         -DGINKGO_BUILD_OMP=${BUILD_OMP} -DGINKGO_BUILD_CUDA=${BUILD_CUDA}
-        -DGINKGO_BUILD_HIP=${BUILD_HIP}
+        -DGINKGO_BUILD_HIP=${BUILD_HIP} -DGINKGO_BUILD_MPI=${BUILD_MPI}
         -DGINKGO_BUILD_TESTS=ON -DGINKGO_BUILD_EXAMPLES=ON
     - make -j${NUM_CORES} install
     - |
@@ -401,6 +402,29 @@ build/nocuda/intel/core/debug/shared:
   tags:
     - private_ci
     - cuda
+
+build/nocuda/gcc/metis/release/shared:
+  <<: *default_build
+  image: localhost:5000/gko-nocuda-gnu8-llvm70
+  variables:
+    <<: *default_variables
+    BUILD_OMP: "ON"
+    WITH_METIS: "ON"
+    BUILD_TYPE: Release
+  tags:
+    - private_ci
+    - cpu
+
+build/nocuda/gcc/mpi/release/shared:
+  <<: *default_build
+  image: localhost:5000/gko-nocuda-gnu8-llvm70
+  variables:
+    <<: *default_variables
+    BUILD_OMP: "ON"
+    BUILD_MPI: "ON"
+    BUILD_TYPE: Release
+  tags:
+    - private_ci
     - cpu
 
 build/nocuda/gcc/omp/release/shared:

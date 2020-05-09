@@ -199,6 +199,13 @@ public:
     version omp_version;
 
     /**
+     * Contains version information of the MPI module.
+     *
+     * This is the version of the static/shared library called "ginkgo_mpi".
+     */
+    version mpi_version;
+
+    /**
      * Contains version information of the CUDA module.
      *
      * This is the version of the static/shared library called "ginkgo_cuda".
@@ -225,6 +232,8 @@ private:
 
     static version get_omp_version() noexcept;
 
+    static version get_mpi_version() noexcept;
+
     static version get_cuda_version() noexcept;
 
     static version get_hip_version() noexcept;
@@ -234,6 +243,7 @@ private:
           core_version{get_core_version()},
           reference_version{get_reference_version()},
           omp_version{get_omp_version()},
+          mpi_version{get_mpi_version()},
           cuda_version{get_cuda_version()},
           hip_version{get_hip_version()}
     {}

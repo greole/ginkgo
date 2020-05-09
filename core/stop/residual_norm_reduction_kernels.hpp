@@ -72,6 +72,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace residual_norm_reduction {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace residual_norm_reduction
+}  // namespace mpi
+
+
 namespace cuda {
 namespace residual_norm_reduction {
 

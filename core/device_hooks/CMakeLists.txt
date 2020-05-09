@@ -8,6 +8,16 @@ if(NOT GINKGO_BUILD_CUDA)
     ginkgo_install_library(ginkgo_cuda cuda)
 endif()
 
+if (NOT GINKGO_BUILD_MPI)
+    add_library(ginkgo_mpi
+        $<TARGET_OBJECTS:ginkgo_mpi_device>
+        mpi_hooks.cpp)
+    ginkgo_compile_features(ginkgo_mpi)
+    target_link_libraries(ginkgo_mpi PUBLIC ginkgo_cuda)
+    ginkgo_default_includes(ginkgo_mpi)
+    ginkgo_install_library(ginkgo_mpi mpi)
+endif()
+
 if (NOT GINKGO_BUILD_OMP)
     add_library(ginkgo_omp
         $<TARGET_OBJECTS:ginkgo_omp_device>
@@ -18,6 +28,7 @@ if (NOT GINKGO_BUILD_OMP)
     ginkgo_default_includes(ginkgo_omp)
     ginkgo_install_library(ginkgo_omp omp)
 endif()
+
 
 if (NOT GINKGO_BUILD_REFERENCE)
     add_library(ginkgo_reference

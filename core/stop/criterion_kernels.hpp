@@ -62,6 +62,15 @@ GKO_DECLARE_SET_ALL_STATUSES_KERNEL();
 }  // namespace omp
 
 
+namespace mpi {
+namespace set_all_statuses {
+
+GKO_DECLARE_SET_ALL_STATUSES_KERNEL();
+
+}  // namespace set_all_statuses
+}  // namespace mpi
+
+
 namespace cuda {
 namespace set_all_statuses {
 

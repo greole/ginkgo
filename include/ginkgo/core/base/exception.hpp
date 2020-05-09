@@ -198,6 +198,100 @@ public:
 
 
 /**
+ * MetisError is thrown when a METIS routine throws a non-zero error code.
+ */
+class MetisError : public Error {
+public:
+    /**
+     * Initializes a METIS error.
+     *
+     * @param file The name of the offending source file
+     * @param line The source code line number where the error occurred
+     * @param func The name of the METIS routine that failed
+     * @param error_code The resulting METIS error code
+     */
+    MetisError(const std::string &file, int line, const std::string &func,
+               int64 error_code)
+        : Error(file, line, func + ": " + get_error(error_code))
+    {}
+
+private:
+    static std::string get_error(int64 error_code)
+    {
+#if GKO_HAVE_METIS
+#define GKO_REGISTER_METIS_ERROR(error_name) \
+    if (error_code == int64(error_name)) {   \
+        return #error_name;                  \
+    }
+        GKO_REGISTER_METIS_ERROR(METIS_ERROR_INPUT);
+        GKO_REGISTER_METIS_ERROR(METIS_ERROR_MEMORY);
+        GKO_REGISTER_METIS_ERROR(METIS_ERROR);
+#endif
+
+        return "Unknown error";
+    }
+};
+
+
+/**
+ * MpiError is thrown when a MPI routine throws a non-zero error code.
+ */
+class MpiError : public Error {
+public:
+    /**
+     * Initializes a MPI error.
+     * @param file The name of the offending source file
+     * @param line The source code line number where the error occurred
+     * @param func The name of the MPI routine that failed
+     * @param error_code The resulting MPI error code
+     */
+    MpiError(const std::string &file, int line, const std::string &func,
+             int64 error_code)
+        : Error(file, line, func + ": " + get_error(error_code))
+    {}
+
+private:
+    static std::string get_error(int64 error_code);
+};
+
+
+/**
+ * MpiError is thrown when a MPI has already been initialized.
+ * MPI_Init can only be called once in a program.
+ */
+class MpiInitialized : public Error {
+public:
+    /**
+     * Initializes a MPI error.
+     * @param file The name of the offending source file
+     * @param line The source code line number where the error occurred
+     * @param func The name of the MPI routine that failed
+     */
+    MpiInitialized(const std::string &file, int line, const std::string &func)
+        : Error(file, line, func)
+    {}
+};
+
+
+/**
+ * MpiError is thrown when a MPI has already been finalized.
+ * Any MPI routines that are called after calling MPI_Finalize throw this error.
+ */
+class MpiFinalized : public Error {
+public:
+    /**
+     * Initializes a MPI error.
+     * @param file The name of the offending source file
+     * @param line The source code line number where the error occurred
+     * @param func The name of the MPI routine that failed
+     */
+    MpiFinalized(const std::string &file, int line, const std::string &func)
+        : Error(file, line, func)
+    {}
+};
+
+
+/**
  * CudaError is thrown when a CUDA routine throws a non-zero error code.
  */
 class CudaError : public Error {

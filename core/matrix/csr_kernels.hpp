@@ -218,6 +218,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace csr {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace csr
+}  // namespace mpi
+
+
 namespace cuda {
 namespace csr {
 

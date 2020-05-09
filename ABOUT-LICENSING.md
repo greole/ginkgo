@@ -240,6 +240,11 @@ also licensed the same as the deal.II library.
 > page](https://github.com/dealii/dealii/blob/master/LICENSE.md) or on the
 > official [GNU license page](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html).
 
+For generating tests with MPI special care needs to be taken with gtest. Hence a header-only
+library gtest-mpi-listener is used. This library is provided by LLNL and is hosted on github
+(https://github.com/LLNL/gtest-mpi-listener). It is available under a dual license, MIT and 
+Apache 2.0. More details on its LICENSE can be found on their github repository page. 
+
 __NOTE:__ Some of the options that pull additional software when compiling
 Ginkgo are ON by default, and have to be disabled manually to prevent
 third-party licensing. Refer to the [Installation section in

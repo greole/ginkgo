@@ -111,6 +111,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace gmres {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace gmres
+}  // namespace mpi
+
+
 namespace cuda {
 namespace gmres {
 

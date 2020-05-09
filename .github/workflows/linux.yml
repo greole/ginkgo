@@ -1,0 +1,44 @@
+name: Linux-build
+
+on: [push]
+
+jobs:
+  cuda-mpich-build:
+
+    name: Build with CUDA and MPI
+    runs-on: [ubuntu-latest]
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: install-mpi
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mpich
+    - name: install-cuda
+      run: |
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
+        sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+        sudo add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /"
+        sudo apt-get update
+        sudo apt-get -y install cuda
+    - name: info
+      run: |
+        g++ -v
+        /usr/local/cuda-10.2/bin/nvcc --version
+        mpiexec --version
+        cmake --version
+        MPI_DIR=$(which mpicxx)
+        echo $MPI_DIR
+    - name: build-test
+      run: |
+        export PATH=/usr/local/cuda-10.2/bin:/usr/local/cuda-10.2/NsightCompute-2019.1${PATH:+:${PATH}}
+        export LD_LIBRARY_PATH=/usr/local/cuda-10.2/lib64\
+                         ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+        mkdir build
+        cd build
+        cmake -DCMAKE_PREFIX_PATH=/usr/local/cuda-10.2 -DGINKGO_BUILD_BENCHMARKS=off -DGINKGO_BUILD_EXAMPLES=off -DGINKGO_BUILD_CUDA=on -DGINKGO_BUILD_MPI=on ..
+        make -j10
+        ctest -j10 -E "cuda"
+        make install
+        make test_install

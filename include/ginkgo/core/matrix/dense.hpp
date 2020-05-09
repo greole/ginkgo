@@ -448,6 +448,7 @@ protected:
      */
     Dense(std::shared_ptr<const Executor> exec, const dim<2> &size,
           size_type stride)
+        // : EnableDistributedData<Dense>(exec, size),
         : EnableLinOp<Dense>(exec, size),
           values_(exec, size[0] * stride),
           stride_(stride)

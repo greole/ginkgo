@@ -108,6 +108,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace cgs {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace cgs
+}  // namespace mpi
+
+
 namespace cuda {
 namespace cgs {
 

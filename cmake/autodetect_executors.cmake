@@ -1,15 +1,25 @@
 set(GINKGO_HAS_OMP OFF)
+set(GINKGO_HAS_MPI OFF)
 set(GINKGO_HAS_CUDA OFF)
 set(GINKGO_HAS_HIP OFF)
 find_package(OpenMP)
+find_package(MPI)
 include(CheckLanguage)
 check_language(CUDA)
+
 
 if(OpenMP_CXX_FOUND)
     if(NOT DEFINED GINKGO_BUILD_OMP)
         message(STATUS "Enabling OpenMP executor")
     endif()
     set(GINKGO_HAS_OMP ON)
+endif()
+
+if(MPI_FOUND)
+  if(NOT DEFINED GINKGO_BUILD_MPI)
+    message(STATUS "Enabling MPI executor")
+  endif()
+  set(GINKGO_HAS_MPI ON)
 endif()
 
 if(CMAKE_CUDA_COMPILER)

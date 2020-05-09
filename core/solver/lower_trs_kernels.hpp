@@ -123,6 +123,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace hip
 
 
+namespace mpi {
+namespace lower_trs {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace lower_trs
+}  // namespace mpi
+
+
 #undef GKO_DECLARE_ALL_AS_TEMPLATES
 
 

@@ -93,6 +93,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace hip
 
 
+namespace mpi {
+namespace components {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace components
+}  // namespace mpi
+
+
 #undef GKO_DECLARE_ALL_AS_TEMPLATES
 
 

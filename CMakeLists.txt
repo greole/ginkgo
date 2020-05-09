@@ -4,18 +4,28 @@ project(Ginkgo LANGUAGES C CXX VERSION 1.1.1 DESCRIPTION "A numerical linear alg
 set(Ginkgo_VERSION_TAG "develop")
 set(PROJECT_VERSION_TAG ${Ginkgo_VERSION_TAG})
 
-# Determine which executors can be compiled
-include(cmake/hip_path.cmake)
-include(cmake/autodetect_executors.cmake)
-include(cmake/build_type_helpers.cmake)
-
 # Ginkgo configuration options
+option(GINKGO_DISABLE_AUTODETECT "Disable the auto-detection of executor modules" OFF)
+if(GINKGO_DISABLE_AUTODETECT)
+  message(STATUS "Auto-detection of executor modules has been disabled. Please enable the executor modules you need, manually.")
+  set(GINKGO_HAS_OMP OFF)
+  set(GINKGO_HAS_MPI OFF)
+  set(GINKGO_HAS_CUDA OFF)
+  set(GINKGO_HAS_HIP OFF)
+else()
+  # Determine which executors can be compiled
+  include(cmake/hip_path.cmake)
+  include(cmake/autodetect_executors.cmake)
+  include(cmake/build_type_helpers.cmake)
+endif()
+
 option(GINKGO_DEVEL_TOOLS "Add development tools to the build system" OFF)
 option(GINKGO_BUILD_TESTS "Generate build files for unit tests" ON)
 option(GINKGO_BUILD_EXAMPLES "Build Ginkgo's examples" ON)
 option(GINKGO_BUILD_BENCHMARKS "Build Ginkgo's benchmarks" ON)
 option(GINKGO_BUILD_REFERENCE "Compile reference CPU kernels" ON)
 option(GINKGO_BUILD_OMP "Compile OpenMP kernels for CPU" ${GINKGO_HAS_OMP})
+option(GINKGO_BUILD_MPI "Compile MPI kernels for CPU" ${GINKGO_HAS_MPI})
 option(GINKGO_BUILD_CUDA "Compile kernels for NVIDIA GPUs" ${GINKGO_HAS_CUDA})
 option(GINKGO_BUILD_HIP "Compile kernels for AMD or NVIDIA GPUs" ${GINKGO_HAS_HIP})
 option(GINKGO_WITH_HWLOC "Add support for the Hardware Locality module from Open-MPI" OFF)
@@ -150,7 +160,7 @@ endif()
 # set(HWLOC_XMLFILE "${CMAKE_SOURCE_DIR}/topo.xml")
 set(GINKGO_HAVE_HWLOC 0)
 if(GINKGO_WITH_HWLOC)
-  find_package(HWLOC)
+  find_package(HWLOC REQUIRED)
   set(GKO_HWLOC_XMLFILE "${HWLOC_XMLFILE}")
   if(HWLOC_FOUND)
     set(GINKGO_HAVE_HWLOC 1)
@@ -196,6 +206,7 @@ add_subdirectory(core)           # Core Ginkgo types and top-level functions
 if (GINKGO_BUILD_REFERENCE)
     add_subdirectory(reference)  # Reference kernel implementations
 endif()
+
 if (GINKGO_BUILD_OMP)
     add_subdirectory(omp)        # High-performance omp kernels
 endif()
@@ -203,6 +214,10 @@ endif()
 # which needs to know the `ginkgo` target.
 if(GINKGO_BUILD_HIP)
     add_subdirectory(hip)        # High-performance kernels for AMD or NVIDIA GPUs
+endif()
+
+if (GINKGO_BUILD_MPI)
+  add_subdirectory(mpi)        # High-performance mpi kernels
 endif()
 
 # Non core directories and targets

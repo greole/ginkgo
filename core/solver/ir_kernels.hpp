@@ -65,6 +65,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace ir {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace ir
+}  // namespace mpi
+
+
 namespace cuda {
 namespace ir {
 

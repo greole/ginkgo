@@ -48,6 +48,17 @@ std::shared_ptr<const Executor> CudaExecutor::get_master() const noexcept
     return master_;
 }
 
+std::shared_ptr<Executor> CudaExecutor::get_sub_executor() noexcept
+{
+    return this->shared_from_this();
+}
+
+
+std::shared_ptr<const Executor> CudaExecutor::get_sub_executor() const noexcept
+{
+    return this->shared_from_this();
+}
+
 
 std::shared_ptr<MemorySpace> CudaExecutor::get_mem_space() noexcept
 {

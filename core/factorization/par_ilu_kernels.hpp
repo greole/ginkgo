@@ -97,6 +97,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace hip
 
 
+namespace mpi {
+namespace par_ilu_factorization {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace par_ilu_factorization
+}  // namespace mpi
+
+
 #undef GKO_DECLARE_ALL_AS_TEMPLATES
 
 

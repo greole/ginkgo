@@ -45,6 +45,17 @@ std::shared_ptr<const Executor> HipExecutor::get_master() const noexcept
     return master_;
 }
 
+std::shared_ptr<Executor> HipExecutor::get_sub_executor() noexcept
+{
+    return this->shared_from_this();
+}
+
+
+std::shared_ptr<const Executor> HipExecutor::get_sub_executor() const noexcept
+{
+    return this->shared_from_this();
+}
+
 
 std::shared_ptr<MemorySpace> HipExecutor::get_mem_space() noexcept
 {

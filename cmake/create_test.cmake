@@ -55,6 +55,46 @@ function(ginkgo_create_test_cpp_cuda_header test_name)
     add_test(NAME ${REL_BINARY_DIR}/${test_name} COMMAND ${TEST_TARGET_NAME})
 endfunction(ginkgo_create_test_cpp_cuda_header)
 
+function(ginkgo_create_metis_test test_name)
+  file(RELATIVE_PATH REL_BINARY_DIR
+    ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+  string(REPLACE "/" "_" TEST_TARGET_NAME "${REL_BINARY_DIR}/${test_name}")
+  add_executable(${TEST_TARGET_NAME} ${test_name}.cpp)
+  target_include_directories("${TEST_TARGET_NAME}"
+    PRIVATE
+    "$<BUILD_INTERFACE:${Ginkgo_BINARY_DIR}>"
+    )
+  set_target_properties(${TEST_TARGET_NAME} PROPERTIES
+    OUTPUT_NAME ${test_name})
+  target_link_libraries(${TEST_TARGET_NAME} PRIVATE ginkgo GTest::GTest GTest::Main ${ARGN})
+  if (GINKGO_HAVE_METIS)
+    target_link_libraries(${TEST_TARGET_NAME} PRIVATE METIS::METIS)
+  endif()
+  add_test(NAME ${REL_BINARY_DIR}/${test_name} COMMAND ${TEST_TARGET_NAME})
+endfunction(ginkgo_create_metis_test)
+
+function(ginkgo_create_mpi_test test_name num_mpi_procs)
+  file(RELATIVE_PATH REL_BINARY_DIR
+    ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+  string(REPLACE "/" "_" TEST_TARGET_NAME "${REL_BINARY_DIR}/${test_name}")
+  add_executable(${TEST_TARGET_NAME} ${test_name}.cpp)
+  target_include_directories("${TEST_TARGET_NAME}"
+    PRIVATE
+    "$<BUILD_INTERFACE:${Ginkgo_BINARY_DIR}>"
+    ${MPI_INCLUDE_PATH}
+    )
+  set_target_properties(${TEST_TARGET_NAME} PROPERTIES
+    OUTPUT_NAME ${test_name})
+  if (GINKGO_CHECK_CIRCULAR_DEPS)
+    target_link_libraries(${TEST_TARGET_NAME} PRIVATE "${GINKGO_CIRCULAR_DEPS_FLAGS}")
+  endif()
+  target_link_libraries(${TEST_TARGET_NAME} PRIVATE ginkgo GTest::Main GTest::GTest ${ARGN})
+  target_link_libraries(${TEST_TARGET_NAME} PRIVATE ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES})
+  set(test_param ${MPIEXEC_NUMPROC_FLAG} ${num_mpi_procs} ${CMAKE_BINARY_DIR}/${REL_BINARY_DIR}/${test_name})
+  add_test(NAME ${REL_BINARY_DIR}/${test_name}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${test_param} )
+endfunction(ginkgo_create_mpi_test)
+
 function(ginkgo_create_cuda_test test_name)
     file(RELATIVE_PATH REL_BINARY_DIR
          ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})

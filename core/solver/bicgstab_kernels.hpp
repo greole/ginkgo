@@ -121,6 +121,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace bicgstab {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace bicgstab
+}  // namespace mpi
+
+
 namespace cuda {
 namespace bicgstab {
 

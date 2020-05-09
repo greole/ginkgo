@@ -57,6 +57,18 @@ std::shared_ptr<const Executor> OmpExecutor::get_master() const noexcept
 }
 
 
+std::shared_ptr<Executor> OmpExecutor::get_sub_executor() noexcept
+{
+    return this->shared_from_this();
+}
+
+
+std::shared_ptr<const Executor> OmpExecutor::get_sub_executor() const noexcept
+{
+    return this->shared_from_this();
+}
+
+
 std::shared_ptr<MemorySpace> OmpExecutor::get_mem_space() noexcept
 {
     return this->mem_space_instance_;

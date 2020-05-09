@@ -112,6 +112,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace reference
 
 
+namespace mpi {
+namespace rcm {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace rcm
+}  // namespace mpi
+
+
 #undef GKO_DECLARE_ALL_AS_TEMPLATES
 
 

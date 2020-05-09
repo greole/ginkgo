@@ -297,6 +297,22 @@ private:
         const override
 
 
+class DistributedMemorySpace {
+public:
+    /**
+     * Creates a new DistributedMemorySpace.
+     */
+    static std::shared_ptr<DistributedMemorySpace> create()
+    {
+        return std::shared_ptr<DistributedMemorySpace>(
+            new DistributedMemorySpace());
+    }
+
+protected:
+    DistributedMemorySpace() = default;
+};
+
+
 class HostMemorySpace : public detail::MemorySpaceBase<HostMemorySpace> {
     friend class detail::MemorySpaceBase<HostMemorySpace>;
 

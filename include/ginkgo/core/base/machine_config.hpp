@@ -136,7 +136,37 @@ public:
     std::size_t get_num_gpus() override { return gpus_.size(); }
     std::size_t get_num_numas() override { return num_numas_; }
 
-    virtual void load_gpus() {}
+    virtual void load_gpus()
+    {
+#if GKO_HAVE_HWLOC
+        std::size_t num_in_numa = 0;
+        int last_numa = 0;
+        auto topology = this->topo_.get();
+        auto n_objs = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_OS_DEVICE);
+        for (std::size_t i = 1; i < n_objs; i++, num_in_numa++) {
+            hwloc_obj_t obj = NULL;
+            while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
+                if (HWLOC_OBJ_OSDEV_COPROC == obj->attr->osdev.type &&
+                    obj->name && !strncmp("cuda", obj->name, 4) &&
+                    atoi(obj->name + 4) == (int)i) {
+                    while (obj &&
+                           (!obj->nodeset || hwloc_bitmap_iszero(obj->nodeset)))
+                        obj = obj->parent;
+                    if (obj && obj->nodeset) {
+                        auto this_numa = hwloc_bitmap_first(obj->nodeset);
+                        if (this_numa != last_numa) {
+                            num_in_numa = 0;
+                        }
+                        this->gpus_.push_back(
+                            topology_obj_info{obj, this_numa, i, num_in_numa});
+                        last_numa = this_numa;
+                    }
+                }
+            }
+        }
+
+#endif
+    }
 
     void hwloc_binding_helper(std::vector<topology_obj_info> &obj,
                               std::size_t id)

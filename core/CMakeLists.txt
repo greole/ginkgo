@@ -54,15 +54,15 @@ ginkgo_compile_features(ginkgo)
 target_compile_options(ginkgo PRIVATE "${GINKGO_COMPILER_FLAGS}")
 
 if (GINKGO_HAVE_HWLOC)
-  target_link_libraries(ginkgo PUBLIC ${HWLOC_hwloc_LIBRARY})
-  target_include_directories(ginkgo PUBLIC ${HWLOC_hwloc.h_DIRS})
+  target_link_libraries(ginkgo PRIVATE ${HWLOC_hwloc_LIBRARY})
+  target_include_directories(ginkgo PRIVATE ${HWLOC_hwloc.h_DIRS})
 endif()
 
 #add a namespace alias so Ginkgo can always be included as Ginkgo::ginkgo
 #regardless of whether it is installed or added as a subdirectory
 add_library(Ginkgo::ginkgo ALIAS ginkgo)
 target_link_libraries(ginkgo
-    PUBLIC ginkgo_omp ginkgo_cuda ginkgo_reference ginkgo_hip)
+    PUBLIC ginkgo_omp ginkgo_mpi ginkgo_cuda ginkgo_reference ginkgo_hip)
 if (GINKGO_HAVE_PAPI_SDE)
     target_link_libraries(ginkgo PRIVATE PAPI::PAPI)
 endif()

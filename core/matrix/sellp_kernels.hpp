@@ -95,6 +95,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace omp
 
 
+namespace mpi {
+namespace sellp {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace sellp
+}  // namespace mpi
+
+
 namespace cuda {
 namespace sellp {
 

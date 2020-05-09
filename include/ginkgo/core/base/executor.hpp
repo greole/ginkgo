@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define GKO_CORE_BASE_EXECUTOR_HPP_
 
 
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <sstream>
@@ -57,6 +58,10 @@ struct cusparseContext;
 struct hipblasContext;
 
 struct hipsparseContext;
+
+struct machineInfoContext;
+
+struct MpiContext;
 
 
 namespace gko {
@@ -111,6 +116,8 @@ class ExecutorBase;
  *     explicit DeviceInfoPrinter(std::ostream &os) : os_(os) {}
  *
  *     void run(const gko::OmpExecutor *) const override { os_ << "OMP"; }
+ *
+ *     void run(const gko::MpiExecutor *) const override { os_ << "MPI"; }
  *
  *     void run(const gko::CudaExecutor *exec) const override
  *     { os_ << "CUDA(" << exec->get_device_id() << ")"; }
@@ -170,6 +177,7 @@ class ExecutorBase;
  * {
  *     exec.run(
  *         [&]() { os << "OMP"; },  // OMP closure
+ *         [&]() { os << "MPI"; },  // MPI closure
  *         [&]() { os << "CUDA("    // CUDA closure
  *                    << static_cast<gko::CudaExecutor&>(exec)
  *                         .get_device_id()
@@ -254,7 +262,7 @@ private:                                                                     \
  * kernel when the operation is executed.
  *
  * The kernels used to bind the operation are searched in `kernels::DEV_TYPE`
- * namespace, where `DEV_TYPE` is replaced by `omp`, `cuda`, `hip` and
+ * namespace, where `DEV_TYPE` is replaced by `omp`, `mpi`, `cuda`, `hip` and
  * `reference`.
  *
  * @param _name  operation name
@@ -264,12 +272,18 @@ private:                                                                     \
  * -------
  *
  * ```c++
- * // define the omp, cuda, hip and reference kernels which will be bound to the
+ * // define the omp, mpi, cuda, hip and reference kernels which will be bound
+ * to the
  * // operation
  * namespace kernels {
  * namespace omp {
  * void my_kernel(int x) {
  *      // omp code
+ * }
+ * }
+ * namespace mpi {
+ * void my_kernel(int x) {
+ *      // mpi code
  * }
  * }
  * namespace cuda {
@@ -294,6 +308,7 @@ private:                                                                     \
  * int main() {
  *     // create executors
  *     auto omp = OmpExecutor::create();
+ *     auto mpi = MpiExecutor::create();
  *     auto cuda = CudaExecutor::create(omp, 0);
  *     auto hip = HipExecutor::create(omp, 0);
  *     auto ref = ReferenceExecutor::create();
@@ -302,6 +317,7 @@ private:                                                                     \
  *     auto op = make_my_op(5); // x = 5
  *
  *     omp->run(op);  // run omp kernel
+ *     mpi->run(op);  // run mpi kernel
  *     cuda->run(op);  // run cuda kernel
  *     hip->run(op);  // run hip kernel
  *     ref->run(op);  // run reference kernel
@@ -332,6 +348,7 @@ private:                                                                     \
         }                                                                    \
                                                                              \
         GKO_KERNEL_DETAIL_DEFINE_RUN_OVERLOAD(OmpExecutor, omp, _kernel);    \
+        GKO_KERNEL_DETAIL_DEFINE_RUN_OVERLOAD(MpiExecutor, mpi, _kernel);    \
         GKO_KERNEL_DETAIL_DEFINE_RUN_OVERLOAD(CudaExecutor, cuda, _kernel);  \
         GKO_KERNEL_DETAIL_DEFINE_RUN_OVERLOAD(HipExecutor, hip, _kernel);    \
         GKO_KERNEL_DETAIL_DEFINE_RUN_OVERLOAD(ReferenceExecutor, reference,  \
@@ -359,6 +376,8 @@ private:                                                                     \
  *
  * +    OmpExecutor specifies that the data should be stored and the associated
  *      operations executed on an OpenMP-supporting device (e.g. host CPU);
+ * +    MpiExecutor specifies that the data should be stored and the associated
+ *      operations executed on an MPI-supporting device (e.g. host CPU);
  * +    CudaExecutor specifies that the data should be stored and the
  *      operations executed on the NVIDIA GPU accelerator;
  * +    HipExecutor specifies that the data should be stored and the
@@ -460,20 +479,23 @@ public:
      * Runs one of the passed in functors, depending on the Executor type.
      *
      * @tparam ClosureOmp  type of op_omp
+     * @tparam ClosureMpi  type of op_mpi
      * @tparam ClosureCuda  type of op_cuda
      * @tparam ClosureHip  type of op_hip
      *
      * @param op_omp  functor to run in case of a OmpExecutor or
      *                ReferenceExecutor
+     * @param op_mpi  functor to run in case of a MpiExecutor
      * @param op_cuda  functor to run in case of a CudaExecutor
      * @param op_hip  functor to run in case of a HipExecutor
      */
-    template <typename ClosureOmp, typename ClosureCuda, typename ClosureHip>
-    void run(const ClosureOmp &op_omp, const ClosureCuda &op_cuda,
-             const ClosureHip &op_hip) const
+    template <typename ClosureOmp, typename ClosureMpi, typename ClosureCuda,
+              typename ClosureHip>
+    void run(const ClosureOmp &op_omp, const ClosureMpi &op_mpi,
+             const ClosureCuda &op_cuda, const ClosureHip &op_hip) const
     {
-        LambdaOperation<ClosureOmp, ClosureCuda, ClosureHip> op(op_omp, op_cuda,
-                                                                op_hip);
+        LambdaOperation<ClosureOmp, ClosureMpi, ClosureCuda, ClosureHip> op(
+            op_omp, op_mpi, op_cuda, op_hip);
         this->run(op);
     }
 
@@ -525,6 +547,18 @@ public:
     virtual std::shared_ptr<const Executor> get_master() const noexcept = 0;
 
     /**
+     * Returns the sub-executor of this Executor.
+     * @return the sub-executor of this Executor.
+     */
+    virtual std::shared_ptr<Executor> get_sub_executor() noexcept = 0;
+
+    /**
+     * @copydoc get_sub_executor
+     */
+    virtual std::shared_ptr<const Executor> get_sub_executor() const
+        noexcept = 0;
+
+    /**
      * Returns the associated memory space of this Executor.
      * @return the associated memory space of this Executor.
      */
@@ -543,7 +577,7 @@ public:
 
 private:
     /**
-     * The LambdaOperation class wraps three functor objects into an
+     * The LambdaOperation class wraps four functor objects into an
      * Operation.
      *
      * The first object is called by the OmpExecutor, the second one by the
@@ -552,10 +586,12 @@ private:
      * version.
      *
      * @tparam ClosureOmp  the type of the first functor
+     * @tparam ClosureMpi  the type of the second functor
      * @tparam ClosureCuda  the type of the second functor
      * @tparam ClosureHip  the type of the third functor
      */
-    template <typename ClosureOmp, typename ClosureCuda, typename ClosureHip>
+    template <typename ClosureOmp, typename ClosureMpi, typename ClosureCuda,
+              typename ClosureHip>
     class LambdaOperation : public Operation {
     public:
         /**
@@ -563,17 +599,26 @@ private:
          *
          * @param op_omp  a functor object which will be called by OmpExecutor
          *                and ReferenceExecutor
+         * @param op_mpi  a functor object which will be called by MpiExecutor
          * @param op_cuda  a functor object which will be called by CudaExecutor
          * @param op_hip  a functor object which will be called by HipExecutor
          */
-        LambdaOperation(const ClosureOmp &op_omp, const ClosureCuda &op_cuda,
-                        const ClosureHip &op_hip)
-            : op_omp_(op_omp), op_cuda_(op_cuda), op_hip_(op_hip)
+        LambdaOperation(const ClosureOmp &op_omp, const ClosureMpi &op_mpi,
+                        const ClosureCuda &op_cuda, const ClosureHip &op_hip)
+            : op_omp_(op_omp),
+              op_mpi_(op_mpi),
+              op_cuda_(op_cuda),
+              op_hip_(op_hip)
         {}
 
         void run(std::shared_ptr<const OmpExecutor>) const override
         {
             op_omp_();
+        }
+
+        void run(std::shared_ptr<const MpiExecutor>) const override
+        {
+            op_mpi_();
         }
 
         void run(std::shared_ptr<const CudaExecutor>) const override
@@ -588,6 +633,7 @@ private:
 
     private:
         ClosureOmp op_omp_;
+        ClosureMpi op_mpi_;
         ClosureCuda op_cuda_;
         ClosureHip op_hip_;
     };
@@ -638,6 +684,8 @@ class OmpExecutor : public detail::ExecutorBase<OmpExecutor>,
 public:
     using omp_exec_info = machine_config::topology<OmpExecutor>;
 
+    using DefaultMemorySpace = HostMemorySpace;
+
     /**
      * Creates a new OmpExecutor.
      */
@@ -660,6 +708,10 @@ public:
     std::shared_ptr<Executor> get_master() noexcept override;
 
     std::shared_ptr<const Executor> get_master() const noexcept override;
+
+    std::shared_ptr<Executor> get_sub_executor() noexcept override;
+
+    std::shared_ptr<const Executor> get_sub_executor() const noexcept override;
 
     std::shared_ptr<MemorySpace> get_mem_space() noexcept override;
 
@@ -690,9 +742,9 @@ protected:
 
     bool check_mem_space_validity(std::shared_ptr<MemorySpace> mem_space)
     {
-        auto check_host_mem_space =
-            dynamic_cast<HostMemorySpace *>(mem_space.get());
-        if (check_host_mem_space == nullptr) {
+        auto check_default_mem_space =
+            dynamic_cast<DefaultMemorySpace *>(mem_space.get());
+        if (check_default_mem_space == nullptr) {
             return false;
         } else {
             return true;
@@ -709,6 +761,141 @@ namespace kernels {
 namespace omp {
 using DefaultExecutor = OmpExecutor;
 }  // namespace omp
+}  // namespace kernels
+
+
+/**
+ * This is the Executor subclass which represents the MPI device
+ * (typically CPU).
+ *
+ * @ingroup exec_mpi
+ * @ingroup Executor
+ */
+class MpiExecutor : public detail::ExecutorBase<MpiExecutor>,
+                    public std::enable_shared_from_this<MpiExecutor>,
+                    public machine_config::topology<MpiExecutor> {
+    friend class detail::ExecutorBase<MpiExecutor>;
+
+public:
+    template <typename T>
+    using handle_manager = std::unique_ptr<T, std::function<void(T *)>>;
+
+    using mpi_exec_info = machine_config::topology<MpiExecutor>;
+
+    using DefaultMemorySpace = DistributedMemorySpace;
+
+    /**
+     * Creates a new MpiExecutor.
+     */
+    static std::shared_ptr<MpiExecutor> create(
+        std::initializer_list<std::string> sub_exec_list, int num_args = 0,
+        char **args = nullptr);
+
+    static std::shared_ptr<MpiExecutor> create();
+
+    std::shared_ptr<Executor> get_master() noexcept override;
+
+    std::shared_ptr<const Executor> get_master() const noexcept override;
+
+    std::shared_ptr<Executor> get_sub_executor() noexcept override;
+
+    std::shared_ptr<const Executor> get_sub_executor() const noexcept override;
+
+    void run(const Operation &op) const override
+    {
+        this->template log<log::Logger::operation_launched>(this, &op);
+        op.run(std::static_pointer_cast<const MpiExecutor>(
+            this->shared_from_this()));
+        this->template log<log::Logger::operation_completed>(this, &op);
+    }
+
+    static int get_num_ranks();
+
+    static int get_my_rank();
+
+    std::shared_ptr<MemorySpace> get_mem_space() noexcept override;
+
+    std::shared_ptr<const MemorySpace> get_mem_space() const noexcept override;
+
+    void synchronize() const override;
+
+    // void synchronize_communicator(handle_manager<MpiContext> comm) const;
+
+    /**
+     * Get the Executor information for this executor
+     *
+     * @return the executor info (mpi_exec_info*) for this executor
+     */
+    mpi_exec_info *get_exec_info() const { return exec_info_.get(); }
+
+    // std::vector<std::shared_ptr<gko::Executor>> get_sub_executors() const
+    // {
+    //     return sub_executors_;
+    // }
+
+    std::vector<std::string> get_sub_executor_list() const
+    {
+        return sub_exec_list_;
+    }
+
+protected:
+    MpiExecutor() = delete;
+
+    void mpi_init();
+
+    void create_sub_executors(std::vector<std::string> &sub_exec_list,
+                              std::shared_ptr<gko::Executor> &sub_executor);
+
+    bool is_finalized();
+
+    // int get_num_gpus();
+
+    bool is_initialized();
+
+    void destroy();
+
+    MpiExecutor(std::initializer_list<std::string> sub_exec_list, int num_args,
+                char **args)
+        : num_ranks_(1),
+          num_args_(num_args),
+          args_(args),
+          sub_exec_list_(sub_exec_list)
+    {
+        this->mpi_init();
+        num_ranks_ = this->get_num_ranks();
+        this->create_sub_executors(sub_exec_list_, sub_executor_);
+    }
+
+    bool check_mem_space_validity(std::shared_ptr<MemorySpace> mem_space)
+    {
+        auto check_default_mem_space =
+            dynamic_cast<DefaultMemorySpace *>(mem_space.get());
+        if (check_default_mem_space == nullptr) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+private:
+    int num_ranks_;
+    int num_args_;
+    int required_thread_support_;
+    int provided_thread_support_;
+    char **args_;
+    std::vector<std::string> sub_exec_list_;
+    std::shared_ptr<gko::Executor> sub_executor_;
+    handle_manager<MpiContext> mpi_comm_;
+
+    std::unique_ptr<mpi_exec_info> exec_info_;
+    std::shared_ptr<MemorySpace> mem_space_instance_;
+};
+
+
+namespace kernels {
+namespace mpi {
+using DefaultExecutor = MpiExecutor;
+}  // namespace mpi
 }  // namespace kernels
 
 
@@ -785,13 +972,15 @@ protected:
 
     bool check_mem_space_validity(std::shared_ptr<MemorySpace> mem_space)
     {
-        auto check_host_mem_space =
-            dynamic_cast<HostMemorySpace *>(mem_space.get());
-        if (check_host_mem_space == nullptr) {
+        auto check_default_mem_space =
+            dynamic_cast<DefaultMemorySpace *>(mem_space.get());
+        if (check_default_mem_space == nullptr) {
             return false;
+        } else {
+            return true;
         }
-        return true;
     }
+
 
 private:
     std::unique_ptr<ref_exec_info> exec_info_;
@@ -847,6 +1036,10 @@ public:
     std::shared_ptr<Executor> get_master() noexcept override;
 
     std::shared_ptr<const Executor> get_master() const noexcept override;
+
+    std::shared_ptr<Executor> get_sub_executor() noexcept override;
+
+    std::shared_ptr<const Executor> get_sub_executor() const noexcept override;
 
     std::shared_ptr<MemorySpace> get_mem_space() noexcept override;
 
@@ -1065,6 +1258,10 @@ public:
     std::shared_ptr<Executor> get_master() noexcept override;
 
     std::shared_ptr<const Executor> get_master() const noexcept override;
+
+    std::shared_ptr<Executor> get_sub_executor() noexcept override;
+
+    std::shared_ptr<const Executor> get_sub_executor() const noexcept override;
 
     std::shared_ptr<MemorySpace> get_mem_space() noexcept override;
 

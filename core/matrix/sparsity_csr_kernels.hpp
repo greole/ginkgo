@@ -144,6 +144,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 }  // namespace hip
 
 
+namespace mpi {
+namespace sparsity_csr {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace sparsity_csr
+}  // namespace mpi
+
+
 #undef GKO_DECLARE_ALL_AS_TEMPLATES
 
 
