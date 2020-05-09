@@ -87,6 +87,7 @@ class SparsityCsr;
 template <typename ValueType = default_precision>
 class Dense : public EnableLinOp<Dense<ValueType>>,
               public EnableCreateMethod<Dense<ValueType>>,
+              public EnableDistributedCreateMethod<Dense<ValueType>>,
               public ConvertibleTo<Dense<next_precision<ValueType>>>,
               public ConvertibleTo<Coo<ValueType, int32>>,
               public ConvertibleTo<Coo<ValueType, int64>>,
@@ -108,6 +109,7 @@ class Dense : public EnableLinOp<Dense<ValueType>>,
               public Permutable<int32>,
               public Permutable<int64> {
     friend class EnableCreateMethod<Dense>;
+    friend class EnableDistributedCreateMethod<Dense>;
     friend class EnablePolymorphicObject<Dense, LinOp>;
     friend class Coo<ValueType, int32>;
     friend class Coo<ValueType, int64>;

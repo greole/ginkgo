@@ -40,10 +40,6 @@ namespace gko {
 
 std::string MpiError::get_error(int64 error_code)
 {
-    // std::string name = cudaGetErrorName(static_cast<cudaError>(error_code));
-    // std::string message =
-    //     cudaGetErrorString(static_cast<cudaError>(error_code));
-    // return name + ": " + message;
     // TODO: Use the proper MPI Error handler.
     std::string message = "MPI Error code " + std::to_string(error_code);
     return message;

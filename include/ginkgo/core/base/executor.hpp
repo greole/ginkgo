@@ -1008,6 +1008,7 @@ class CudaExecutor : public detail::ExecutorBase<CudaExecutor>,
 
 public:
     using cuda_exec_info = machine_config::topology<CudaExecutor>;
+    using DefaultMemorySpace = CudaMemorySpace;
 
     /**
      * Creates a new CudaExecutor.
@@ -1230,6 +1231,7 @@ class HipExecutor : public detail::ExecutorBase<HipExecutor>,
 
 public:
     using hip_exec_info = machine_config::topology<HipExecutor>;
+    using DefaultMemorySpace = HipMemorySpace;
 
     /**
      * Creates a new HipExecutor.

@@ -648,6 +648,33 @@ public:
 };
 
 
+/**
+ * This mixin implements a static `distributed_create()` method on
+ * `ConcreteType` that dynamically allocates the memory, uses the passed-in
+ * arguments to construct the object, and returns an std::unique_ptr to such an
+ * object.
+ *
+ * @tparam ConcreteObject  the concrete type for which `create()` is being
+ *                         implemented [CRTP parameter]
+ */
+template <typename ConcreteType>
+class EnableDistributedCreateMethod {
+public:
+    template <typename ExecType, typename... Args>
+    static std::unique_ptr<ConcreteType> distributed_create(ExecType &exec,
+                                                            Args &&... args)
+    {
+        if (auto chk = dynamic_cast<gko::MpiExecutor *>(
+                const_cast<gko::Executor *>(exec.get()))) {
+            return std::unique_ptr<ConcreteType>(new ConcreteType(
+                exec->get_sub_executor(), std::forward<Args>(args)...));
+        } else {
+            GKO_NOT_SUPPORTED(exec.get());
+        }
+    }
+};
+
+
 }  // namespace gko
 
 
