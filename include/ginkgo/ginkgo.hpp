@@ -50,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/math.hpp>
 #include <ginkgo/core/base/matrix_data.hpp>
 #include <ginkgo/core/base/memory_space.hpp>
-#include <ginkgo/core/base/metis_types.hpp>
 #include <ginkgo/core/base/mtx_io.hpp>
 #include <ginkgo/core/base/name_demangling.hpp>
 #include <ginkgo/core/base/perturbation.hpp>
@@ -85,7 +84,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/preconditioner/isai.hpp>
 #include <ginkgo/core/preconditioner/jacobi.hpp>
 
-#include <ginkgo/core/reorder/metis_fill_reduce.hpp>
 #include <ginkgo/core/reorder/rcm.hpp>
 #include <ginkgo/core/reorder/reordering_base.hpp>
 

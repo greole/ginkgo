@@ -109,6 +109,15 @@ GKO_DECLARE_ALL;
 }  // namespace hip
 
 
+namespace mpi {
+namespace overhead {
+
+GKO_DECLARE_ALL;
+
+}  // namespace overhead
+}  // namespace mpi
+
+
 #undef GKO_DECLARE_ALL
 
 
