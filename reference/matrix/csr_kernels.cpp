@@ -874,23 +874,23 @@ void find_strongest_neighbor(std::shared_ptr<const ReferenceExecutor> exec,
     const auto row_ptrs = source->get_const_row_ptrs();
     const auto col_idxs = source->get_const_col_idxs();
     const auto vals = source->get_const_values();
-    auto max_weight_unagg = zero<remove_complex<ValueType>>();
-    auto max_weight_agg = zero<remove_complex<ValueType>>();
-    IndexType strongest_unagg = -1;
-    IndexType strongest_agg = -1;
     for (size_type row = 0; row < agg.get_num_elems(); row++) {
+        auto max_weight_unagg = zero<remove_complex<ValueType>>();
+        auto max_weight_agg = zero<remove_complex<ValueType>>();
+        IndexType strongest_unagg = -1;
+        IndexType strongest_agg = -1;
         if (agg.get_const_data()[row] == -1) {
-            for (auto j = row_ptrs[row]; j < row_ptrs[row + 1]; j++) {
+            for (auto ind = row_ptrs[row]; ind < row_ptrs[row + 1]; ind++) {
                 auto weight = zero<remove_complex<ValueType>>();
-                auto col = col_idxs[j];
+                auto col = col_idxs[ind];
                 if (col == row) {
                     continue;
                 }
                 // Handle the unsymmetric values cases
-                for (auto trans_col = row_ptrs[col];
-                     trans_col < row_ptrs[col + 1]; trans_col++) {
-                    if (col_idxs[trans_col] == row) {
-                        weight = 0.5 * (abs(vals[j]) + abs(vals[trans_col])) /
+                for (auto trans_ind = row_ptrs[col];
+                     trans_ind < row_ptrs[col + 1]; trans_ind++) {
+                    if (col_idxs[trans_ind] == row) {
+                        weight = 0.5 * (abs(vals[ind]) + abs(vals[trans_ind])) /
                                  max(abs(diag.get_const_data()[row]),
                                      abs(diag.get_const_data()[col]));
                         break;
@@ -909,17 +909,17 @@ void find_strongest_neighbor(std::shared_ptr<const ReferenceExecutor> exec,
                     max_weight_agg = weight;
                     strongest_agg = col;
                 }
+            }
 
-                if (strongest_unagg == -1 && strongest_agg != -1) {
-                    // all neighbor is agg, connect to the strongest agg
-                    agg.get_data()[row] = agg.get_data()[strongest_agg];
-                } else if (strongest_unagg != -1) {
-                    // set the strongest neighbor in the unagg group
-                    strongest_neighbor.get_data()[row] = strongest_unagg;
-                } else {
-                    // no neighbor
-                    strongest_neighbor.get_data()[row] = row;
-                }
+            if (strongest_unagg == -1 && strongest_agg != -1) {
+                // all neighbor is agg, connect to the strongest agg
+                agg.get_data()[row] = agg.get_data()[strongest_agg];
+            } else if (strongest_unagg != -1) {
+                // set the strongest neighbor in the unagg group
+                strongest_neighbor.get_data()[row] = strongest_unagg;
+            } else {
+                // no neighbor
+                strongest_neighbor.get_data()[row] = row;
             }
         }
     }
@@ -939,8 +939,12 @@ void assign_to_exist_agg(std::shared_ptr<const ReferenceExecutor> exec,
     const auto vals = source->get_const_values();
     const auto diag_vals = diag.get_const_data();
     auto max_weight_agg = zero<remove_complex<ValueType>>();
-    IndexType strongest_agg = -1;
+
     for (IndexType row = 0; row < agg.get_num_elems(); row++) {
+        if (agg.get_data()[row] != -1) {
+            continue;
+        }
+        IndexType strongest_agg = -1;
         for (auto idx = row_ptrs[row]; idx < row_ptrs[row + 1]; idx++) {
             auto col = col_idxs[idx];
             if (col == row) {

@@ -82,11 +82,15 @@ protected:
                                   std::make_shared<typename Mtx::classical>())),
           mtx3_unsorted(
               Mtx::create(exec, gko::dim<2>(3, 3), 7,
-                          std::make_shared<typename Mtx::classical>()))
+                          std::make_shared<typename Mtx::classical>())),
+          mtx4(Mtx::create(exec, gko::dim<2>(5, 5), 15,
+                           std::make_shared<typename Mtx::classical>())),
+          mtx4_diag(exec, 5)
     {
         this->create_mtx(mtx.get());
         this->create_mtx2(mtx2.get());
         this->create_mtx3(mtx3_sorted.get(), mtx3_unsorted.get());
+        this->create_mtx4(mtx4.get(), &mtx4_diag);
     }
 
     void create_mtx(Mtx *m)
@@ -193,6 +197,65 @@ protected:
         cols_u[4] = 0;
         cols_u[5] = 2;
         cols_u[6] = 0;
+    }
+
+    void create_mtx4(Mtx *fine, gko::Array<value_type> *diag)
+    {
+        auto vals = fine->get_values();
+        auto cols = fine->get_col_idxs();
+        auto rows = fine->get_row_ptrs();
+        auto diag_val = diag->get_data();
+        /* this matrix is stored:
+         *  5 -3 -3  0  0
+         * -3  5  0 -2 -1
+         * -3  0  5  0 -1
+         *  0 -3  0  5  0
+         *  0 -2 -2  0  5
+         */
+        vals[0] = 5;
+        vals[1] = -3;
+        vals[2] = -3;
+        vals[3] = -3;
+        vals[4] = 5;
+        vals[5] = -2;
+        vals[6] = -1;
+        vals[7] = -3;
+        vals[8] = 5;
+        vals[9] = -1;
+        vals[10] = -3;
+        vals[11] = 5;
+        vals[12] = -2;
+        vals[13] = -2;
+        vals[14] = 5;
+
+        rows[0] = 0;
+        rows[1] = 3;
+        rows[2] = 7;
+        rows[3] = 10;
+        rows[4] = 12;
+        rows[5] = 15;
+
+        cols[0] = 0;
+        cols[1] = 1;
+        cols[2] = 2;
+        cols[3] = 0;
+        cols[4] = 1;
+        cols[5] = 3;
+        cols[6] = 4;
+        cols[7] = 0;
+        cols[8] = 2;
+        cols[9] = 4;
+        cols[10] = 1;
+        cols[11] = 3;
+        cols[12] = 1;
+        cols[13] = 2;
+        cols[14] = 4;
+
+        diag_val[0] = 5;
+        diag_val[1] = 5;
+        diag_val[2] = 5;
+        diag_val[3] = 5;
+        diag_val[4] = 5;
     }
 
     void assert_equal_to_mtx(const Coo *m)
@@ -344,6 +407,8 @@ protected:
     std::unique_ptr<Mtx> mtx2;
     std::unique_ptr<Mtx> mtx3_sorted;
     std::unique_ptr<Mtx> mtx3_unsorted;
+    std::unique_ptr<Mtx> mtx4;
+    gko::Array<value_type> mtx4_diag;
 };
 
 TYPED_TEST_CASE(Csr, gko::test::ValueIndexTypes);
@@ -1343,6 +1408,103 @@ TYPED_TEST(Csr, SortUnsortedMatrix)
     matrix->sort_by_column_index();
 
     GKO_ASSERT_MTX_NEAR(matrix, this->mtx3_sorted, 0.0);
+}
+
+
+TYPED_TEST(Csr, ExtractDiag)
+{
+    using value_type = typename TestFixture::value_type;
+
+    gko::Array<value_type> diag(this->exec, 5);
+    this->mtx4->extract_diag(diag);
+    GKO_ASSERT_ARRAY_EQ(&diag, &this->mtx4_diag);
+}
+
+
+TYPED_TEST(Csr, FindStrongestNeighbor)
+{
+    using index_type = typename TestFixture::index_type;
+    gko::Array<index_type> strongest_neighbor(this->exec, 5);
+    gko::Array<index_type> agg(this->exec, 5);
+    auto snb_vals = strongest_neighbor.get_data();
+    auto agg_vals = agg.get_data();
+    for (int i = 0; i < 5; i++) {
+        snb_vals[i] = -1;
+        agg_vals[i] = -1;
+    }
+    this->mtx4->find_strongest_neighbor(this->mtx4_diag, agg,
+                                        strongest_neighbor);
+    ASSERT_EQ(snb_vals[0], 2);
+    ASSERT_EQ(snb_vals[1], 0);
+    ASSERT_EQ(snb_vals[2], 0);
+    ASSERT_EQ(snb_vals[3], 1);
+    ASSERT_EQ(snb_vals[4], 2);
+}
+
+
+TYPED_TEST(Csr, AssignToExistAgg)
+{
+    using index_type = typename TestFixture::index_type;
+    gko::Array<index_type> agg(this->exec, 5);
+    auto agg_vals = agg.get_data();
+    // 0 - 2, 1 - 3
+    agg_vals[0] = 0;
+    agg_vals[1] = 1;
+    agg_vals[2] = 0;
+    agg_vals[3] = 1;
+    agg_vals[4] = -1;
+    this->mtx4->assign_to_exist_agg(this->mtx4_diag, agg);
+    ASSERT_EQ(agg_vals[0], 0);
+    ASSERT_EQ(agg_vals[1], 1);
+    ASSERT_EQ(agg_vals[2], 0);
+    ASSERT_EQ(agg_vals[3], 1);
+    ASSERT_EQ(agg_vals[4], 0);
+}
+
+
+TYPED_TEST(Csr, AmgxPgmGenerate)
+{
+    using index_type = typename TestFixture::index_type;
+    using value_type = typename TestFixture::value_type;
+    using mtx_type = typename TestFixture::Mtx;
+    gko::Array<index_type> agg(this->exec, 5);
+    auto agg_vals = agg.get_data();
+    // 0 - 2, 1 - 3, 4
+    agg_vals[0] = 0;
+    agg_vals[1] = 1;
+    agg_vals[2] = 0;
+    agg_vals[3] = 1;
+    agg_vals[4] = 2;
+    auto coarse = this->mtx4->amgx_pgm_generate(3, agg);
+    auto csr_coarse = gko::as<mtx_type>(coarse.get());
+
+    ASSERT_EQ(csr_coarse->get_size(), gko::dim<2>(3, 3));
+    ASSERT_EQ(csr_coarse->get_num_stored_elements(), 9);
+    auto r = csr_coarse->get_const_row_ptrs();
+    auto c = csr_coarse->get_const_col_idxs();
+    auto v = csr_coarse->get_const_values();
+    ASSERT_EQ(r[0], 0);
+    ASSERT_EQ(r[1], 3);
+    ASSERT_EQ(r[2], 6);
+    ASSERT_EQ(r[3], 9);
+    ASSERT_EQ(c[0], 0);
+    ASSERT_EQ(c[1], 1);
+    ASSERT_EQ(c[2], 2);
+    ASSERT_EQ(c[3], 0);
+    ASSERT_EQ(c[4], 1);
+    ASSERT_EQ(c[5], 2);
+    ASSERT_EQ(c[6], 0);
+    ASSERT_EQ(c[7], 1);
+    ASSERT_EQ(c[8], 2);
+    ASSERT_EQ(v[0], value_type{4});
+    ASSERT_EQ(v[1], value_type{-3});
+    ASSERT_EQ(v[2], value_type{-1});
+    ASSERT_EQ(v[3], value_type{-3});
+    ASSERT_EQ(v[4], value_type{5});
+    ASSERT_EQ(v[5], value_type{-1});
+    ASSERT_EQ(v[6], value_type{-2});
+    ASSERT_EQ(v[7], value_type{-2});
+    ASSERT_EQ(v[8], value_type{5});
 }
 
 

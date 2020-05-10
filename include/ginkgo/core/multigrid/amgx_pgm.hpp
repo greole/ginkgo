@@ -30,8 +30,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************<GINKGO LICENSE>*******************************/
 
-#ifndef GKO_CORE_MULTIGRID_IR_HPP_
-#define GKO_CORE_MULTIGRID_IR_HPP_
+#ifndef GKO_CORE_MULTIGRID_AMGX_PGM_HPP_
+#define GKO_CORE_MULTIGRID_AMGX_PGM_HPP_
 
 
 #include <vector>
@@ -110,6 +110,15 @@ public:
     }
 
 
+    IndexType *get_agg() noexcept { return agg_.get_data(); }
+
+
+    const IndexType *get_const_agg() const noexcept
+    {
+        return agg_.get_const_data();
+    }
+
+
     GKO_CREATE_FACTORY_PARAMETERS(parameters, Factory)
     {
         unsigned GKO_FACTORY_PARAMETER(max_iterations, 15);
@@ -138,7 +147,7 @@ protected:
 private:
     std::shared_ptr<const LinOp> system_matrix_{};
     Array<ValueType> diag_;
-    Array<index_type> agg_;
+    Array<IndexType> agg_;
 };
 
 
@@ -146,4 +155,4 @@ private:
 }  // namespace gko
 
 
-#endif  // GKO_CORE_MULTIGRID_IR_HPP_
+#endif  // GKO_CORE_MULTIGRID_AMGX_PGM_HPP_

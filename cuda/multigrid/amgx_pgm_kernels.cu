@@ -83,6 +83,13 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
 
 
 template <typename IndexType>
+void initial(std::shared_ptr<const CudaExecutor> exec,
+             Array<IndexType> &agg) GKO_NOT_IMPLEMENTED;
+
+GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_INITIAL_KERNEL);
+
+
+template <typename IndexType>
 void match_edge(std::shared_ptr<const CudaExecutor> exec,
                 const Array<IndexType> &strongest_neighbor,
                 Array<IndexType> &agg) GKO_NOT_IMPLEMENTED;
@@ -93,7 +100,7 @@ GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_MATCH_EDGE_KERNEL);
 template <typename IndexType>
 void count_unagg(std::shared_ptr<const CudaExecutor> exec,
                  const Array<IndexType> &agg,
-                 IndexType *num_unagg) GKO_NOT_IMPLEMENTED;
+                 size_type *num_unagg) GKO_NOT_IMPLEMENTED;
 
 GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_COUNT_UNAGG_KERNEL);
 

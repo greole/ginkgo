@@ -103,6 +103,18 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
 
 
 template <typename IndexType>
+void initial(std::shared_ptr<const ReferenceExecutor> exec,
+             Array<IndexType> &agg)
+{
+    for (size_type i = 0; i < agg.get_num_elems(); i++) {
+        agg.get_data()[i] = -1;
+    }
+}
+
+GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_INITIAL_KERNEL);
+
+
+template <typename IndexType>
 void match_edge(std::shared_ptr<const ReferenceExecutor> exec,
                 const Array<IndexType> &strongest_neighbor,
                 Array<IndexType> &agg)
@@ -126,7 +138,7 @@ GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_MATCH_EDGE_KERNEL);
 
 template <typename IndexType>
 void count_unagg(std::shared_ptr<const ReferenceExecutor> exec,
-                 const Array<IndexType> &agg, IndexType *num_unagg)
+                 const Array<IndexType> &agg, size_type *num_unagg)
 {
     IndexType unagg = 0;
     for (size_type i = 0; i < agg.get_num_elems(); i++) {
@@ -143,17 +155,20 @@ void renumber(std::shared_ptr<const ReferenceExecutor> exec,
               Array<IndexType> &agg, size_type *num_agg)
 {
     const auto num = agg.get_num_elems();
-    Array<IndexType> agg_map(exec, num);
+    Array<IndexType> agg_map(exec, num + 1);
     auto agg_vals = agg.get_data();
     auto agg_map_vals = agg_map.get_data();
+    for (size_type i = 0; i < num + 1; i++) {
+        agg_map_vals[i] = 0;
+    }
     for (size_type i = 0; i < num; i++) {
         agg_map_vals[agg_vals[i]] = 1;
     }
-    components::prefix_sum(exec, agg_map_vals, num);
+    components::prefix_sum(exec, agg_map_vals, num + 1);
     for (size_type i = 0; i < num; i++) {
         agg_vals[i] = agg_map_vals[agg_vals[i]];
     }
-    *num_agg = agg_map_vals[num - 1];
+    *num_agg = agg_map_vals[num];
 }
 
 GKO_INSTANTIATE_FOR_EACH_INDEX_TYPE(GKO_DECLARE_AMGX_PGM_RENUMBER_KERNEL);
