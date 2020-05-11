@@ -1059,7 +1059,8 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
 template <typename ValueType, typename IndexType>
 void assign_to_exist_agg(std::shared_ptr<const CudaExecutor> exec,
                          const matrix::Csr<ValueType, IndexType> *source,
-                         const Array<ValueType> &diag, Array<IndexType> &agg)
+                         const Array<ValueType> &diag, Array<IndexType> &agg,
+                         Array<IndexType> &intermediate_agg)
 {
     GKO_NOT_IMPLEMENTED;
 }

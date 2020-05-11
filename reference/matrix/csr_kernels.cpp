@@ -932,16 +932,21 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
 template <typename ValueType, typename IndexType>
 void assign_to_exist_agg(std::shared_ptr<const ReferenceExecutor> exec,
                          const matrix::Csr<ValueType, IndexType> *source,
-                         const Array<ValueType> &diag, Array<IndexType> &agg)
+                         const Array<ValueType> &diag, Array<IndexType> &agg,
+                         Array<IndexType> &intermediate_agg)
 {
     const auto row_ptrs = source->get_const_row_ptrs();
     const auto col_idxs = source->get_const_col_idxs();
     const auto vals = source->get_const_values();
     const auto diag_vals = diag.get_const_data();
     auto max_weight_agg = zero<remove_complex<ValueType>>();
+    const auto agg_const_val = agg.get_const_data();
+    auto agg_val = (intermediate_agg.get_num_elems() > 0)
+                       ? intermediate_agg.get_data()
+                       : agg.get_data();
 
     for (IndexType row = 0; row < agg.get_num_elems(); row++) {
-        if (agg.get_data()[row] != -1) {
+        if (agg_const_val[row] != -1) {
             continue;
         }
         IndexType strongest_agg = -1;
@@ -952,7 +957,7 @@ void assign_to_exist_agg(std::shared_ptr<const ReferenceExecutor> exec,
             }
             auto weight =
                 abs(vals[idx]) / max(abs(diag_vals[row]), abs(diag_vals[col]));
-            if (agg.get_const_data()[col] != -1 &&
+            if (agg_const_val[col] != -1 &&
                 (weight > max_weight_agg ||
                  (weight == max_weight_agg && col > strongest_agg))) {
                 max_weight_agg = weight;
@@ -960,10 +965,15 @@ void assign_to_exist_agg(std::shared_ptr<const ReferenceExecutor> exec,
             }
         }
         if (strongest_agg != -1) {
-            agg.get_data()[row] = agg.get_const_data()[strongest_agg];
+            agg_val[row] = agg_const_val[strongest_agg];
         } else {
-            agg.get_data()[row] = row;
+            agg_val[row] = row;
         }
+    }
+
+    if (intermediate_agg.get_num_elems() > 0) {
+        // Copy the intermediate_agg to agg
+        agg = intermediate_agg;
     }
 }
 

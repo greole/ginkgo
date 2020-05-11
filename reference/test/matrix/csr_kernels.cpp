@@ -1446,6 +1446,7 @@ TYPED_TEST(Csr, AssignToExistAgg)
 {
     using index_type = typename TestFixture::index_type;
     gko::Array<index_type> agg(this->exec, 5);
+    gko::Array<index_type> intermediate_agg(this->exec, 0);
     auto agg_vals = agg.get_data();
     // 0 - 2, 1 - 3
     agg_vals[0] = 0;
@@ -1453,7 +1454,7 @@ TYPED_TEST(Csr, AssignToExistAgg)
     agg_vals[2] = 0;
     agg_vals[3] = 1;
     agg_vals[4] = -1;
-    this->mtx4->assign_to_exist_agg(this->mtx4_diag, agg);
+    this->mtx4->assign_to_exist_agg(this->mtx4_diag, agg, intermediate_agg);
     ASSERT_EQ(agg_vals[0], 0);
     ASSERT_EQ(agg_vals[1], 1);
     ASSERT_EQ(agg_vals[2], 0);

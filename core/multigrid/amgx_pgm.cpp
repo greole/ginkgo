@@ -58,41 +58,51 @@ GKO_REGISTER_OPERATION(match_edge, amgx_pgm::match_edge);
 GKO_REGISTER_OPERATION(count_unagg, amgx_pgm::count_unagg);
 GKO_REGISTER_OPERATION(renumber, amgx_pgm::renumber);
 
+
 }  // namespace amgx_pgm
 
 
 template <typename ValueType, typename IndexType>
 void AmgxPgm<ValueType, IndexType>::generate()
 {
-    // Extract diagonal elements
-    int num_unagg;
-    int num_prevunagg;
     auto exec = this->get_executor();
     const auto num = this->system_matrix_->get_size()[0];
     Array<ValueType> diag(this->get_executor(), num);
     Array<IndexType> strongest_neighbor(this->get_executor(), num);
+    Array<IndexType> intermediate_agg(this->get_executor(),
+                                      parameters_.deterministic * num);
     const auto amgxpgm_op =
         as<AmgxPgmOp<ValueType, IndexType>>(this->system_matrix_.get());
+    // Initial agg = -1
     exec->run(amgx_pgm::make_initial(agg_));
+    // Extract the diagonal value of matrix
     amgxpgm_op->extract_diag(diag);
-    size_type num_unassign;
+    size_type num_unagg{0};
+    size_type num_unagg_prev{0};
     for (int i = 0; i < parameters_.max_iterations; i++) {
         // Find the strongest neighbor of each row
         amgxpgm_op->find_strongest_neighbor(diag, agg_, strongest_neighbor);
         // Match edges
         exec->run(amgx_pgm::make_match_edge(strongest_neighbor, agg_));
-        // Get the numUnAssign
-        exec->run(amgx_pgm::make_count_unagg(agg_, &num_unassign));
-        // no new match or all match, the ratio of numUnAssign is lower than
-        // parameter
-        if (num_unassign == 0) {
+        // Get the num_unagg
+        exec->run(amgx_pgm::make_count_unagg(agg_, &num_unagg));
+        // no new match, all match, or the ratio of num_unagg/num is lower
+        // than parameter.max_unassigned_percentage
+        if (num_unagg == 0 || num_unagg == num_unagg_prev ||
+            static_cast<double>(num_unagg) / num <
+                parameters_.max_unassigned_percentage) {
             break;
         }
+        num_unagg_prev = num_unagg;
     }
-    // Handle the unassign
-    while (num_unassign != 0) {
-        amgxpgm_op->assign_to_exist_agg(diag, agg_);
-        exec->run(amgx_pgm::make_count_unagg(agg_, &num_unassign));
+    // Handle the left unassign points
+    if (num_unagg != 0 && intermediate_agg.get_num_elems() > 0) {
+        // copy the agg to intermediate_agg
+        intermediate_agg = agg_;
+    }
+    while (num_unagg != 0) {
+        amgxpgm_op->assign_to_exist_agg(diag, agg_, intermediate_agg);
+        exec->run(amgx_pgm::make_count_unagg(agg_, &num_unagg));
     }
     size_type num_agg;
     // Renumber the index
@@ -107,6 +117,7 @@ void AmgxPgm<ValueType, IndexType>::generate()
         num);
 }
 
+
 template <typename ValueType, typename IndexType>
 void AmgxPgm<ValueType, IndexType>::restrict_apply_impl(const LinOp *b,
                                                         LinOp *x) const
@@ -116,6 +127,7 @@ void AmgxPgm<ValueType, IndexType>::restrict_apply_impl(const LinOp *b,
                                             as<matrix::Dense<ValueType>>(b),
                                             as<matrix::Dense<ValueType>>(x)));
 }
+
 
 template <typename ValueType, typename IndexType>
 void AmgxPgm<ValueType, IndexType>::prolongate_applyadd_impl(const LinOp *b,

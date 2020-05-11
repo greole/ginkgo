@@ -182,7 +182,8 @@ namespace kernels {
     void assign_to_exist_agg(std::shared_ptr<const DefaultExecutor> exec,     \
                              const matrix::Csr<ValueType, IndexType> *source, \
                              const Array<ValueType> &diag,                    \
-                             Array<IndexType> &agg)
+                             Array<IndexType> &agg,                           \
+                             Array<IndexType> &intermediate_agg)
 
 #define GKO_DECLARE_CSR_AMGX_PGM_GENERATE(ValueType, IndexType)             \
     void amgx_pgm_generate(std::shared_ptr<const DefaultExecutor> exec,     \

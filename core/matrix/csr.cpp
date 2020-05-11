@@ -481,10 +481,11 @@ void Csr<ValueType, IndexType>::find_strongest_neighbor(
 
 template <typename ValueType, typename IndexType>
 void Csr<ValueType, IndexType>::assign_to_exist_agg(
-    const Array<ValueType> &diag, Array<IndexType> &agg) const
+    const Array<ValueType> &diag, Array<IndexType> &agg,
+    Array<IndexType> &intermediate_agg) const
 {
     auto exec = this->get_executor();
-    exec->run(csr::make_assign_to_exist_agg(this, diag, agg));
+    exec->run(csr::make_assign_to_exist_agg(this, diag, agg, intermediate_agg));
 }
 
 

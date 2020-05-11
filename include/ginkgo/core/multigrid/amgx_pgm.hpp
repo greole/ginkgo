@@ -49,48 +49,17 @@ namespace multigrid {
 
 
 /**
- * Iterative refinement (IR) is an iterative method that uses another coarse
- * method to approximate the error of the current solution via the current
- * residual.
+ * Amgx parallel graph match (AmgxPgm) is the aggregate method introduced in the
+ * paper M. Naumov et al., "AmgX: A Library for GPU Accelerated Algebraic
+ * Multigrid and Preconditioned Iterative Methods"
  *
- * For any approximation of the solution `solution` to the system `Ax = b`, the
- * residual is defined as: `residual = b - A solution`. The error in
- * `solution`,  `e = x - solution` (with `x` being the exact solution) can be
- * obtained as the solution to the residual equation `Ae = residual`, since `A e
- * = Ax - A solution = b - A solution = residual`. Then, the real solution is
- * computed as `x = solution + e`. Instead of accurately solving the residual
- * equation `Ae = residual`, the solution of the system `e` can be approximated
- * to obtain the approximation `error` using a coarse method `multigrid`, which
- * is used to update `solution`, and the entire process is repeated with the
- * updated `solution`.  This yields the iterative refinement method:
- *
- * ```
- * solution = initial_guess
- * while not converged:
- *     residual = b - A solution
- *     error = multigrid(A, residual)
- *     solution = solution + error
- * ```
- *
- * Assuming that `multigrid` has accuracy `c`, i.e., `| e - error | <= c | e |`,
- * iterative refinement will converge with a convergence rate of `c`. Indeed,
- * from `e - error = x - solution - error = x - solution*` (where `solution*`
- * denotes the value stored in `solution` after the update) and `e = inv(A)
- * residual = inv(A)b - inv(A) A solution = x - solution` it follows that | x -
- * solution* | <= c | x - solution |.
- *
- * Unless otherwise specified via the `multigrid` factory parameter, this
- * implementation uses the identity operator (i.e. the multigrid that
- * approximates the solution of a system Ax = b by setting x := b) as the
- * default inner multigrid. Such a setting results in a relaxation method known
- * as the Richardson iteration with parameter 1, which is guaranteed to converge
- * for matrices whose spectrum is strictly contained within the unit disc around
- * 1 (i.e., all its eigenvalues `lambda` have to satisfy the equation `|lambda -
- * 1| < 1).
+ * AmgxPgm creates the aggreagate group according to the matrix value not the
+ * structure.
  *
  * @tparam ValueType  precision of matrix elements
+ * @tparam IndexType  precision of matrix indexes
  *
- * @ingroup multigrids
+ * @ingroup CoarseFine
  * @ingroup LinOp
  */
 template <typename ValueType = default_precision, typename IndexType = int32>
@@ -98,7 +67,7 @@ class AmgxPgm : public CoarseFine {
 public:
     using value_type = ValueType;
     using index_type = IndexType;
-    using matrix_type = matrix::Csr<ValueType, IndexType>;
+
     /**
      * Returns the system operator (matrix) of the linear system.
      *
@@ -109,26 +78,48 @@ public:
         return system_matrix_;
     }
 
-
+    /**
+     * Returns the aggregate group.
+     *
+     * @return the aggregate group.
+     */
     IndexType *get_agg() noexcept { return agg_.get_data(); }
 
-
+    /**
+     * @copydoc AmgxPgm::get_agg()
+     *
+     * @note This is the constant version of the function, which can be
+     *       significantly more memory efficient than the non-constant version,
+     *       so always prefer this version.
+     */
     const IndexType *get_const_agg() const noexcept
     {
         return agg_.get_const_data();
     }
 
-
     GKO_CREATE_FACTORY_PARAMETERS(parameters, Factory)
     {
+        /**
+         * The maximum number of iteration.
+         */
         unsigned GKO_FACTORY_PARAMETER(max_iterations, 15);
+
+        /**
+         * The maximum ratio of unassigned number.
+         */
         double GKO_FACTORY_PARAMETER(max_unassigned_percentage, 0.05);
+
+        /**
+         * Use the deterministic assign_to_exist_agg method or not.
+         */
+        bool GKO_FACTORY_PARAMETER(deterministic, false);
     };
     GKO_ENABLE_LIN_OP_FACTORY(AmgxPgm, parameters, Factory);
     GKO_ENABLE_BUILD_METHOD(Factory);
 
 protected:
     void restrict_apply_impl(const LinOp *b, LinOp *x) const;
+
     void prolongate_applyadd_impl(const LinOp *b, LinOp *x) const;
 
     explicit AmgxPgm(const Factory *factory,
@@ -136,8 +127,7 @@ protected:
         : CoarseFine(factory->get_executor()),
           parameters_{factory->get_parameters()},
           system_matrix_{std::move(system_matrix)},
-          agg_(factory->get_executor(), system_matrix_->get_size()[0]),
-          diag_(factory->get_executor(), system_matrix_->get_size()[0])
+          agg_(factory->get_executor(), system_matrix_->get_size()[0])
     {
         this->generate();
     }
@@ -146,7 +136,6 @@ protected:
 
 private:
     std::shared_ptr<const LinOp> system_matrix_{};
-    Array<ValueType> diag_;
     Array<IndexType> agg_;
 };
 

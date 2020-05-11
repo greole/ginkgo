@@ -30,8 +30,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************<GINKGO LICENSE>*******************************/
 
-#ifndef GKO_CORE_BASE_COARSEFINE_HPP_
-#define GKO_CORE_BASE_COARSEFINE_HPP_
+#ifndef GKO_CORE_BASE_COARSE_FINE_HPP_
+#define GKO_CORE_BASE_COARSE_FINE_HPP_
 
 
 #include <functional>
@@ -46,9 +46,8 @@ namespace gko {
 
 /**
  * The CoarseFine class can be used to construct a LinOp to represent the
- * operation ``. This operator adds a
- * movement along a direction constructed by `basis` and `projector` on the
- * LinOp. `projector` gives the coefficient of `basis` to decide the direction.
+ * operation `R * matrix * P` which R is the restrict operator (fine level ->
+ * coarse level) and P is prolongate operator (coarse level -> fine level)
  *
  * @ingroup LinOp
  */
@@ -58,12 +57,21 @@ class CoarseFine : public EnableLinOp<CoarseFine> {
     friend class EnableCreateMethod<CoarseFine>;
 
 public:
-    // Return R * A * P
-    virtual std::shared_ptr<const LinOp> get_coarse_operator() const
-    {
-        return coarse_;
-    }
-    // x = R * b
+    /**
+     * Returns the coarse operator (matrix) which is R * matrix * P
+     *
+     * @return the coarse operator (matrix)
+     */
+    std::shared_ptr<const LinOp> get_coarse_operator() const { return coarse_; }
+
+    /**
+     * Applies a restrict operator to a vector (or a sequence of vectors).
+     *
+     * Performs the operation x = restrict(b).
+     *
+     * @param b  the input vector(s) on which the operator is applied
+     * @param x  the output vector(s) where the result is stored
+     */
     void restrict_apply(const LinOp *b, LinOp *x) const
     {
         GKO_ASSERT_EQ(fine_dim_, b->get_size()[0]);
@@ -72,8 +80,16 @@ public:
         auto exec = this->get_executor();
         this->restrict_apply_(make_temporary_clone(exec, b).get(),
                               make_temporary_clone(exec, x).get());
-    };
-    // x = x + P * b
+    }
+
+    /**
+     * Applies a prolongate operator to a vector (or a sequence of vectors).
+     *
+     * Performs the operation x = prolongate(b) + x.
+     *
+     * @param b  the input vector(s) on which the operator is applied
+     * @param x  the output vector(s) where the result is stored
+     */
     void prolongate_applyadd(const LinOp *b, LinOp *x) const
     {
         GKO_ASSERT_EQ(coarse_dim_, b->get_size()[0]);
@@ -92,9 +108,15 @@ protected:
     {
         coarse_->apply(alpha, b, beta, x);
     }
-    // virtual void restrict_apply_impl(const LinOp *b, LinOp *x) const = 0;
-    // virtual void prolongate_applyadd_impl(const LinOp *b, LinOp *x) const =
-    // 0;
+
+    /**
+     * Sets the components of CoarseFine
+     *
+     * @param coarse  the coarse matrix
+     * @param restrict_func  the restrict_apply function
+     * @param prolongate_func  the prolongate_applyadd function
+     * @param fine_dim  the fine_level size
+     */
     void set_coarse_fine(
         std::shared_ptr<const LinOp> coarse,
         std::function<void(const LinOp *, LinOp *)> restrict_func,
@@ -107,6 +129,7 @@ protected:
         restrict_apply_ = restrict_func;
         prolongate_applyadd_ = prolongate_func;
     }
+
     explicit CoarseFine(std::shared_ptr<const Executor> exec)
         : EnableLinOp<CoarseFine>(exec)
     {}
@@ -119,15 +142,47 @@ private:
     size_type coarse_dim_;
 };
 
+
+/**
+ * The AmgxPgmOp class contains the essential functions of AmgxPgm class.
+ */
 template <typename ValueType, typename IndexType>
 class AmgxPgmOp {
 public:
+    /**
+     * Extract the diagonal value from matrix
+     *
+     * @param diag  the diagonal values
+     */
     virtual void extract_diag(Array<ValueType> &diag) const = 0;
+
+    /**
+     * Find the strongest neighbor index in the unaggregate points
+     *
+     * @param diag  the diagonal values
+     * @param agg  the aggregate group
+     * @param strongest_neighbor  the strongest_neighbor index
+     */
     virtual void find_strongest_neighbor(
         const Array<ValueType> &diag, Array<IndexType> &agg,
         Array<IndexType> &strongest_neighbor) const = 0;
-    virtual void assign_to_exist_agg(const Array<ValueType> &diag,
-                                     Array<IndexType> &agg) const = 0;
+
+    /**
+     * Assign unaggregate points to aggregate group
+     *
+     * @param diag  the diagonal values
+     * @param agg  the aggregate group
+     */
+    virtual void assign_to_exist_agg(
+        const Array<ValueType> &diag, Array<IndexType> &agg,
+        Array<IndexType> &intermediate_agg) const = 0;
+
+    /**
+     * Generate the coarse matrix according to the aggregate group
+     *
+     * @param num_agg  the number of aggregate group
+     * @param agg  the aggregate group
+     */
     virtual std::unique_ptr<LinOp> amgx_pgm_generate(
         const size_type num_agg, const Array<IndexType> &agg) const = 0;
 };
@@ -136,4 +191,4 @@ public:
 }  // namespace gko
 
 
-#endif  // GKO_CORE_BASE_COARSEFINE_HPP_
+#endif  // GKO_CORE_BASE_COARSE_FINE_HPP_
