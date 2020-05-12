@@ -108,13 +108,7 @@ void AmgxPgm<ValueType, IndexType>::generate()
     // Renumber the index
     exec->run(amgx_pgm::make_renumber(agg_, &num_agg));
     auto coarse = amgxpgm_op->amgx_pgm_generate(num_agg, agg_);
-    this->set_coarse_fine(
-        std::move(coarse),
-        std::bind(&AmgxPgm::restrict_apply_impl, this, std::placeholders::_1,
-                  std::placeholders::_2),
-        std::bind(&AmgxPgm::prolongate_applyadd_impl, this,
-                  std::placeholders::_1, std::placeholders::_2),
-        num);
+    this->set_coarse_fine(std::move(coarse), num);
 }
 
 

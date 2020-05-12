@@ -63,7 +63,10 @@ namespace multigrid {
  * @ingroup LinOp
  */
 template <typename ValueType = default_precision, typename IndexType = int32>
-class AmgxPgm : public CoarseFine {
+class AmgxPgm : public EnableCFOp<AmgxPgm<ValueType, IndexType>> {
+    friend class EnableCFOp<AmgxPgm>;
+    friend class EnablePolymorphicObject<AmgxPgm, CoarseFine>;
+
 public:
     using value_type = ValueType;
     using index_type = IndexType;
@@ -114,17 +117,19 @@ public:
          */
         bool GKO_FACTORY_PARAMETER(deterministic, false);
     };
-    GKO_ENABLE_LIN_OP_FACTORY(AmgxPgm, parameters, Factory);
+    GKO_ENABLE_CFOP_FACTORY(AmgxPgm, parameters, Factory);
     GKO_ENABLE_BUILD_METHOD(Factory);
 
 protected:
-    void restrict_apply_impl(const LinOp *b, LinOp *x) const;
+    void restrict_apply_impl(const LinOp *b, LinOp *x) const override;
 
-    void prolongate_applyadd_impl(const LinOp *b, LinOp *x) const;
-
+    void prolongate_applyadd_impl(const LinOp *b, LinOp *x) const override;
+    explicit AmgxPgm(std::shared_ptr<const Executor> exec)
+        : EnableCFOp<AmgxPgm>(std::move(exec))
+    {}
     explicit AmgxPgm(const Factory *factory,
                      std::shared_ptr<const LinOp> system_matrix)
-        : CoarseFine(factory->get_executor()),
+        : EnableCFOp<AmgxPgm>(factory->get_executor()),
           parameters_{factory->get_parameters()},
           system_matrix_{std::move(system_matrix)},
           agg_(factory->get_executor(), system_matrix_->get_size()[0])
