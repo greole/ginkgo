@@ -82,6 +82,31 @@ namespace amgx_pgm {
     void renumber(std::shared_ptr<const DefaultExecutor> exec, \
                   Array<_itype> &agg, size_type *num_agg)
 
+#define GKO_DECLARE_AMGX_PGM_EXTRACT_DIAG(ValueType, IndexType)        \
+    void extract_diag(std::shared_ptr<const DefaultExecutor> exec,     \
+                      const matrix::Csr<ValueType, IndexType> *source, \
+                      Array<ValueType> &diag)
+
+#define GKO_DECLARE_AMGX_PGM_FIND_STRONGEST_NEIGHBOR(ValueType, IndexType) \
+    void find_strongest_neighbor(                                          \
+        std::shared_ptr<const DefaultExecutor> exec,                       \
+        const matrix::Csr<ValueType, IndexType> *source,                   \
+        const Array<ValueType> &diag, Array<IndexType> &agg,               \
+        Array<IndexType> &strongest_neighbor)
+
+#define GKO_DECLARE_AMGX_PGM_ASSIGN_TO_EXIST_AGG(ValueType, IndexType)        \
+    void assign_to_exist_agg(std::shared_ptr<const DefaultExecutor> exec,     \
+                             const matrix::Csr<ValueType, IndexType> *source, \
+                             const Array<ValueType> &diag,                    \
+                             Array<IndexType> &agg,                           \
+                             Array<IndexType> &intermediate_agg)
+
+#define GKO_DECLARE_AMGX_PGM_GENERATE(ValueType, IndexType)                 \
+    void amgx_pgm_generate(std::shared_ptr<const DefaultExecutor> exec,     \
+                           const matrix::Csr<ValueType, IndexType> *source, \
+                           const Array<IndexType> &agg,                     \
+                           matrix::Csr<ValueType, IndexType> *coarse)
+
 
 #define GKO_DECLARE_ALL_AS_TEMPLATES                                    \
     template <typename ValueType, typename IndexType>                   \
@@ -95,7 +120,16 @@ namespace amgx_pgm {
     template <typename IndexType>                                       \
     GKO_DECLARE_AMGX_PGM_COUNT_UNAGG_KERNEL(IndexType);                 \
     template <typename IndexType>                                       \
-    GKO_DECLARE_AMGX_PGM_RENUMBER_KERNEL(IndexType)
+    GKO_DECLARE_AMGX_PGM_RENUMBER_KERNEL(IndexType);                    \
+    template <typename ValueType, typename IndexType>                   \
+    GKO_DECLARE_AMGX_PGM_EXTRACT_DIAG(ValueType, IndexType);            \
+    template <typename ValueType, typename IndexType>                   \
+    GKO_DECLARE_AMGX_PGM_FIND_STRONGEST_NEIGHBOR(ValueType, IndexType); \
+    template <typename ValueType, typename IndexType>                   \
+    GKO_DECLARE_AMGX_PGM_ASSIGN_TO_EXIST_AGG(ValueType, IndexType);     \
+    template <typename ValueType, typename IndexType>                   \
+    GKO_DECLARE_AMGX_PGM_GENERATE(ValueType, IndexType)
+
 
 }  // namespace amgx_pgm
 

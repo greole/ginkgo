@@ -267,7 +267,7 @@ TYPED_TEST(AmgxPgm, Renumber)
 }
 
 
-TYPED_TEST(AmgxPgm, GenerateWith)
+TYPED_TEST(AmgxPgm, Generate)
 {
     auto coarse_fine = this->AmgxPgm_factory->generate(this->mtx);
 
@@ -306,6 +306,107 @@ TYPED_TEST(AmgxPgm, CoarseFineProlongateApplyadd)
     amgx_pgm->prolongate_applyadd(this->coarse_b.get(), x.get());
     GKO_ASSERT_MTX_NEAR(x, this->prolongate_ans,
                         gko::remove_complex<value_type>{0});
+}
+
+
+TYPED_TEST(AmgxPgm, ExtractDiag)
+{
+    using value_type = typename TestFixture::value_type;
+
+    gko::Array<value_type> diag(this->exec, 5);
+    gko::kernels::reference::amgx_pgm::extract_diag(this->exec, this->mtx.get(),
+                                                    diag);
+    GKO_ASSERT_ARRAY_EQ(diag, this->mtx_diag);
+}
+
+
+TYPED_TEST(AmgxPgm, FindStrongestNeighbor)
+{
+    using index_type = typename TestFixture::index_type;
+    gko::Array<index_type> strongest_neighbor(this->exec, 5);
+    gko::Array<index_type> agg(this->exec, 5);
+    auto snb_vals = strongest_neighbor.get_data();
+    auto agg_vals = agg.get_data();
+    for (int i = 0; i < 5; i++) {
+        snb_vals[i] = -1;
+        agg_vals[i] = -1;
+    }
+    gko::kernels::reference::amgx_pgm::find_strongest_neighbor(
+        this->exec, this->mtx.get(), this->mtx_diag, agg, strongest_neighbor);
+    ASSERT_EQ(snb_vals[0], 2);
+    ASSERT_EQ(snb_vals[1], 0);
+    ASSERT_EQ(snb_vals[2], 0);
+    ASSERT_EQ(snb_vals[3], 1);
+    ASSERT_EQ(snb_vals[4], 2);
+}
+
+
+TYPED_TEST(AmgxPgm, AssignToExistAgg)
+{
+    using index_type = typename TestFixture::index_type;
+    gko::Array<index_type> agg(this->exec, 5);
+    gko::Array<index_type> intermediate_agg(this->exec, 0);
+    auto agg_vals = agg.get_data();
+    // 0 - 2, 1 - 3
+    agg_vals[0] = 0;
+    agg_vals[1] = 1;
+    agg_vals[2] = 0;
+    agg_vals[3] = 1;
+    agg_vals[4] = -1;
+    gko::kernels::reference::amgx_pgm::assign_to_exist_agg(
+        this->exec, this->mtx.get(), this->mtx_diag, agg, intermediate_agg);
+    ASSERT_EQ(agg_vals[0], 0);
+    ASSERT_EQ(agg_vals[1], 1);
+    ASSERT_EQ(agg_vals[2], 0);
+    ASSERT_EQ(agg_vals[3], 1);
+    ASSERT_EQ(agg_vals[4], 0);
+}
+
+
+TYPED_TEST(AmgxPgm, GenerateMtx)
+{
+    using index_type = typename TestFixture::index_type;
+    using value_type = typename TestFixture::value_type;
+    using mtx_type = typename TestFixture::Mtx;
+    gko::Array<index_type> agg(this->exec, 5);
+    auto agg_vals = agg.get_data();
+    // 0 - 2, 1 - 3, 4
+    agg_vals[0] = 0;
+    agg_vals[1] = 1;
+    agg_vals[2] = 0;
+    agg_vals[3] = 1;
+    agg_vals[4] = 2;
+    auto csr_coarse = mtx_type::create(this->exec, gko::dim<2>{3, 3}, 0);
+    gko::kernels::reference::amgx_pgm::amgx_pgm_generate(
+        this->exec, this->mtx.get(), agg, csr_coarse.get());
+
+    ASSERT_EQ(csr_coarse->get_size(), gko::dim<2>(3, 3));
+    ASSERT_EQ(csr_coarse->get_num_stored_elements(), 9);
+    auto r = csr_coarse->get_const_row_ptrs();
+    auto c = csr_coarse->get_const_col_idxs();
+    auto v = csr_coarse->get_const_values();
+    ASSERT_EQ(r[0], 0);
+    ASSERT_EQ(r[1], 3);
+    ASSERT_EQ(r[2], 6);
+    ASSERT_EQ(r[3], 9);
+    ASSERT_EQ(c[0], 0);
+    ASSERT_EQ(c[1], 1);
+    ASSERT_EQ(c[2], 2);
+    ASSERT_EQ(c[3], 0);
+    ASSERT_EQ(c[4], 1);
+    ASSERT_EQ(c[5], 2);
+    ASSERT_EQ(c[6], 0);
+    ASSERT_EQ(c[7], 1);
+    ASSERT_EQ(c[8], 2);
+    ASSERT_EQ(v[0], value_type{4});
+    ASSERT_EQ(v[1], value_type{-3});
+    ASSERT_EQ(v[2], value_type{-1});
+    ASSERT_EQ(v[3], value_type{-3});
+    ASSERT_EQ(v[4], value_type{5});
+    ASSERT_EQ(v[5], value_type{-1});
+    ASSERT_EQ(v[6], value_type{-2});
+    ASSERT_EQ(v[7], value_type{-2});
+    ASSERT_EQ(v[8], value_type{5});
 }
 
 

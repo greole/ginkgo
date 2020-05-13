@@ -107,8 +107,7 @@ class Csr : public EnableLinOp<Csr<ValueType, IndexType>>,
             public ReadableFromMatrixData<ValueType, IndexType>,
             public WritableToMatrixData<ValueType, IndexType>,
             public Transposable,
-            public Permutable<IndexType>,
-            public AmgxPgmOp<ValueType, IndexType> {
+            public Permutable<IndexType> {
     friend class EnableCreateMethod<Csr>;
     friend class EnablePolymorphicObject<Csr, LinOp>;
     friend class Coo<ValueType, IndexType>;
@@ -802,19 +801,6 @@ public:
         strategy_ = std::move(strategy->copy());
         this->make_srow();
     }
-
-    void extract_diag(Array<ValueType> &diag) const override;
-
-    void find_strongest_neighbor(
-        const Array<ValueType> &diag, Array<IndexType> &agg,
-        Array<IndexType> &strongest_neighbor) const override;
-
-    void assign_to_exist_agg(const Array<ValueType> &diag,
-                             Array<IndexType> &agg,
-                             Array<IndexType> &intermediate_agg) const override;
-
-    std::unique_ptr<LinOp> amgx_pgm_generate(
-        const size_type num_agg, const Array<IndexType> &agg) const override;
 
 protected:
     /**

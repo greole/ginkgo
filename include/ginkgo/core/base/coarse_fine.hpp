@@ -301,51 +301,6 @@ public:                                                                      \
                   "semi-colon warnings")
 
 
-/**
- * The AmgxPgmOp class contains the essential functions of AmgxPgm class.
- */
-template <typename ValueType, typename IndexType>
-class AmgxPgmOp {
-public:
-    /**
-     * Extract the diagonal value from matrix
-     *
-     * @param diag  the diagonal values
-     */
-    virtual void extract_diag(Array<ValueType> &diag) const = 0;
-
-    /**
-     * Find the strongest neighbor index in the unaggregate points
-     *
-     * @param diag  the diagonal values
-     * @param agg  the aggregate group
-     * @param strongest_neighbor  the strongest_neighbor index
-     */
-    virtual void find_strongest_neighbor(
-        const Array<ValueType> &diag, Array<IndexType> &agg,
-        Array<IndexType> &strongest_neighbor) const = 0;
-
-    /**
-     * Assign unaggregate points to aggregate group
-     *
-     * @param diag  the diagonal values
-     * @param agg  the aggregate group
-     */
-    virtual void assign_to_exist_agg(
-        const Array<ValueType> &diag, Array<IndexType> &agg,
-        Array<IndexType> &intermediate_agg) const = 0;
-
-    /**
-     * Generate the coarse matrix according to the aggregate group
-     *
-     * @param num_agg  the number of aggregate group
-     * @param agg  the aggregate group
-     */
-    virtual std::unique_ptr<LinOp> amgx_pgm_generate(
-        const size_type num_agg, const Array<IndexType> &agg) const = 0;
-};
-
-
 }  // namespace gko
 
 

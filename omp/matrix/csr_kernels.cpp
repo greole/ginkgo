@@ -763,57 +763,6 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
     GKO_DECLARE_CSR_IS_SORTED_BY_COLUMN_INDEX);
 
 
-template <typename ValueType, typename IndexType>
-void extract_diag(std::shared_ptr<const OmpExecutor> exec,
-                  const matrix::Csr<ValueType, IndexType> *source,
-                  Array<ValueType> &diag)
-{
-    GKO_NOT_IMPLEMENTED;
-}
-
-GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_DECLARE_CSR_EXTRACT_DIAG);
-
-
-template <typename ValueType, typename IndexType>
-void find_strongest_neighbor(std::shared_ptr<const OmpExecutor> exec,
-                             const matrix::Csr<ValueType, IndexType> *source,
-                             const Array<ValueType> &diag,
-                             Array<IndexType> &agg,
-                             Array<IndexType> &strongest_neighbor)
-{
-    GKO_NOT_IMPLEMENTED;
-}
-
-GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
-    GKO_DECLARE_CSR_FIND_STRONGEST_NEIGHBOR);
-
-
-template <typename ValueType, typename IndexType>
-void assign_to_exist_agg(std::shared_ptr<const OmpExecutor> exec,
-                         const matrix::Csr<ValueType, IndexType> *source,
-                         const Array<ValueType> &diag, Array<IndexType> &agg,
-                         Array<IndexType> &intermediate_agg)
-{
-    GKO_NOT_IMPLEMENTED;
-}
-
-GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
-    GKO_DECLARE_CSR_ASSIGN_TO_EXIST_AGG);
-
-
-template <typename ValueType, typename IndexType>
-void amgx_pgm_generate(std::shared_ptr<const OmpExecutor> exec,
-                       const matrix::Csr<ValueType, IndexType> *source,
-                       const Array<IndexType> &agg,
-                       matrix::Csr<ValueType, IndexType> *coarse)
-{
-    GKO_NOT_IMPLEMENTED;
-}
-
-GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
-    GKO_DECLARE_CSR_AMGX_PGM_GENERATE);
-
-
 }  // namespace csr
 }  // namespace omp
 }  // namespace kernels

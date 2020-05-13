@@ -166,31 +166,6 @@ namespace kernels {
         std::shared_ptr<const DefaultExecutor> exec,                    \
         const matrix::Csr<ValueType, IndexType> *to_check, bool *is_sorted)
 
-#define GKO_DECLARE_CSR_EXTRACT_DIAG(ValueType, IndexType)             \
-    void extract_diag(std::shared_ptr<const DefaultExecutor> exec,     \
-                      const matrix::Csr<ValueType, IndexType> *source, \
-                      Array<ValueType> &diag)
-
-#define GKO_DECLARE_CSR_FIND_STRONGEST_NEIGHBOR(ValueType, IndexType) \
-    void find_strongest_neighbor(                                     \
-        std::shared_ptr<const DefaultExecutor> exec,                  \
-        const matrix::Csr<ValueType, IndexType> *source,              \
-        const Array<ValueType> &diag, Array<IndexType> &agg,          \
-        Array<IndexType> &strongest_neighbor)
-
-#define GKO_DECLARE_CSR_ASSIGN_TO_EXIST_AGG(ValueType, IndexType)             \
-    void assign_to_exist_agg(std::shared_ptr<const DefaultExecutor> exec,     \
-                             const matrix::Csr<ValueType, IndexType> *source, \
-                             const Array<ValueType> &diag,                    \
-                             Array<IndexType> &agg,                           \
-                             Array<IndexType> &intermediate_agg)
-
-#define GKO_DECLARE_CSR_AMGX_PGM_GENERATE(ValueType, IndexType)             \
-    void amgx_pgm_generate(std::shared_ptr<const DefaultExecutor> exec,     \
-                           const matrix::Csr<ValueType, IndexType> *source, \
-                           const Array<IndexType> &agg,                     \
-                           matrix::Csr<ValueType, IndexType> *coarse)
-
 #define GKO_DECLARE_ALL_AS_TEMPLATES                                         \
     template <typename ValueType, typename IndexType>                        \
     GKO_DECLARE_CSR_SPMV_KERNEL(ValueType, IndexType);                       \
@@ -231,15 +206,7 @@ namespace kernels {
     template <typename ValueType, typename IndexType>                        \
     GKO_DECLARE_CSR_SORT_BY_COLUMN_INDEX(ValueType, IndexType);              \
     template <typename ValueType, typename IndexType>                        \
-    GKO_DECLARE_CSR_IS_SORTED_BY_COLUMN_INDEX(ValueType, IndexType);         \
-    template <typename ValueType, typename IndexType>                        \
-    GKO_DECLARE_CSR_EXTRACT_DIAG(ValueType, IndexType);                      \
-    template <typename ValueType, typename IndexType>                        \
-    GKO_DECLARE_CSR_FIND_STRONGEST_NEIGHBOR(ValueType, IndexType);           \
-    template <typename ValueType, typename IndexType>                        \
-    GKO_DECLARE_CSR_ASSIGN_TO_EXIST_AGG(ValueType, IndexType);               \
-    template <typename ValueType, typename IndexType>                        \
-    GKO_DECLARE_CSR_AMGX_PGM_GENERATE(ValueType, IndexType)
+    GKO_DECLARE_CSR_IS_SORTED_BY_COLUMN_INDEX(ValueType, IndexType)
 
 
 namespace omp {
