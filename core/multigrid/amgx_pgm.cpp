@@ -98,7 +98,10 @@ void AmgxPgm<ValueType, IndexType>::generate()
     Array<IndexType> strongest_neighbor(this->get_executor(), num);
     Array<IndexType> intermediate_agg(this->get_executor(),
                                       parameters_.deterministic * num);
-    const auto amgxpgm_op = gko::as<matrix_type>(this->system_matrix_.get());
+    auto csr_system_matrix_unique_ptr = matrix_type::create(exec);
+    as<ConvertibleTo<matrix_type>>(system_matrix_.get())
+        ->convert_to(csr_system_matrix_unique_ptr.get());
+    auto amgxpgm_op = csr_system_matrix_unique_ptr.get();
     // Initial agg = -1
     exec->run(amgx_pgm::make_initial(agg_));
     // Extract the diagonal value of matrix
@@ -135,7 +138,6 @@ void AmgxPgm<ValueType, IndexType>::generate()
     size_type num_agg;
     // Renumber the index
     exec->run(amgx_pgm::make_renumber(agg_, &num_agg));
-
 
     // Construct the coarse matrix
     auto coarse = amgx_pgm_generate(exec, amgxpgm_op, num_agg, agg_);
