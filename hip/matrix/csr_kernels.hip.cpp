@@ -654,14 +654,15 @@ void advanced_spgemm(std::shared_ptr<const HipExecutor> exec,
         auto vbeta = exec->copy_val_to_host(beta->get_const_values());
         auto total_nnz = c_nnz + d->get_num_stored_elements();
         auto nnz_per_row = total_nnz / m;
-        select_spgeam(spgeam_kernels(),
-                      [&](int compiled_subwarp_size) {
-                          return compiled_subwarp_size >= nnz_per_row ||
-                                 compiled_subwarp_size == config::warp_size;
-                      },
-                      syn::value_list<int>(), syn::type_list<>(), exec, valpha,
-                      c_tmp_row_ptrs, c_tmp_col_idxs, c_tmp_vals, vbeta,
-                      d_row_ptrs, d_col_idxs, d_vals, c);
+        select_spgeam(
+            spgeam_kernels(),
+            [&](int compiled_subwarp_size) {
+                return compiled_subwarp_size >= nnz_per_row ||
+                       compiled_subwarp_size == config::warp_size;
+            },
+            syn::value_list<int>(), syn::type_list<>(), exec, valpha,
+            c_tmp_row_ptrs, c_tmp_col_idxs, c_tmp_vals, vbeta, d_row_ptrs,
+            d_col_idxs, d_vals, c);
     } else {
         GKO_NOT_IMPLEMENTED;
     }
@@ -1140,6 +1141,32 @@ void is_sorted_by_column_index(
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
     GKO_DECLARE_CSR_IS_SORTED_BY_COLUMN_INDEX);
+
+
+template <typename ValueType, typename IndexType>
+void extract_diagonal(std::shared_ptr<const HipExecutor> exec,
+                      const matrix::Csr<ValueType, IndexType> *orig,
+                      matrix::Dense<ValueType> *diag)
+{
+    auto nnz = orig->get_num_stored_elements();
+    auto diag_size = diag->get_size()[0];
+    auto diag_stride = diag->get_stride();
+    auto num_blocks =
+        ceildiv(config::warp_size * diag_size, default_block_size);
+
+    const auto orig_values = orig->get_const_values();
+    const atuo orig_row_ptrs = orig->get_const_row_ptrs();
+    const atuo orig_col_idxs = orig->get_const_col_idxs();
+    auto diag_values = diag->get_values();
+
+    hipLaunchKernelGGL(HIP_KERNEL_NAME(kernel::extract_diagonal),
+                       dim3(num_blocks), dim3(default_block_size), 0, 0,
+                       diag_size, nnz, as_hip_type(orig_values),
+                       as_hip_type(orig_row_ptrs), as_hip_type(orig_col_idxs),
+                       diag_stride, as_hip_type(diag_values));
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_DECLARE_CSR_EXTRACT_DIAGONAL);
 
 
 }  // namespace csr
