@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ginkgo/core/base/array.hpp>
 #include <ginkgo/core/base/lin_op.hpp>
+#include <ginkgo/core/base/math.hpp>
 
 
 namespace gko {
@@ -125,10 +126,13 @@ class Csr : public EnableLinOp<Csr<ValueType, IndexType>>,
             public ConvertibleTo<Hybrid<ValueType, IndexType>>,
             public ConvertibleTo<Sellp<ValueType, IndexType>>,
             public ConvertibleTo<SparsityCsr<ValueType, IndexType>>,
+            public DiagonalExtractable<ValueType>,
             public ReadableFromMatrixData<ValueType, IndexType>,
             public WritableToMatrixData<ValueType, IndexType>,
             public Transposable,
-            public Permutable<IndexType> {
+            public Permutable<IndexType>,
+            public EnableAbsoluteComputation<
+                remove_complex<Csr<ValueType, IndexType>>> {
     friend class EnableCreateMethod<Csr>;
     friend class EnablePolymorphicObject<Csr, LinOp>;
     friend class Coo<ValueType, IndexType>;
@@ -138,12 +142,14 @@ class Csr : public EnableLinOp<Csr<ValueType, IndexType>>,
     friend class Sellp<ValueType, IndexType>;
     friend class SparsityCsr<ValueType, IndexType>;
     friend class CsrBuilder<ValueType, IndexType>;
+    friend class Csr<to_complex<ValueType>, IndexType>;
 
 public:
     using value_type = ValueType;
     using index_type = IndexType;
     using transposed_type = Csr<ValueType, IndexType>;
     using mat_data = matrix_data<ValueType, IndexType>;
+    using absolute_type = remove_complex<Csr>;
 
     class automatical;
 
@@ -431,7 +437,11 @@ public:
         {
             if (warp_size_ > 0) {
                 int multiple = 8;
-                if (nnz >= 2e6) {
+                if (nnz >= 2e8) {
+                    multiple = 2048;
+                } else if (nnz >= 2e7) {
+                    multiple = 512;
+                } else if (nnz >= 2e6) {
                     multiple = 128;
                 } else if (nnz >= 2e5) {
                     multiple = 32;
@@ -566,7 +576,7 @@ public:
             } else {
                 index_type maxnum = 0;
                 for (index_type i = 1; i < num_rows + 1; i++) {
-                    maxnum = max(maxnum, row_ptrs[i] - row_ptrs[i - 1]);
+                    maxnum = std::max(maxnum, row_ptrs[i] - row_ptrs[i - 1]);
                 }
                 if (maxnum > row_len_limit) {
                     load_balance actual_strategy(nwarps_, warp_size_,
@@ -693,6 +703,12 @@ public:
 
     std::unique_ptr<LinOp> inverse_column_permute(
         const Array<IndexType> *inverse_permutation_indices) const override;
+
+    std::unique_ptr<Diagonal<ValueType>> extract_diagonal() const override;
+
+    std::unique_ptr<absolute_type> compute_absolute() const override;
+
+    void compute_absolute_inplace() override;
 
     /**
      * Sorts all (value, col_idx) pairs in each row by column index

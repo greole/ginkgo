@@ -42,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "core/base/allocator.hpp"
+#include "core/components/absolute_array.hpp"
+#include "core/components/fill_array.hpp"
 #include "core/matrix/sellp_kernels.hpp"
 
 
@@ -55,6 +57,12 @@ GKO_REGISTER_OPERATION(advanced_spmv, sellp::advanced_spmv);
 GKO_REGISTER_OPERATION(convert_to_dense, sellp::convert_to_dense);
 GKO_REGISTER_OPERATION(convert_to_csr, sellp::convert_to_csr);
 GKO_REGISTER_OPERATION(count_nonzeros, sellp::count_nonzeros);
+GKO_REGISTER_OPERATION(extract_diagonal, sellp::extract_diagonal);
+GKO_REGISTER_OPERATION(fill_array, components::fill_array);
+GKO_REGISTER_OPERATION(inplace_absolute_array,
+                       components::inplace_absolute_array);
+GKO_REGISTER_OPERATION(outplace_absolute_array,
+                       components::outplace_absolute_array);
 
 
 }  // namespace sellp
@@ -283,6 +291,52 @@ void Sellp<ValueType, IndexType>::write(mat_data &data) const
             }
         }
     }
+}
+
+
+template <typename ValueType, typename IndexType>
+std::unique_ptr<Diagonal<ValueType>>
+Sellp<ValueType, IndexType>::extract_diagonal() const
+{
+    auto exec = this->get_executor();
+
+    const auto diag_size = std::min(this->get_size()[0], this->get_size()[1]);
+    auto diag = Diagonal<ValueType>::create(exec, diag_size);
+    exec->run(sellp::make_fill_array(diag->get_values(), diag->get_size()[0],
+                                     zero<ValueType>()));
+    exec->run(sellp::make_extract_diagonal(this, lend(diag)));
+    return diag;
+}
+
+
+template <typename ValueType, typename IndexType>
+void Sellp<ValueType, IndexType>::compute_absolute_inplace()
+{
+    auto exec = this->get_executor();
+
+    exec->run(sellp::make_inplace_absolute_array(
+        this->get_values(), this->get_num_stored_elements()));
+}
+
+
+template <typename ValueType, typename IndexType>
+std::unique_ptr<typename Sellp<ValueType, IndexType>::absolute_type>
+Sellp<ValueType, IndexType>::compute_absolute() const
+{
+    auto exec = this->get_executor();
+
+    auto abs_sellp = absolute_type::create(
+        exec, this->get_size(), this->get_slice_size(),
+        this->get_stride_factor(), this->get_total_cols());
+
+    abs_sellp->col_idxs_ = col_idxs_;
+    abs_sellp->slice_lengths_ = slice_lengths_;
+    abs_sellp->slice_sets_ = slice_sets_;
+    exec->run(sellp::make_outplace_absolute_array(
+        this->get_const_values(), this->get_num_stored_elements(),
+        abs_sellp->get_values()));
+
+    return abs_sellp;
 }
 
 

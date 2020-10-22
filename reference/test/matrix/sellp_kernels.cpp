@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/executor.hpp>
 #include <ginkgo/core/matrix/csr.hpp>
 #include <ginkgo/core/matrix/dense.hpp>
+#include <ginkgo/core/matrix/diagonal.hpp>
 
 
 #include "core/matrix/sellp_kernels.hpp"
@@ -585,6 +586,111 @@ TYPED_TEST(Sellp, CountsNonzeros)
                                                    &nonzeros);
 
     ASSERT_EQ(nonzeros, 4);
+}
+
+
+TYPED_TEST(Sellp, ExtractsDiagonal)
+{
+    using T = typename TestFixture::value_type;
+    auto matrix = this->mtx1->clone();
+    auto diag = matrix->extract_diagonal();
+
+    ASSERT_EQ(diag->get_size()[0], 2);
+    ASSERT_EQ(diag->get_size()[1], 2);
+    ASSERT_EQ(diag->get_values()[0], T{1.});
+    ASSERT_EQ(diag->get_values()[1], T{5.});
+}
+
+
+TYPED_TEST(Sellp, ExtractsDiagonalWithSliceSizeAndStrideFactor)
+{
+    using T = typename TestFixture::value_type;
+    auto matrix = this->mtx2->clone();
+    auto diag = matrix->extract_diagonal();
+
+    ASSERT_EQ(diag->get_size()[0], 2);
+    ASSERT_EQ(diag->get_size()[1], 2);
+    ASSERT_EQ(diag->get_values()[0], T{1.});
+    ASSERT_EQ(diag->get_values()[1], T{5.});
+}
+
+
+TYPED_TEST(Sellp, InplaceAbsolute)
+{
+    using Mtx = typename TestFixture::Mtx;
+    auto mtx = gko::initialize<Mtx>(
+        {{1.0, 2.0, -2.0}, {3.0, -5.0, 0.0}, {0.0, 1.0, -1.5}}, this->exec);
+
+    mtx->compute_absolute_inplace();
+
+    GKO_ASSERT_MTX_NEAR(
+        mtx, l({{1.0, 2.0, 2.0}, {3.0, 5.0, 0.0}, {0.0, 1.0, 1.5}}), 0.0);
+}
+
+
+TYPED_TEST(Sellp, OutplaceAbsolute)
+{
+    using Mtx = typename TestFixture::Mtx;
+    auto mtx = gko::initialize<Mtx>(
+        {{1.0, 2.0, -2.0}, {3.0, -5.0, 0.0}, {0.0, 1.0, -1.5}}, this->exec);
+
+    auto abs_mtx = mtx->compute_absolute();
+
+    GKO_ASSERT_MTX_NEAR(
+        abs_mtx, l({{1.0, 2.0, 2.0}, {3.0, 5.0, 0.0}, {0.0, 1.0, 1.5}}), 0.0);
+}
+
+
+template <typename ValueIndexType>
+class SellpComplex : public ::testing::Test {
+protected:
+    using value_type =
+        typename std::tuple_element<0, decltype(ValueIndexType())>::type;
+    using index_type =
+        typename std::tuple_element<1, decltype(ValueIndexType())>::type;
+    using Mtx = gko::matrix::Sellp<value_type, index_type>;
+};
+
+TYPED_TEST_CASE(SellpComplex, gko::test::ComplexValueIndexTypes);
+
+
+TYPED_TEST(SellpComplex, OutplaceAbsolute)
+{
+    using Mtx = typename TestFixture::Mtx;
+    using T = typename TestFixture::value_type;
+    using index_type = typename TestFixture::index_type;
+    auto exec = gko::ReferenceExecutor::create();
+    // clang-format off
+    auto mtx = gko::initialize<Mtx>(
+        {{T{1.0, 0.0}, T{3.0, 4.0}, T{0.0, 2.0}},
+         {T{-4.0, -3.0}, T{-1.0, 0}, T{0.0, 0.0}},
+         {T{0.0, 0.0}, T{0.0, -1.5}, T{2.0, 0.0}}}, exec);
+    // clang-format on
+
+    auto abs_mtx = mtx->compute_absolute();
+
+    GKO_ASSERT_MTX_NEAR(
+        abs_mtx, l({{1.0, 5.0, 2.0}, {5.0, 1.0, 0.0}, {0.0, 1.5, 2.0}}), 0.0);
+}
+
+
+TYPED_TEST(SellpComplex, InplaceAbsolute)
+{
+    using Mtx = typename TestFixture::Mtx;
+    using T = typename TestFixture::value_type;
+    using index_type = typename TestFixture::index_type;
+    auto exec = gko::ReferenceExecutor::create();
+    // clang-format off
+    auto mtx = gko::initialize<Mtx>(
+        {{T{1.0, 0.0}, T{3.0, 4.0}, T{0.0, 2.0}},
+         {T{-4.0, -3.0}, T{-1.0, 0}, T{0.0, 0.0}},
+         {T{0.0, 0.0}, T{0.0, -1.5}, T{2.0, 0.0}}}, exec);
+    // clang-format on
+
+    mtx->compute_absolute_inplace();
+
+    GKO_ASSERT_MTX_NEAR(
+        mtx, l({{1.0, 5.0, 2.0}, {5.0, 1.0, 0.0}, {0.0, 1.5, 2.0}}), 0.0);
 }
 
 

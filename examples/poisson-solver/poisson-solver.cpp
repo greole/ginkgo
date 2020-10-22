@@ -100,7 +100,7 @@ gko::remove_complex<ValueType> calculate_error(
     Closure correct_u)
 {
     const ValueType h = 1.0 / static_cast<ValueType>(discretization_points + 1);
-    auto error = 0.0;
+    gko::remove_complex<ValueType> error = 0.0;
     for (int i = 0; i < discretization_points; ++i) {
         using std::abs;
         const auto xi = static_cast<ValueType>(i + 1) * h;
@@ -122,29 +122,40 @@ int main(int argc, char *argv[])
     using cg = gko::solver::Cg<ValueType>;
     using bj = gko::preconditioner::Jacobi<ValueType, IndexType>;
 
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " DISCRETIZATION_POINTS [executor]"
+    // Print version information
+    std::cout << gko::version_info::get() << std::endl;
+
+    if (argc == 2 && (std::string(argv[1]) == "--help")) {
+        std::cerr << "Usage: " << argv[0] << " [executor] [DISCRETIZATION_POINTS]"
                   << std::endl;
         std::exit(-1);
     }
 
     // Get number of discretization points
+    const auto executor_string = argc >= 2 ? argv[1] : "reference";
     const unsigned int discretization_points =
-        argc >= 2 ? std::atoi(argv[1]) : 100;
-    const auto executor_string = argc >= 3 ? argv[2] : "reference";
+        argc >= 3 ? std::atoi(argv[2]) : 100;
 
     // Figure out where to run the code
-    const auto omp = gko::OmpExecutor::create();
-    std::map<std::string, std::shared_ptr<gko::Executor>> exec_map{
-        {"omp", omp},
-        {"cuda", gko::CudaExecutor::create(0, omp, true)},
-        {"hip", gko::HipExecutor::create(0, omp, true)},
-        {"reference", gko::ReferenceExecutor::create()}};
+    std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
+        exec_map{
+            {"omp", [] { return gko::OmpExecutor::create(); }},
+            {"cuda",
+             [] {
+                 return gko::CudaExecutor::create(0, gko::OmpExecutor::create(),
+                                                  true);
+             }},
+            {"hip",
+             [] {
+                 return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
+                                                 true);
+             }},
+            {"reference", [] { return gko::ReferenceExecutor::create(); }}};
 
     // executor where Ginkgo will perform the computation
-    const auto exec = exec_map.at(executor_string);  // throws if not valid
+    const auto exec = exec_map.at(executor_string)();  // throws if not valid
     // executor used by the application
-    const auto app_exec = exec_map["omp"];
+    const auto app_exec = exec->get_master();
 
     // problem:
     auto correct_u = [](ValueType x) { return x * x * x; };
@@ -177,8 +188,9 @@ int main(int argc, char *argv[])
         ->generate(clone(exec, matrix))  // copy the matrix to the executor
         ->apply(lend(rhs), lend(u));
 
-    print_solution<ValueType>(u0, u1, lend(u));
-    std::cout << "The average relative error is "
+    // Uncomment to print the solution
+    // print_solution<ValueType>(u0, u1, lend(u));
+    std::cout << "Solve complete.\nThe average relative error is "
               << calculate_error(discretization_points, lend(u), correct_u) /
                      static_cast<gko::remove_complex<ValueType>>(
                          discretization_points)

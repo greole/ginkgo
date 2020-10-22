@@ -53,6 +53,10 @@ template <typename ValueType>
 using vec = gko::matrix::Dense<ValueType>;
 
 
+template <typename ValueType>
+using real_vec = gko::matrix::Dense<gko::remove_complex<ValueType>>;
+
+
 namespace utils {
 
 
@@ -70,9 +74,9 @@ std::unique_ptr<vec<ValueType>> create_vector(
 
 // utilities for computing norms and residuals
 template <typename ValueType>
-gko::remove_complex<ValueType> get_norm(const vec<ValueType> *norm)
+ValueType get_first_element(const vec<ValueType> *norm)
 {
-    return std::real(clone(norm->get_executor()->get_master(), norm)->at(0, 0));
+    return norm->get_executor()->copy_val_to_host(norm->get_const_values());
 }
 
 
@@ -80,9 +84,9 @@ template <typename ValueType>
 gko::remove_complex<ValueType> compute_norm(const vec<ValueType> *b)
 {
     auto exec = b->get_executor();
-    auto b_norm = gko::initialize<vec<ValueType>>({0.0}, exec);
+    auto b_norm = gko::initialize<real_vec<ValueType>>({0.0}, exec);
     b->compute_norm2(gko::lend(b_norm));
-    return get_norm(gko::lend(b_norm));
+    return get_first_element(gko::lend(b_norm));
 }
 
 
@@ -261,8 +265,8 @@ struct ResidualLogger : gko::log::Logger {
                                const gko::LinOp *residual_norm) const override
     {
         if (residual_norm) {
-            rec_res_norms.push_back(
-                utils::get_norm(gko::as<vec<ValueType>>(residual_norm)));
+            rec_res_norms.push_back(utils::get_first_element(
+                gko::as<real_vec<ValueType>>(residual_norm)));
         } else {
             rec_res_norms.push_back(
                 utils::compute_norm(gko::as<vec<ValueType>>(residual)));
@@ -302,8 +306,8 @@ struct ResidualLogger : gko::log::Logger {
 private:
     const gko::LinOp *matrix;
     const vec<ValueType> *b;
-    mutable std::vector<ValueType> rec_res_norms;
-    mutable std::vector<ValueType> true_res_norms;
+    mutable std::vector<gko::remove_complex<ValueType>> rec_res_norms;
+    mutable std::vector<gko::remove_complex<ValueType>> true_res_norms;
 };
 
 
@@ -365,17 +369,31 @@ int main(int argc, char *argv[])
     std::cout << gko::version_info::get() << std::endl;
 
     // Figure out where to run the code
-    std::shared_ptr<gko::Executor> exec;
-    if (argc == 1 || std::string(argv[1]) == "reference") {
-        exec = gko::ReferenceExecutor::create();
-    } else if (argc > 1 && std::string(argv[1]) == "omp") {
-        exec = gko::OmpExecutor::create();
-    } else if (argc > 1 && std::string(argv[1]) == "cuda" &&
-               gko::CudaExecutor::get_num_devices() > 0) {
-        exec = gko::CudaExecutor::create(0, gko::OmpExecutor::create(), true);
-    } else {
-        print_usage(argv[0]);
+    if (argc == 2 && (std::string(argv[1]) == "--help")) {
+        std::cerr << "Usage: " << argv[0] << " [executor]"
+                  << std::endl;
+        std::exit(-1);
     }
+
+    // Figure out where to run the code
+    const auto executor_string = argc >= 2 ? argv[1] : "reference";
+    std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
+        exec_map{
+            {"omp", [] { return gko::OmpExecutor::create(); }},
+            {"cuda",
+             [] {
+                 return gko::CudaExecutor::create(0, gko::OmpExecutor::create(),
+                                                  true);
+             }},
+            {"hip",
+             [] {
+                 return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
+                                                 true);
+             }},
+            {"reference", [] { return gko::ReferenceExecutor::create(); }}};
+
+    // executor where Ginkgo will perform the computation
+    const auto exec = exec_map.at(executor_string)();  // throws if not valid
 
     // Read the input matrix file directory
     std::string input_mtx = "data/A.mtx";

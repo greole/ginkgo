@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/exception_helpers.hpp>
 #include <ginkgo/core/base/executor.hpp>
 #include <ginkgo/core/matrix/dense.hpp>
+#include <ginkgo/core/matrix/diagonal.hpp>
 
 
 #include "core/matrix/hybrid_kernels.hpp"
@@ -215,6 +216,46 @@ TEST_F(Hybrid, MoveToCsrIsEquivalentToRef)
     dmtx->move_to(dcsr_mtx.get());
 
     GKO_ASSERT_MTX_NEAR(csr_mtx.get(), dcsr_mtx.get(), 1e-14);
+}
+
+
+TEST_F(Hybrid, ExtractDiagonalIsEquivalentToRef)
+{
+    set_up_apply_data();
+
+    auto diag = mtx->extract_diagonal();
+    auto ddiag = dmtx->extract_diagonal();
+
+    GKO_ASSERT_MTX_NEAR(diag.get(), ddiag.get(), 0);
+}
+
+
+TEST_F(Hybrid, InplaceAbsoluteMatrixIsEquivalentToRef)
+{
+    set_up_apply_data();
+
+    mtx->compute_absolute_inplace();
+    dmtx->compute_absolute_inplace();
+
+    GKO_ASSERT_MTX_NEAR(mtx, dmtx, 1e-14);
+}
+
+
+TEST_F(Hybrid, OutplaceAbsoluteMatrixIsEquivalentToRef)
+{
+    set_up_apply_data(1, std::make_shared<Mtx::column_limit>(2));
+    using AbsMtx = gko::remove_complex<Mtx>;
+
+    auto abs_mtx = mtx->compute_absolute();
+    auto dabs_mtx = dmtx->compute_absolute();
+    auto abs_strategy = gko::as<AbsMtx::column_limit>(abs_mtx->get_strategy());
+    auto dabs_strategy =
+        gko::as<AbsMtx::column_limit>(dabs_mtx->get_strategy());
+
+    GKO_ASSERT_MTX_NEAR(abs_mtx, dabs_mtx, 1e-14);
+    GKO_ASSERT_EQ(abs_strategy->get_num_columns(),
+                  dabs_strategy->get_num_columns());
+    GKO_ASSERT_EQ(abs_strategy->get_num_columns(), 2);
 }
 
 

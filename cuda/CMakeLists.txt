@@ -29,7 +29,7 @@ include(CudaArchitectureSelector)
 
 set(CUDA_INCLUDE_DIRS ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
-# This is required by some examples such as cmake_matrix_format
+# This is required by some examples such as custom_matrix_format
 # which need the correct CMAKE_CUDA_FLAGS to be set
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}" PARENT_SCOPE)
 set(CMAKE_CUDA_COMPILER_VERSION ${CMAKE_CUDA_COMPILER_VERSION} PARENT_SCOPE)
@@ -70,6 +70,7 @@ target_sources(ginkgo_cuda
     base/exception.cpp
     base/executor.cpp
     base/version.cpp
+    components/absolute_array.cu
     components/fill_array.cu
     components/precision_conversion.cu
     components/prefix_sum.cu
@@ -86,6 +87,7 @@ target_sources(ginkgo_cuda
     matrix/coo_kernels.cu
     matrix/csr_kernels.cu
     matrix/dense_kernels.cu
+    matrix/diagonal_kernels.cu
     matrix/ell_kernels.cu
     matrix/hybrid_kernels.cu
     matrix/sellp_kernels.cu
@@ -95,6 +97,7 @@ target_sources(ginkgo_cuda
     preconditioner/jacobi_generate_kernel.cu
     preconditioner/jacobi_kernels.cu
     preconditioner/jacobi_simple_apply_kernel.cu
+    reorder/rcm_kernels.cu
     solver/bicg_kernels.cu
     solver/bicgstab_kernels.cu
     solver/cg_kernels.cu
@@ -122,6 +125,25 @@ if (NOT CMAKE_CUDA_HOST_COMPILER AND NOT GINKGO_CUDA_DEFAULT_HOST_COMPILER)
 elseif(GINKGO_CUDA_DEFAULT_HOST_COMPILER)
     unset(CMAKE_CUDA_HOST_COMPILER CACHE)
 endif()
+
+if(CMAKE_CUDA_HOST_COMPILER AND NOT CMAKE_CXX_COMPILER STREQUAL CMAKE_CUDA_HOST_COMPILER)
+    message(WARNING "The CMake CXX compiler and CUDA host compiler do not match. "
+        "If you encounter any build error, especially while linking, try to use "
+        "the same compiler for both.\n"
+        "The CXX compiler is ${CMAKE_CXX_COMPILER} with version ${CMAKE_CXX_COMPILER_VERSION}.\n"
+        "The CUDA host compiler is ${CMAKE_CUDA_HOST_COMPILER}.")
+endif()
+
+if (CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION
+    MATCHES "9.2" AND CMAKE_CUDA_HOST_COMPILER MATCHES ".*clang.*" )
+    ginkgo_extract_clang_version(${CMAKE_CUDA_HOST_COMPILER} GINKGO_CUDA_HOST_CLANG_VERSION)
+
+    if (GINKGO_CUDA_HOST_CLANG_VERSION MATCHES "5\.0.*")
+        message(FATAL_ERROR "There is a bug between nvcc 9.2 and clang 5.0 which create a compiling issue."
+            "Consider using a different CUDA host compiler or CUDA version.")
+    endif()
+endif()
+
 target_compile_options(ginkgo_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:${GINKGO_CUDA_COMPILER_FLAGS}>)
 target_compile_options(ginkgo_cuda PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${GINKGO_COMPILER_FLAGS}>)
 ginkgo_compile_features(ginkgo_cuda)

@@ -117,6 +117,9 @@ private:
 };
 
 
+#if defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
+
+
 template <typename ValueType = gko::default_precision,
           typename IndexType = gko::int32>
 class CuspCsrmp
@@ -298,6 +301,9 @@ private:
 };
 
 
+#endif  // defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
+
+
 template <typename ValueType = gko::default_precision,
           typename IndexType = gko::int32>
 class CuspCsrEx
@@ -320,21 +326,6 @@ public:
     gko::size_type get_num_stored_elements() const noexcept
     {
         return csr_->get_num_stored_elements();
-    }
-
-    ~CuspCsrEx() override
-    {
-        const auto id = this->get_gpu_exec()->get_device_id();
-        if (set_buffer_) {
-            try {
-                gko::cuda::device_guard g{id};
-                GKO_ASSERT_NO_CUDA_ERRORS(cudaFree(buffer_));
-            } catch (const std::exception &e) {
-                std::cerr
-                    << "Error when unallocating CuspCsrEx temporary buffer: "
-                    << e.what() << std::endl;
-            }
-        }
     }
 
     CuspCsrEx(const CuspCsrEx &other) = delete;
@@ -364,14 +355,13 @@ protected:
             csr_->get_num_stored_elements(), &alpha, this->get_descr(),
             csr_->get_const_values(), csr_->get_const_row_ptrs(),
             csr_->get_const_col_idxs(), db, &beta, dx, &buffer_size);
-        GKO_ASSERT_NO_CUDA_ERRORS(cudaMalloc(&buffer_, buffer_size));
-        set_buffer_ = true;
+        buffer_.resize_and_reset(buffer_size);
 
         gko::kernels::cuda::cusparse::spmv<ValueType, IndexType>(
             handle, algmode_, trans_, this->get_size()[0], this->get_size()[1],
             csr_->get_num_stored_elements(), &alpha, this->get_descr(),
             csr_->get_const_values(), csr_->get_const_row_ptrs(),
-            csr_->get_const_col_idxs(), db, &beta, dx, buffer_);
+            csr_->get_const_col_idxs(), db, &beta, dx, buffer_.get_data());
 
         // Exiting the scope sets the pointer mode back to the default
         // DEVICE for Ginkgo
@@ -384,20 +374,22 @@ protected:
           csr_(std::move(
               csr::create(exec, std::make_shared<typename csr::classical>()))),
           trans_(CUSPARSE_OPERATION_NON_TRANSPOSE),
-          set_buffer_(false)
+          buffer_(exec)
     {
 #ifdef ALLOWMP
         algmode_ = CUSPARSE_ALG_MERGE_PATH;
-#endif
+#endif  // ALLOWMP
     }
 
 private:
     std::shared_ptr<csr> csr_;
     cusparseOperation_t trans_;
     cusparseAlgMode_t algmode_;
-    mutable void *buffer_;
-    mutable bool set_buffer_;
+    mutable gko::Array<char> buffer_;
 };
+
+
+#if defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
 
 
 template <typename ValueType = gko::default_precision,
@@ -484,8 +476,12 @@ private:
 };
 
 
-#if defined(CUDA_VERSION) && (CUDA_VERSION >= 10010) && \
-    !(defined(_WIN32) || defined(__CYGWIN__))
+#endif  // defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
+
+
+#if defined(CUDA_VERSION) &&  \
+    (CUDA_VERSION >= 11000 || \
+     ((CUDA_VERSION >= 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
 
 
 template <typename ValueType>
@@ -512,7 +508,7 @@ void cusp_generic_spmv(std::shared_ptr<const gko::CudaExecutor> gpu_exec,
         &vecb, dense_b->get_num_stored_elements(),
         as_culibs_type(const_cast<ValueType *>(db)), cu_value));
 
-    size_t buffer_size = 0;
+    gko::size_type buffer_size = 0;
     GKO_ASSERT_NO_CUSPARSE_ERRORS(cusparseSpMV_bufferSize(
         gpu_exec->get_cusparse_handle(), trans, &scalars.get_const_data()[0],
         mat, vecb, &scalars.get_const_data()[1], vecx, cu_value, alg,
@@ -680,22 +676,25 @@ private:
 };
 
 
-#endif  // defined(CUDA_VERSION) && (CUDA_VERSION >= 10010) &&
-        // !(defined(_WIN32) || defined(__CYGWIN__))
+#endif  // defined(CUDA_VERSION) && (CUDA_VERSION >= 11000 || ((CUDA_VERSION >=
+        // 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
 
 
 }  // namespace detail
 
 
 // Some shortcuts
-using cusp_csr = detail::CuspCsr<>;
 using cusp_csrex = detail::CuspCsrEx<>;
+#if defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
+using cusp_csr = detail::CuspCsr<>;
 using cusp_csrmp = detail::CuspCsrmp<>;
 using cusp_csrmm = detail::CuspCsrmm<>;
+#endif  // defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
 
 
-#if defined(CUDA_VERSION) && (CUDA_VERSION >= 10010) && \
-    !(defined(_WIN32) || defined(__CYGWIN__))
+#if defined(CUDA_VERSION) &&  \
+    (CUDA_VERSION >= 11000 || \
+     ((CUDA_VERSION >= 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
 
 
 using cusp_gcsr = detail::CuspGenericCsr<>;
@@ -704,14 +703,17 @@ using cusp_gcsr2 =
 using cusp_gcoo = detail::CuspGenericCoo<>;
 
 
-#endif  // defined(CUDA_VERSION) && (CUDA_VERSION >= 10010) &&
-        // !(defined(_WIN32) || defined(__CYGWIN__))
+#endif  // defined(CUDA_VERSION) && (CUDA_VERSION >= 11000 || ((CUDA_VERSION >=
+        // 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
 
 
+#if defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
 using cusp_coo =
     detail::CuspHybrid<double, gko::int32, CUSPARSE_HYB_PARTITION_USER, 0>;
 using cusp_ell =
     detail::CuspHybrid<double, gko::int32, CUSPARSE_HYB_PARTITION_MAX, 0>;
 using cusp_hybrid = detail::CuspHybrid<>;
+#endif  // defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
+
 
 #endif  // GKO_BENCHMARK_UTILS_CUDA_LINOPS_HPP_

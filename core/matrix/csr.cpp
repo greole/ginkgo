@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/matrix/sparsity_csr.hpp>
 
 
+#include "core/components/absolute_array.hpp"
+#include "core/components/fill_array.hpp"
 #include "core/matrix/csr_kernels.hpp"
 
 
@@ -78,6 +80,12 @@ GKO_REGISTER_OPERATION(calculate_nonzeros_per_row,
 GKO_REGISTER_OPERATION(sort_by_column_index, csr::sort_by_column_index);
 GKO_REGISTER_OPERATION(is_sorted_by_column_index,
                        csr::is_sorted_by_column_index);
+GKO_REGISTER_OPERATION(extract_diagonal, csr::extract_diagonal);
+GKO_REGISTER_OPERATION(fill_array, components::fill_array);
+GKO_REGISTER_OPERATION(inplace_absolute_array,
+                       components::inplace_absolute_array);
+GKO_REGISTER_OPERATION(outplace_absolute_array,
+                       components::outplace_absolute_array);
 
 
 }  // namespace csr
@@ -461,6 +469,51 @@ bool Csr<ValueType, IndexType>::is_sorted_by_column_index() const
     bool is_sorted;
     exec->run(csr::make_is_sorted_by_column_index(this, &is_sorted));
     return is_sorted;
+}
+
+
+template <typename ValueType, typename IndexType>
+std::unique_ptr<Diagonal<ValueType>>
+Csr<ValueType, IndexType>::extract_diagonal() const
+{
+    auto exec = this->get_executor();
+
+    const auto diag_size = std::min(this->get_size()[0], this->get_size()[1]);
+    auto diag = Diagonal<ValueType>::create(exec, diag_size);
+    exec->run(csr::make_fill_array(diag->get_values(), diag->get_size()[0],
+                                   zero<ValueType>()));
+    exec->run(csr::make_extract_diagonal(this, lend(diag)));
+    return diag;
+}
+
+
+template <typename ValueType, typename IndexType>
+void Csr<ValueType, IndexType>::compute_absolute_inplace()
+{
+    auto exec = this->get_executor();
+
+    exec->run(csr::make_inplace_absolute_array(
+        this->get_values(), this->get_num_stored_elements()));
+}
+
+
+template <typename ValueType, typename IndexType>
+std::unique_ptr<typename Csr<ValueType, IndexType>::absolute_type>
+Csr<ValueType, IndexType>::compute_absolute() const
+{
+    auto exec = this->get_executor();
+
+    auto abs_csr = absolute_type::create(exec, this->get_size(),
+                                         this->get_num_stored_elements());
+
+    abs_csr->col_idxs_ = col_idxs_;
+    abs_csr->row_ptrs_ = row_ptrs_;
+    exec->run(csr::make_outplace_absolute_array(this->get_const_values(),
+                                                this->get_num_stored_elements(),
+                                                abs_csr->get_values()));
+
+    convert_strategy_helper(abs_csr.get());
+    return abs_csr;
 }
 
 

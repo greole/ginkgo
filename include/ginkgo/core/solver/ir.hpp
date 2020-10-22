@@ -178,25 +178,26 @@ public:
          * Criterion factories.
          */
         std::vector<std::shared_ptr<const stop::CriterionFactory>>
-            GKO_FACTORY_PARAMETER(criteria, nullptr);
+            GKO_FACTORY_PARAMETER_VECTOR(criteria, nullptr);
 
         /**
          * Inner solver factory.
          */
-        std::shared_ptr<const LinOpFactory> GKO_FACTORY_PARAMETER(solver,
-                                                                  nullptr);
+        std::shared_ptr<const LinOpFactory> GKO_FACTORY_PARAMETER_SCALAR(
+            solver, nullptr);
 
         /**
          * Already generated solver. If one is provided, the factory `solver`
          * will be ignored.
          */
-        std::shared_ptr<const LinOp> GKO_FACTORY_PARAMETER(generated_solver,
-                                                           nullptr);
+        std::shared_ptr<const LinOp> GKO_FACTORY_PARAMETER_SCALAR(
+            generated_solver, nullptr);
 
         /**
          * Relaxation factor for Richardson iteration
          */
-        ValueType GKO_FACTORY_PARAMETER(relaxation_factor, value_type{1});
+        ValueType GKO_FACTORY_PARAMETER_SCALAR(relaxation_factor,
+                                               value_type{1});
     };
     GKO_ENABLE_LIN_OP_FACTORY(Ir, parameters, Factory);
     GKO_ENABLE_BUILD_METHOD(Factory);
@@ -218,6 +219,7 @@ protected:
           parameters_{factory->get_parameters()},
           system_matrix_{std::move(system_matrix)}
     {
+        GKO_ASSERT_IS_SQUARE_MATRIX(system_matrix_);
         if (parameters_.generated_solver) {
             solver_ = parameters_.generated_solver;
             GKO_ASSERT_EQUAL_DIMENSIONS(solver_, this);
@@ -225,7 +227,7 @@ protected:
             solver_ = parameters_.solver->generate(system_matrix_);
         } else {
             solver_ = matrix::Identity<ValueType>::create(this->get_executor(),
-                                                          this->get_size()[0]);
+                                                          this->get_size());
         }
         relaxation_factor_ = gko::initialize<matrix::Dense<ValueType>>(
             {parameters_.relaxation_factor}, this->get_executor());

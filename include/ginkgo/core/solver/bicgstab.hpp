@@ -132,19 +132,19 @@ public:
          * Criterion factories.
          */
         std::vector<std::shared_ptr<const stop::CriterionFactory>>
-            GKO_FACTORY_PARAMETER(criteria, nullptr);
+            GKO_FACTORY_PARAMETER_VECTOR(criteria, nullptr);
 
         /**
          * Preconditioner factory.
          */
-        std::shared_ptr<const LinOpFactory> GKO_FACTORY_PARAMETER(
+        std::shared_ptr<const LinOpFactory> GKO_FACTORY_PARAMETER_SCALAR(
             preconditioner, nullptr);
 
         /**
          * Already generated preconditioner. If one is provided, the factory
          * `preconditioner` will be ignored.
          */
-        std::shared_ptr<const LinOp> GKO_FACTORY_PARAMETER(
+        std::shared_ptr<const LinOp> GKO_FACTORY_PARAMETER_SCALAR(
             generated_preconditioner, nullptr);
     };
     GKO_ENABLE_LIN_OP_FACTORY(Bicgstab, parameters, Factory);
@@ -167,6 +167,7 @@ protected:
           parameters_{factory->get_parameters()},
           system_matrix_{std::move(system_matrix)}
     {
+        GKO_ASSERT_IS_SQUARE_MATRIX(system_matrix_);
         if (parameters_.generated_preconditioner) {
             GKO_ASSERT_EQUAL_DIMENSIONS(parameters_.generated_preconditioner,
                                         this);
@@ -176,7 +177,7 @@ protected:
                 parameters_.preconditioner->generate(system_matrix_));
         } else {
             set_preconditioner(matrix::Identity<ValueType>::create(
-                this->get_executor(), this->get_size()[0]));
+                this->get_executor(), this->get_size()));
         }
         stop_criterion_factory_ =
             stop::combine(std::move(parameters_.criteria));

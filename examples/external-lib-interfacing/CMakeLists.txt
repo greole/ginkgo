@@ -1,7 +1,7 @@
 if(GINKGO_BUILD_EXTLIB_EXAMPLE)
     # This is just an example of the CMakeLists.txt file that can be used after the
     # correct version of deal.ii has been installed.
-    cmake_minimum_required(VERSION 3.8)
+    cmake_minimum_required(VERSION 3.9)
     project(DEAL_II_EXAMPLE LANGUAGES CXX)
 
     find_package(MPI REQUIRED)
@@ -14,8 +14,9 @@ if(GINKGO_BUILD_EXTLIB_EXAMPLE)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 
+    set(run_target "external-lib-interfacing")
     add_executable(${PROJECT_NAME} "")
-    target_sources(${PROJECT_NAME} PRIVATE external-lib-interfacing.cpp)
+    target_sources(${PROJECT_NAME} PRIVATE ${run_target}.cpp)
     target_compile_options(${PROJECT_NAME} PRIVATE -g -Wall)
     target_compile_definitions(${PROJECT_NAME} PRIVATE OMPI_SKIP_MPICXX)
 

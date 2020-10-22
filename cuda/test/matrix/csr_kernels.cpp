@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/executor.hpp>
 #include <ginkgo/core/matrix/coo.hpp>
 #include <ginkgo/core/matrix/dense.hpp>
+#include <ginkgo/core/matrix/diagonal.hpp>
 #include <ginkgo/core/matrix/ell.hpp>
 #include <ginkgo/core/matrix/hybrid.hpp>
 #include <ginkgo/core/matrix/identity.hpp>
@@ -59,8 +60,8 @@ namespace {
 
 class Csr : public ::testing::Test {
 protected:
-    using Mtx = gko::matrix::Csr<>;
     using Vec = gko::matrix::Dense<>;
+    using Mtx = gko::matrix::Csr<>;
     using ComplexVec = gko::matrix::Dense<std::complex<double>>;
     using ComplexMtx = gko::matrix::Csr<std::complex<double>>;
 
@@ -416,6 +417,7 @@ TEST_F(Csr, TransposeIsEquivalentToRef)
 
     GKO_ASSERT_MTX_NEAR(static_cast<Mtx *>(d_trans.get()),
                         static_cast<Mtx *>(trans.get()), 0.0);
+    ASSERT_TRUE(static_cast<Mtx *>(d_trans.get())->is_sorted_by_column_index());
 }
 
 
@@ -428,6 +430,8 @@ TEST_F(Csr, ConjugateTransposeIsEquivalentToRef)
 
     GKO_ASSERT_MTX_NEAR(static_cast<ComplexMtx *>(d_trans.get()),
                         static_cast<ComplexMtx *>(trans.get()), 0.0);
+    ASSERT_TRUE(
+        static_cast<ComplexMtx *>(d_trans.get())->is_sorted_by_column_index());
 }
 
 
@@ -722,6 +726,61 @@ TEST_F(Csr, OneAutomaticalWorksWithDifferentMatrices)
     EXPECT_EQ("classical", classical_mtx_d->get_strategy()->get_name());
     ASSERT_NE(load_balance_mtx_d->get_strategy().get(),
               classical_mtx_d->get_strategy().get());
+}
+
+
+TEST_F(Csr, ExtractDiagonalIsEquivalentToRef)
+{
+    set_up_apply_data(std::make_shared<Mtx::automatical>());
+
+    auto diag = mtx->extract_diagonal();
+    auto ddiag = dmtx->extract_diagonal();
+
+    GKO_ASSERT_MTX_NEAR(diag.get(), ddiag.get(), 0);
+}
+
+
+TEST_F(Csr, InplaceAbsoluteMatrixIsEquivalentToRef)
+{
+    set_up_apply_data(std::make_shared<Mtx::automatical>(cuda));
+
+    mtx->compute_absolute_inplace();
+    dmtx->compute_absolute_inplace();
+
+    GKO_ASSERT_MTX_NEAR(mtx, dmtx, 1e-14);
+}
+
+
+TEST_F(Csr, OutplaceAbsoluteMatrixIsEquivalentToRef)
+{
+    set_up_apply_data(std::make_shared<Mtx::automatical>(cuda));
+
+    auto abs_mtx = mtx->compute_absolute();
+    auto dabs_mtx = dmtx->compute_absolute();
+
+    GKO_ASSERT_MTX_NEAR(abs_mtx, dabs_mtx, 1e-14);
+}
+
+
+TEST_F(Csr, InplaceAbsoluteComplexMatrixIsEquivalentToRef)
+{
+    set_up_apply_complex_data(std::make_shared<ComplexMtx::automatical>(cuda));
+
+    complex_mtx->compute_absolute_inplace();
+    complex_dmtx->compute_absolute_inplace();
+
+    GKO_ASSERT_MTX_NEAR(complex_mtx, complex_dmtx, 1e-14);
+}
+
+
+TEST_F(Csr, OutplaceAbsoluteComplexMatrixIsEquivalentToRef)
+{
+    set_up_apply_complex_data(std::make_shared<ComplexMtx::automatical>(cuda));
+
+    auto abs_mtx = complex_mtx->compute_absolute();
+    auto dabs_mtx = complex_dmtx->compute_absolute();
+
+    GKO_ASSERT_MTX_NEAR(abs_mtx, dabs_mtx, 1e-14);
 }
 
 

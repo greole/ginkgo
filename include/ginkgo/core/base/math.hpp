@@ -38,10 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <complex>
 #include <cstdlib>
 #include <limits>
+#include <type_traits>
 
 
 #include <ginkgo/config.hpp>
-#include <ginkgo/core/base/std_extensions.hpp>
 #include <ginkgo/core/base/types.hpp>
 #include <ginkgo/core/base/utils.hpp>
 
@@ -133,12 +133,123 @@ struct remove_complex_impl<std::complex<T>> {
 };
 
 
+/**
+ * Use the complex type if it is not complex.
+ *
+ * @tparam T  the type being made complex
+ */
+template <typename T>
+struct to_complex_impl {
+    using type = std::complex<T>;
+};
+
+/**
+ * Use the same type if it is complex type.
+ *
+ * @tparam T  the type being made complex
+ */
+template <typename T>
+struct to_complex_impl<std::complex<T>> {
+    using type = std::complex<T>;
+};
+
+
 template <typename T>
 struct is_complex_impl : public std::integral_constant<bool, false> {};
 
 template <typename T>
 struct is_complex_impl<std::complex<T>>
     : public std::integral_constant<bool, true> {};
+
+
+template <typename T>
+struct is_complex_or_scalar_impl : std::is_scalar<T> {};
+
+template <typename T>
+struct is_complex_or_scalar_impl<std::complex<T>> : std::is_scalar<T> {};
+
+
+/**
+ * template_converter is converting the template parameters of a class by
+ * converter<type>.
+ *
+ * @tparam  converter<type> which convert one type to another type
+ * @tparam  T  type
+ */
+template <template <typename> class converter, typename T>
+struct template_converter {};
+
+/**
+ * template_converter is converting the template parameters of a class by
+ * converter<type>. Converting class<T1, T2, ...> to class<converter<T1>,
+ * converter<T2>, converter<...>>.
+ *
+ * @tparam  converter<type> which convert one type to another type
+ * @tparam  template <...> T  class template base
+ * @tparam  ...Rest  the template parameter of T
+ */
+template <template <typename> class converter, template <typename...> class T,
+          typename... Rest>
+struct template_converter<converter, T<Rest...>> {
+    using type = T<typename converter<Rest>::type...>;
+};
+
+
+template <typename T, typename = void>
+struct remove_complex_s {};
+
+/**
+ * Obtains a real counterpart of a std::complex type, and leaves the type
+ * unchanged if it is not a complex type for complex/scalar type.
+ *
+ * @tparam T  complex or scalar type
+ */
+template <typename T>
+struct remove_complex_s<T,
+                        std::enable_if_t<is_complex_or_scalar_impl<T>::value>> {
+    using type = typename detail::remove_complex_impl<T>::type;
+};
+
+/**
+ * Obtains a real counterpart of a class with template parameters, which
+ * converts complex parameters to real parameters.
+ *
+ * @tparam T  class with template parameters
+ */
+template <typename T>
+struct remove_complex_s<
+    T, std::enable_if_t<!is_complex_or_scalar_impl<T>::value>> {
+    using type =
+        typename detail::template_converter<detail::remove_complex_impl,
+                                            T>::type;
+};
+
+
+template <typename T, typename = void>
+struct to_complex_s {};
+
+/**
+ * Obtains a complex counterpart of a real type, and leaves the type
+ * unchanged if it is a complex type for complex/scalar type.
+ *
+ * @tparam T  complex or scalar type
+ */
+template <typename T>
+struct to_complex_s<T, std::enable_if_t<is_complex_or_scalar_impl<T>::value>> {
+    using type = typename detail::to_complex_impl<T>::type;
+};
+
+/**
+ * Obtains a complex counterpart of a class with template parameters, which
+ * converts real parameters to complex parameters.
+ *
+ * @tparam T  class with template parameters
+ */
+template <typename T>
+struct to_complex_s<T, std::enable_if_t<!is_complex_or_scalar_impl<T>::value>> {
+    using type =
+        typename detail::template_converter<detail::to_complex_impl, T>::type;
+};
 
 
 }  // namespace detail
@@ -168,14 +279,6 @@ struct cpx_real_type<std::complex<T>> {
 
 
 /**
- * Obtains a real counterpart of a std::complex type, and leaves the type
- * unchanged if it is not a complex type.
- */
-template <typename T>
-using remove_complex = typename detail::remove_complex_impl<T>::type;
-
-
-/**
  * Allows to check if T is a complex value during compile time by accessing the
  * `value` attribute of this struct.
  * If `value` is `true`, T is a complex type, if it is `false`, T is not a
@@ -198,6 +301,70 @@ GKO_INLINE GKO_ATTRIBUTES constexpr bool is_complex()
 {
     return detail::is_complex_impl<T>::value;
 }
+
+
+/**
+ * Allows to check if T is a complex or scalar value during compile time by
+ * accessing the `value` attribute of this struct. If `value` is `true`, T is a
+ * complex/scalar type, if it is `false`, T is not a complex/scalar type.
+ *
+ * @tparam T  type to check
+ */
+template <typename T>
+using is_complex_or_scalar_s = detail::is_complex_or_scalar_impl<T>;
+
+/**
+ * Checks if T is a complex/scalar type.
+ *
+ * @tparam T  type to check
+ *
+ * @return `true` if T is a complex/scalar type, `false` otherwise
+ */
+template <typename T>
+GKO_INLINE GKO_ATTRIBUTES constexpr bool is_complex_or_scalar()
+{
+    return detail::is_complex_or_scalar_impl<T>::value;
+}
+
+
+/**
+ * Obtain the type which removed the complex of complex/scalar type or the
+ * template parameter of class by accessing the `type` attribute of this struct.
+ *
+ * @tparam T  type to remove complex
+ *
+ * @note remove_complex<class> can not be used in friend class declaration.
+ */
+template <typename T>
+using remove_complex = typename detail::remove_complex_s<T>::type;
+
+
+/**
+ * Obtain the type which adds the complex of complex/scalar type or the
+ * template parameter of class by accessing the `type` attribute of this struct.
+ *
+ * @tparam T  type to complex_type
+ *
+ * @note to_complex<class> can not be used in friend class declaration.
+ *       the followings are the error message from different combination.
+ *       friend to_complex<Csr>;
+ *         error: can not recognize it is class correctly.
+ *       friend class to_complex<Csr>;
+ *         error: using alias template specialization
+ *       friend class to_complex_s<Csr<ValueType,IndexType>>::type;
+ *         error: can not recognize it is class correctly.
+ */
+template <typename T>
+using to_complex = typename detail::to_complex_s<T>::type;
+
+
+/**
+ * to_real is alias of remove_complex
+ *
+ * @tparam T  type to real
+ */
+template <typename T>
+using to_real = remove_complex<T>;
 
 
 namespace detail {
@@ -372,8 +539,8 @@ struct type_size_impl<std::complex<T>> {
  */
 template <typename T, size_type Limit = sizeof(uint16) * byte_size>
 using truncate_type =
-    xstd::conditional_t<detail::type_size_impl<T>::value >= 2 * Limit,
-                        typename detail::truncate_type_impl<T>::type, T>;
+    std::conditional_t<detail::type_size_impl<T>::value >= 2 * Limit,
+                       typename detail::truncate_type_impl<T>::type, T>;
 
 
 /**
@@ -476,7 +643,7 @@ GKO_INLINE __host__ constexpr T one(const T &)
  * @return additive identity for T
  */
 template <typename T>
-GKO_INLINE __device__ constexpr xstd::enable_if_t<
+GKO_INLINE __device__ constexpr std::enable_if_t<
     !std::is_same<T, std::complex<remove_complex<T>>>::value, T>
 zero()
 {
@@ -506,7 +673,7 @@ GKO_INLINE __device__ constexpr T zero(const T &)
  * @return the multiplicative identity for T
  */
 template <typename T>
-GKO_INLINE __device__ constexpr xstd::enable_if_t<
+GKO_INLINE __device__ constexpr std::enable_if_t<
     !std::is_same<T, std::complex<remove_complex<T>>>::value, T>
 one()
 {
@@ -596,22 +763,6 @@ GKO_INLINE GKO_ATTRIBUTES constexpr T one(const T &)
 
 
 /**
- * Returns the absolute value of the object.
- *
- * @tparam T  the type of the object
- *
- * @param x  the object
- *
- * @return x >= zero<T>() ? x : -x;
- */
-template <typename T>
-GKO_INLINE GKO_ATTRIBUTES constexpr T abs(const T &x)
-{
-    return x >= zero<T>() ? x : -x;
-}
-
-
-/**
  * Returns the larger of the arguments.
  *
  * @tparam T  type of the arguments
@@ -621,8 +772,6 @@ GKO_INLINE GKO_ATTRIBUTES constexpr T abs(const T &x)
  *
  * @return x >= y ? x : y
  *
- * @note C++11 version of this function is not constexpr, thus we provide our
- *       own implementation.
  */
 template <typename T>
 GKO_INLINE GKO_ATTRIBUTES constexpr T max(const T &x, const T &y)
@@ -641,8 +790,6 @@ GKO_INLINE GKO_ATTRIBUTES constexpr T max(const T &x, const T &y)
  *
  * @return x <= y ? x : y
  *
- * @note C++11 version of this function is not `constexpr`, thus we provide our
- *       own implementation.
  */
 template <typename T>
 GKO_INLINE GKO_ATTRIBUTES constexpr T min(const T &x, const T &y)
@@ -661,16 +808,15 @@ GKO_INLINE GKO_ATTRIBUTES constexpr T min(const T &x, const T &y)
  * @return real part of the object (by default, the object itself)
  */
 template <typename T>
-GKO_ATTRIBUTES
-    GKO_INLINE constexpr xstd::enable_if_t<!is_complex_s<T>::value, T>
-    real(const T &x)
+GKO_ATTRIBUTES GKO_INLINE constexpr std::enable_if_t<!is_complex_s<T>::value, T>
+real(const T &x)
 {
     return x;
 }
 
 template <typename T>
-GKO_ATTRIBUTES GKO_INLINE constexpr xstd::enable_if_t<is_complex_s<T>::value,
-                                                      remove_complex<T>>
+GKO_ATTRIBUTES GKO_INLINE constexpr std::enable_if_t<is_complex_s<T>::value,
+                                                     remove_complex<T>>
 real(const T &x)
 {
     return x.real();
@@ -687,16 +833,15 @@ real(const T &x)
  * @return imaginary part of the object (by default, zero<T>())
  */
 template <typename T>
-GKO_ATTRIBUTES
-    GKO_INLINE constexpr xstd::enable_if_t<!is_complex_s<T>::value, T>
-    imag(const T &)
+GKO_ATTRIBUTES GKO_INLINE constexpr std::enable_if_t<!is_complex_s<T>::value, T>
+imag(const T &)
 {
     return zero<T>();
 }
 
 template <typename T>
-GKO_ATTRIBUTES GKO_INLINE constexpr xstd::enable_if_t<is_complex_s<T>::value,
-                                                      remove_complex<T>>
+GKO_ATTRIBUTES GKO_INLINE constexpr std::enable_if_t<is_complex_s<T>::value,
+                                                     remove_complex<T>>
 imag(const T &x)
 {
     return x.imag();
@@ -711,14 +856,14 @@ imag(const T &x)
  * @return  conjugate of the object (by default, the object itself)
  */
 template <typename T>
-GKO_ATTRIBUTES GKO_INLINE xstd::enable_if_t<!is_complex_s<T>::value, T> conj(
+GKO_ATTRIBUTES GKO_INLINE std::enable_if_t<!is_complex_s<T>::value, T> conj(
     const T &x)
 {
     return x;
 }
 
 template <typename T>
-GKO_ATTRIBUTES GKO_INLINE xstd::enable_if_t<is_complex_s<T>::value, T> conj(
+GKO_ATTRIBUTES GKO_INLINE std::enable_if_t<is_complex_s<T>::value, T> conj(
     const T &x)
 {
     return T{x.real(), -x.imag()};
@@ -737,6 +882,33 @@ GKO_INLINE GKO_ATTRIBUTES constexpr auto squared_norm(const T &x)
     -> decltype(real(conj(x) * x))
 {
     return real(conj(x) * x);
+}
+
+
+/**
+ * Returns the absolute value of the object.
+ *
+ * @tparam T  the type of the object
+ *
+ * @param x  the object
+ *
+ * @return x >= zero<T>() ? x : -x;
+ */
+template <typename T>
+GKO_INLINE
+    GKO_ATTRIBUTES constexpr xstd::enable_if_t<!is_complex_s<T>::value, T>
+    abs(const T &x)
+{
+    return x >= zero<T>() ? x : -x;
+}
+
+
+template <typename T>
+GKO_INLINE GKO_ATTRIBUTES constexpr xstd::enable_if_t<is_complex_s<T>::value,
+                                                      remove_complex<T>>
+abs(const T &x)
+{
+    return sqrt(squared_norm(x));
 }
 
 
@@ -790,7 +962,7 @@ constexpr T get_superior_power(const T &base, const T &limit,
  *         +/- infinity nor NaN.
  */
 template <typename T>
-GKO_INLINE GKO_ATTRIBUTES xstd::enable_if_t<!is_complex_s<T>::value, bool>
+GKO_INLINE GKO_ATTRIBUTES std::enable_if_t<!is_complex_s<T>::value, bool>
 is_finite(const T &value)
 {
     constexpr T infinity{detail::infinity_impl<T>::value};
@@ -810,7 +982,7 @@ is_finite(const T &value)
  *         they are neither +/- infinity nor NaN.
  */
 template <typename T>
-GKO_INLINE GKO_ATTRIBUTES xstd::enable_if_t<is_complex_s<T>::value, bool>
+GKO_INLINE GKO_ATTRIBUTES std::enable_if_t<is_complex_s<T>::value, bool>
 is_finite(const T &value)
 {
     return is_finite(value.real()) && is_finite(value.imag());

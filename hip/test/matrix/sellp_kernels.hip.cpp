@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/executor.hpp>
 #include <ginkgo/core/matrix/csr.hpp>
 #include <ginkgo/core/matrix/dense.hpp>
+#include <ginkgo/core/matrix/diagonal.hpp>
 
 
 #include "core/matrix/sellp_kernels.hpp"
@@ -323,6 +324,50 @@ TEST_F(Sellp, CountNonzerosIsEquivalentToRef)
     gko::kernels::hip::sellp::count_nonzeros(hip, dmtx.get(), &dnnz);
 
     ASSERT_EQ(nnz, dnnz);
+}
+
+
+TEST_F(Sellp, ExtractDiagonalIsEquivalentToRef)
+{
+    set_up_apply_matrix();
+
+    auto diag = mtx->extract_diagonal();
+    auto ddiag = dmtx->extract_diagonal();
+
+    GKO_ASSERT_MTX_NEAR(diag.get(), ddiag.get(), 0);
+}
+
+
+TEST_F(Sellp, ExtractDiagonalWithSliceSizeAndStrideFactorIsEquivalentToRef)
+{
+    set_up_apply_matrix(32, 2);
+
+    auto diag = mtx->extract_diagonal();
+    auto ddiag = dmtx->extract_diagonal();
+
+    GKO_ASSERT_MTX_NEAR(diag.get(), ddiag.get(), 0);
+}
+
+
+TEST_F(Sellp, InplaceAbsoluteMatrixIsEquivalentToRef)
+{
+    set_up_apply_matrix(32, 2);
+
+    mtx->compute_absolute_inplace();
+    dmtx->compute_absolute_inplace();
+
+    GKO_ASSERT_MTX_NEAR(mtx, dmtx, 1e-14);
+}
+
+
+TEST_F(Sellp, OutplaceAbsoluteMatrixIsEquivalentToRef)
+{
+    set_up_apply_matrix(32, 2);
+
+    auto abs_mtx = mtx->compute_absolute();
+    auto dabs_mtx = dmtx->compute_absolute();
+
+    GKO_ASSERT_MTX_NEAR(abs_mtx, dabs_mtx, 1e-14);
 }
 
 

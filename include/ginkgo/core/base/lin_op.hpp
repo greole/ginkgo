@@ -35,21 +35,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <memory>
+#include <type_traits>
 #include <utility>
 
 
 #include <ginkgo/core/base/abstract_factory.hpp>
 #include <ginkgo/core/base/dim.hpp>
 #include <ginkgo/core/base/exception_helpers.hpp>
+#include <ginkgo/core/base/math.hpp>
 #include <ginkgo/core/base/matrix_data.hpp>
 #include <ginkgo/core/base/polymorphic_object.hpp>
-#include <ginkgo/core/base/std_extensions.hpp>
 #include <ginkgo/core/base/types.hpp>
 #include <ginkgo/core/base/utils.hpp>
 #include <ginkgo/core/log/logger.hpp>
 
 
 namespace gko {
+namespace matrix {
+
+
+template <typename ValueType>
+class Diagonal;
+
+
+}
 
 
 /**
@@ -592,6 +601,83 @@ private:
 
 
 /**
+ * The diagonal of a LinOp implementing this interface can be extracted.
+ * extract_diagonal extracts the elements whose col and row index are the
+ * same and stores the result in a min(nrows, ncols) x 1 dense matrix.
+ *
+ * @ingroup LinOp
+ */
+template <typename ValueType>
+class DiagonalExtractable {
+public:
+    using value_type = ValueType;
+
+    virtual ~DiagonalExtractable() = default;
+
+    /**
+     * Extracts the diagonal entries of the matrix into a vector.
+     *
+     * @param diag  the vector into which the diagonal will be written
+     */
+    virtual std::unique_ptr<matrix::Diagonal<ValueType>> extract_diagonal()
+        const = 0;
+};
+
+
+/**
+ * The AbsoluteComputable is an interface that allows to get the component wise
+ * absolute of a LinOp. Use EnableAbsoluteComputation<AbsoluteLinOp> to
+ * implement this interface.
+ */
+class AbsoluteComputable {
+public:
+    /**
+     * Gets the absolute LinOp
+     *
+     * @return a pointer to the new absolute LinOp
+     */
+    virtual std::unique_ptr<LinOp> compute_absolute_linop() const = 0;
+
+    /**
+     * Compute absolute inplace on each element.
+     */
+    virtual void compute_absolute_inplace() = 0;
+};
+
+
+/**
+ * The EnableAbsoluteComputation mixin provides the default implementations of
+ * `compute_absolute_linop` and the absolute interface. `compute_absolute` gets
+ * a new AbsoluteLinOp. `compute_absolute_inplace` applies absolute
+ * inplace, so it still keeps the value_type of the class.
+ *
+ * @tparam AbsoluteLinOp  the absolute LinOp which is being returned
+ *                        [CRTP parameter]
+ *
+ * @ingroup LinOp
+ */
+template <typename AbsoluteLinOp>
+class EnableAbsoluteComputation : public AbsoluteComputable {
+public:
+    using absolute_type = AbsoluteLinOp;
+
+    virtual ~EnableAbsoluteComputation() = default;
+
+    std::unique_ptr<LinOp> compute_absolute_linop() const override
+    {
+        return this->compute_absolute();
+    }
+
+    /**
+     * Gets the AbsoluteLinOp
+     *
+     * @return a pointer to the new absolute object
+     */
+    virtual std::unique_ptr<absolute_type> compute_absolute() const = 0;
+};
+
+
+/**
  * The EnableLinOp mixin can be used to provide sensible default implementations
  * of the majority of the LinOp and PolymorphicObject interface.
  *
@@ -741,7 +827,7 @@ public:                                                                \
  *
  * The list of parameters for the factory should be defined in a code block
  * after the macro definition, and should contain a list of
- * GKO_FACTORY_PARAMETER declarations. The class should provide a constructor
+ * GKO_FACTORY_PARAMETER_* declarations. The class should provide a constructor
  * with signature
  * _lin_op(const _factory_name *, std::shared_ptr<const LinOp>)
  * which the factory will use a callback to construct the object.
@@ -753,7 +839,10 @@ public:                                                                \
  *     GKO_ENABLE_LIN_OP_FACTORY(MyLinOp, my_parameters, Factory) {
  *         // a factory parameter named "my_value", of type int and default
  *         // value of 5
- *         int GKO_FACTORY_PARAMETER(my_value, 5);
+ *         int GKO_FACTORY_PARAMETER_SCALAR(my_value, 5);
+ *         // a factory parameter named `my_pair` of type `std::pair<int,int>`
+ *         // and default value {5, 5}
+ *         std::pair<int, int> GKO_FACTORY_PARAMETER_VECTOR(my_pair, 5, 5);
  *     };
  *     // constructor needed by EnableLinOp
  *     explicit MyLinOp(std::shared_ptr<const Executor> exec) {
@@ -787,8 +876,8 @@ public:                                                                \
  * std::cout << my_op->get_my_parameters().my_value;  // prints 0
  * ```
  *
- * @note It is possible to combine both the #GKO_CREATE_FACTORY_PARAMETER()
- * macro with this one in a unique macro for class __templates__ (not with
+ * @note It is possible to combine both the #GKO_CREATE_FACTORY_PARAMETER_*()
+ * macros with this one in a unique macro for class __templates__ (not with
  * regular classes). Splitting this into two distinct macros allows to use them
  * in all contexts. See <https://stackoverflow.com/q/50202718/9385966> for more
  * details.
@@ -870,6 +959,8 @@ public:                                                                      \
  *
  * @see GKO_ENABLE_LIN_OP_FACTORY for more details, and usage example
  *
+ * @deprecated Use GKO_FACTORY_PARAMETER_SCALAR or GKO_FACTORY_PARAMETER_VECTOR
+ *
  * @ingroup LinOp
  */
 #define GKO_FACTORY_PARAMETER(_name, ...)                                    \
@@ -877,7 +968,7 @@ public:                                                                      \
                                                                              \
     template <typename... Args>                                              \
     auto with_##_name(Args &&... _value)                                     \
-        const->const ::gko::xstd::decay_t<decltype(*this)> &                 \
+        const->const std::decay_t<decltype(*this)> &                         \
     {                                                                        \
         using type = decltype(this->_name);                                  \
         this->_name = type{std::forward<Args>(_value)...};                   \
@@ -886,18 +977,81 @@ public:                                                                      \
     static_assert(true,                                                      \
                   "This assert is used to counter the false positive extra " \
                   "semi-colon warnings")
+
+/**
+ * Creates a scalar factory parameter in the factory parameters structure.
+ *
+ * Scalar in this context means that the constructor for this type only takes
+ * a single parameter.
+ *
+ * @param _name  name of the parameter
+ * @param _default  default value of the parameter
+ *
+ * @see GKO_ENABLE_LIN_OP_FACTORY for more details, and usage example
+ *
+ * @ingroup LinOp
+ */
+#define GKO_FACTORY_PARAMETER_SCALAR(_name, _default) \
+    GKO_FACTORY_PARAMETER(_name, _default)
+
+/**
+ * Creates a vector factory parameter in the factory parameters structure.
+ *
+ * Vector in this context means that the constructor for this type takes
+ * multiple parameters.
+ *
+ * @param _name  name of the parameter
+ * @param _default  default value of the parameter
+ *
+ * @see GKO_ENABLE_LIN_OP_FACTORY for more details, and usage example
+ *
+ * @ingroup LinOp
+ */
+#define GKO_FACTORY_PARAMETER_VECTOR(_name, ...) \
+    GKO_FACTORY_PARAMETER(_name, __VA_ARGS__)
 #else  // defined(__CUDACC__) || defined(__HIPCC__)
 // A workaround for the NVCC compiler - parameter pack expansion does not work
-// properly. You won't be able to use factories in code compiled with NVCC, but
-// at least this won't trigger a compiler error as soon as a header using it is
-// included. To not get a linker error, we provide a dummy body.
+// properly, because while the assignment to a scalar value is translated by
+// cudafe into a C-style cast, the parameter pack expansion is not removed and
+// `Args&&... args` is still kept as a parameter pack.
 #define GKO_FACTORY_PARAMETER(_name, ...)                                    \
     mutable _name{__VA_ARGS__};                                              \
                                                                              \
     template <typename... Args>                                              \
     auto with_##_name(Args &&... _value)                                     \
-        const->const ::gko::xstd::decay_t<decltype(*this)> &                 \
+        const->const std::decay_t<decltype(*this)> &                         \
     {                                                                        \
+        GKO_NOT_IMPLEMENTED;                                                 \
+        return *this;                                                        \
+    }                                                                        \
+    static_assert(true,                                                      \
+                  "This assert is used to counter the false positive extra " \
+                  "semi-colon warnings")
+
+#define GKO_FACTORY_PARAMETER_SCALAR(_name, _default)                        \
+    mutable _name{_default};                                                 \
+                                                                             \
+    template <typename Arg>                                                  \
+    auto with_##_name(Arg &&_value)                                          \
+        const->const std::decay_t<decltype(*this)> &                         \
+    {                                                                        \
+        using type = decltype(this->_name);                                  \
+        this->_name = type{std::forward<Arg>(_value)};                       \
+        return *this;                                                        \
+    }                                                                        \
+    static_assert(true,                                                      \
+                  "This assert is used to counter the false positive extra " \
+                  "semi-colon warnings")
+
+#define GKO_FACTORY_PARAMETER_VECTOR(_name, ...)                             \
+    mutable _name{__VA_ARGS__};                                              \
+                                                                             \
+    template <typename... Args>                                              \
+    auto with_##_name(Args &&... _value)                                     \
+        const->const std::decay_t<decltype(*this)> &                         \
+    {                                                                        \
+        using type = decltype(this->_name);                                  \
+        this->_name = type{std::forward<Args>(_value)...};                   \
         return *this;                                                        \
     }                                                                        \
     static_assert(true,                                                      \

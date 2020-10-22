@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/range_accessors.hpp>
 #include <ginkgo/core/matrix/coo.hpp>
 #include <ginkgo/core/matrix/csr.hpp>
+#include <ginkgo/core/matrix/diagonal.hpp>
 #include <ginkgo/core/matrix/ell.hpp>
 #include <ginkgo/core/matrix/hybrid.hpp>
 #include <ginkgo/core/matrix/sellp.hpp>
@@ -173,6 +174,22 @@ void add_scaled(std::shared_ptr<const OmpExecutor> exec,
 }
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_ADD_SCALED_KERNEL);
+
+
+template <typename ValueType>
+void add_scaled_diag(std::shared_ptr<const OmpExecutor> exec,
+                     const matrix::Dense<ValueType> *alpha,
+                     const matrix::Diagonal<ValueType> *x,
+                     matrix::Dense<ValueType> *y)
+{
+    const auto diag_values = x->get_const_values();
+#pragma omp parallel for
+    for (size_type i = 0; i < x->get_size()[0]; i++) {
+        y->at(i, i) += alpha->at(0, 0) * diag_values[i];
+    }
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_ADD_SCALED_DIAG_KERNEL);
 
 
 template <typename ValueType>
@@ -735,6 +752,56 @@ void inverse_column_permute(std::shared_ptr<const OmpExecutor> exec,
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
     GKO_DECLARE_INVERSE_COLUMN_PERMUTE_KERNEL);
+
+
+template <typename ValueType>
+void extract_diagonal(std::shared_ptr<const OmpExecutor> exec,
+                      const matrix::Dense<ValueType> *orig,
+                      matrix::Diagonal<ValueType> *diag)
+{
+    auto diag_values = diag->get_values();
+#pragma omp parallel for
+    for (size_type i = 0; i < diag->get_size()[0]; ++i) {
+        diag_values[i] = orig->at(i, i);
+    }
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_EXTRACT_DIAGONAL_KERNEL);
+
+
+template <typename ValueType>
+void inplace_absolute_dense(std::shared_ptr<const OmpExecutor> exec,
+                            matrix::Dense<ValueType> *source)
+{
+    auto dim = source->get_size();
+
+#pragma omp parallel for
+    for (size_type row = 0; row < dim[0]; row++) {
+        for (size_type col = 0; col < dim[1]; col++) {
+            source->at(row, col) = abs(source->at(row, col));
+        }
+    }
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_INPLACE_ABSOLUTE_DENSE_KERNEL);
+
+
+template <typename ValueType>
+void outplace_absolute_dense(std::shared_ptr<const OmpExecutor> exec,
+                             const matrix::Dense<ValueType> *source,
+                             matrix::Dense<remove_complex<ValueType>> *result)
+{
+    auto dim = source->get_size();
+
+#pragma omp parallel for
+    for (size_type row = 0; row < dim[0]; row++) {
+        for (size_type col = 0; col < dim[1]; col++) {
+            result->at(row, col) = abs(source->at(row, col));
+        }
+    }
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_OUTPLACE_ABSOLUTE_DENSE_KERNEL);
 
 
 }  // namespace dense

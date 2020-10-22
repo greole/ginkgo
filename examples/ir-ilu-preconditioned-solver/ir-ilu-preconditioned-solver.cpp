@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 
 
@@ -44,9 +45,11 @@ int main(int argc, char *argv[])
 {
     // Some shortcuts
     using ValueType = double;
+    using RealValueType = gko::remove_complex<ValueType>;
     using IndexType = int;
 
     using vec = gko::matrix::Dense<ValueType>;
+    using real_vec = gko::matrix::Dense<RealValueType>;
     using mtx = gko::matrix::Csr<ValueType, IndexType>;
     using gmres = gko::solver::Gmres<ValueType>;
     using ir = gko::solver::Ir<ValueType>;
@@ -55,24 +58,31 @@ int main(int argc, char *argv[])
     // Print version information
     std::cout << gko::version_info::get() << std::endl;
 
-    // Figure out where to run the code and how many block-Jacobi sweeps to use
-    std::shared_ptr<gko::Executor> exec;
-    if (argc == 1 || std::string(argv[1]) == "reference") {
-        exec = gko::ReferenceExecutor::create();
-    } else if ((argc == 2 || argc == 3) && std::string(argv[1]) == "omp") {
-        exec = gko::OmpExecutor::create();
-    } else if ((argc == 2 || argc == 3) && std::string(argv[1]) == "cuda" &&
-               gko::CudaExecutor::get_num_devices() > 0) {
-        exec = gko::CudaExecutor::create(0, gko::OmpExecutor::create(), true);
-    } else if ((argc == 2 || argc == 3) && std::string(argv[1]) == "hip" &&
-               gko::HipExecutor::get_num_devices() > 0) {
-        exec = gko::HipExecutor::create(0, gko::OmpExecutor::create(), true);
-    } else {
-        std::cerr << "Usage: " << argv[0] << " [executor] [sweeps]"
-                  << std::endl;
+    // Figure out where to run the code
+    if (argc == 2 && (std::string(argv[1]) == "--help")) {
+        std::cerr << "Usage: " << argv[0] << " [executor]" << std::endl;
         std::exit(-1);
     }
-    unsigned int sweeps = (argc == 3) ? atoi(argv[2]) : 5u;
+
+    const auto executor_string = argc >= 2 ? argv[1] : "reference";
+    const unsigned int sweeps = argc == 3 ? std::atoi(argv[2]) : 5u;
+    std::map<std::string, std::function<std::shared_ptr<gko::Executor>()>>
+        exec_map{
+            {"omp", [] { return gko::OmpExecutor::create(); }},
+            {"cuda",
+             [] {
+                 return gko::CudaExecutor::create(0, gko::OmpExecutor::create(),
+                                                  true);
+             }},
+            {"hip",
+             [] {
+                 return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
+                                                 true);
+             }},
+            {"reference", [] { return gko::ReferenceExecutor::create(); }}};
+
+    // executor where Ginkgo will perform the computation
+    const auto exec = exec_map.at(executor_string)();  // throws if not valid
 
     // Read data
     auto A = gko::share(gko::read<mtx>(std::ifstream("data/A.mtx"), exec));
@@ -125,7 +135,7 @@ int main(int argc, char *argv[])
     auto ilu_preconditioner = ilu_pre_factory->generate(gko::share(par_ilu));
 
     // Create stopping criteria for Gmres
-    const gko::remove_complex<ValueType> reduction_factor = 1e-12;
+    const RealValueType reduction_factor{1e-12};
     auto iter_stop =
         gko::stop::Iteration::build().with_max_iters(1000u).on(exec);
     auto tol_stop = gko::stop::ResidualNormReduction<ValueType>::build()
@@ -163,16 +173,16 @@ int main(int argc, char *argv[])
         time += std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
     }
 
-    std::cout << "Using " << sweeps << " block-Jacobi sweeps. \n";
+    std::cout << "Using " << sweeps << " block-Jacobi sweeps.\n";
 
     // Print solution
-    std::cout << "Solution (x): \n";
+    std::cout << "Solution (x):\n";
     write(std::cout, gko::lend(x));
 
     // Calculate residual
     auto one = gko::initialize<vec>({1.0}, exec);
     auto neg_one = gko::initialize<vec>({-1.0}, exec);
-    auto res = gko::initialize<vec>({0.0}, exec);
+    auto res = gko::initialize<real_vec>({0.0}, exec);
     A->apply(gko::lend(one), gko::lend(x), gko::lend(neg_one), gko::lend(b));
     b->compute_norm2(gko::lend(res));
 
@@ -180,6 +190,6 @@ int main(int argc, char *argv[])
               << "\n";
     std::cout << "GMRES execution time [ms]: "
               << static_cast<double>(time.count()) / 100000000.0 << "\n";
-    std::cout << "Residual norm sqrt(r^T r): \n";
+    std::cout << "Residual norm sqrt(r^T r):\n";
     write(std::cout, gko::lend(res));
 }

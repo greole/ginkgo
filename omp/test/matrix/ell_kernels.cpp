@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/exception_helpers.hpp>
 #include <ginkgo/core/base/executor.hpp>
 #include <ginkgo/core/matrix/dense.hpp>
+#include <ginkgo/core/matrix/diagonal.hpp>
 
 
 #include "core/matrix/ell_kernels.hpp"
@@ -217,6 +218,39 @@ TEST_F(Ell, CountNonzerosIsEquivalentToRef)
     gko::kernels::omp::ell::count_nonzeros(omp, dmtx.get(), &dnnz);
 
     ASSERT_EQ(nnz, dnnz);
+}
+
+
+TEST_F(Ell, ExtractDiagonalIsEquivalentToRef)
+{
+    set_up_apply_data();
+
+    auto diag = mtx->extract_diagonal();
+    auto ddiag = dmtx->extract_diagonal();
+
+    GKO_ASSERT_MTX_NEAR(diag.get(), ddiag.get(), 0);
+}
+
+
+TEST_F(Ell, InplaceAbsoluteMatrixIsEquivalentToRef)
+{
+    set_up_apply_data();
+
+    mtx->compute_absolute_inplace();
+    dmtx->compute_absolute_inplace();
+
+    GKO_ASSERT_MTX_NEAR(mtx, dmtx, 1e-14);
+}
+
+
+TEST_F(Ell, OutplaceAbsoluteMatrixIsEquivalentToRef)
+{
+    set_up_apply_data();
+
+    auto abs_mtx = mtx->compute_absolute();
+    auto dabs_mtx = dmtx->compute_absolute();
+
+    GKO_ASSERT_MTX_NEAR(abs_mtx, dabs_mtx, 1e-14);
 }
 
 

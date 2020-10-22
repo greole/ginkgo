@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/range_accessors.hpp>
 #include <ginkgo/core/matrix/coo.hpp>
 #include <ginkgo/core/matrix/csr.hpp>
+#include <ginkgo/core/matrix/diagonal.hpp>
 #include <ginkgo/core/matrix/ell.hpp>
 #include <ginkgo/core/matrix/sellp.hpp>
 #include <ginkgo/core/matrix/sparsity_csr.hpp>
@@ -166,6 +167,24 @@ void add_scaled(std::shared_ptr<const CudaExecutor> exec,
 }
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_ADD_SCALED_KERNEL);
+
+
+template <typename ValueType>
+void add_scaled_diag(std::shared_ptr<const CudaExecutor> exec,
+                     const matrix::Dense<ValueType> *alpha,
+                     const matrix::Diagonal<ValueType> *x,
+                     matrix::Dense<ValueType> *y)
+{
+    const auto size = y->get_size()[0];
+    const auto grid_dim = ceildiv(size, default_block_size);
+
+    kernel::add_scaled_diag<<<grid_dim, default_block_size>>>(
+        size, as_cuda_type(alpha->get_const_values()),
+        as_cuda_type(x->get_const_values()), as_cuda_type(y->get_values()),
+        y->get_stride());
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_ADD_SCALED_DIAG_KERNEL);
 
 
 template <typename ValueType>
@@ -666,6 +685,52 @@ void inverse_column_permute(std::shared_ptr<const CudaExecutor> exec,
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
     GKO_DECLARE_INVERSE_COLUMN_PERMUTE_KERNEL);
+
+
+template <typename ValueType>
+void extract_diagonal(std::shared_ptr<const CudaExecutor> exec,
+                      const matrix::Dense<ValueType> *orig,
+                      matrix::Diagonal<ValueType> *diag)
+{
+    const dim3 grid_dim = ceildiv(diag->get_size()[0], default_block_size);
+    kernel::extract_diagonal<<<grid_dim, default_block_size>>>(
+        orig->get_size()[0], as_cuda_type(orig->get_const_values()),
+        orig->get_stride(), as_cuda_type(diag->get_values()));
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_EXTRACT_DIAGONAL_KERNEL);
+
+
+template <typename ValueType>
+void inplace_absolute_dense(std::shared_ptr<const CudaExecutor> exec,
+                            matrix::Dense<ValueType> *source)
+{
+    auto dim = source->get_size();
+    const dim3 grid_dim = ceildiv(dim[0] * dim[1], default_block_size);
+
+    kernel::inplace_absolute_dense<<<grid_dim, default_block_size>>>(
+        dim[0], dim[1], as_cuda_type(source->get_values()),
+        source->get_stride());
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_INPLACE_ABSOLUTE_DENSE_KERNEL);
+
+
+template <typename ValueType>
+void outplace_absolute_dense(std::shared_ptr<const CudaExecutor> exec,
+                             const matrix::Dense<ValueType> *source,
+                             matrix::Dense<remove_complex<ValueType>> *result)
+{
+    auto dim = source->get_size();
+    const dim3 grid_dim = ceildiv(dim[0] * dim[1], default_block_size);
+
+    kernel::outplace_absolute_dense<<<grid_dim, default_block_size>>>(
+        dim[0], dim[1], as_cuda_type(source->get_const_values()),
+        source->get_stride(), as_cuda_type(result->get_values()),
+        result->get_stride());
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_OUTPLACE_ABSOLUTE_DENSE_KERNEL);
 
 
 }  // namespace dense
