@@ -80,26 +80,94 @@ GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_CG_INITIALIZE_KERNEL);
 
 
 template <typename ValueType>
+struct Functor {
+    std::shared_ptr<const OmpExecutor> exec;
+    matrix::Dense<ValueType> *p;
+    const matrix::Dense<ValueType> *z;
+    const matrix::Dense<ValueType> *rho;
+    const matrix::Dense<ValueType> *prev_rho;
+    const Array<stopping_status> *stop_status;
+
+    typedef ValueType value_type;
+
+    Functor(std::shared_ptr<const OmpExecutor> exec,
+            matrix::Dense<ValueType> *p, const matrix::Dense<ValueType> *z,
+            const matrix::Dense<ValueType> *rho,
+            const matrix::Dense<ValueType> *prev_rho,
+            const Array<stopping_status> *stop_status)
+        : exec(exec),
+          p(p),
+          z(z),
+          rho(rho),
+          prev_rho(prev_rho),
+          stop_status(stop_status)
+    {}
+
+    virtual void operator()(size_type, size_type) {}
+};
+
+
+template <typename ValueType>
+struct CG_inner_step1 : public Functor<ValueType> {
+    using Functor<ValueType>::Functor;
+    void operator()(size_type i, size_type j)
+    {
+        auto tmp = this->rho->at(j) / this->prev_rho->at(j);
+        this->p->at(i, j) = this->z->at(i, j) + tmp * this->p->at(i, j);
+    }
+};
+
+
+// TODO Replace by macro, instantiate for all data types
+template void Functor<float>::operator()(size_type, size_type);
+
+template <typename Functor>
+void step_1_impl_tensor(Functor func)
+{
+#pragma omp parallel for
+    for (size_type i = 0; i < func.p->get_size()[0]; ++i) {
+        for (size_type j = 0; j < func.p->get_size()[1]; ++j) {
+            if (func.stop_status->get_const_data()[j].has_stopped()) {
+                continue;
+            }
+            if (func.prev_rho->at(j) == zero<typename Functor::value_type>()) {
+                func.p->at(i, j) = func.z->at(i, j);
+            } else {
+                func(i, j);
+            }
+        }
+    }
+}
+
+template <typename Functor>
+void step_1_impl_matrix(Functor func)
+{
+#pragma omp parallel for
+    for (size_type i = 0; i < func.p->get_size()[0]; ++i) {
+        func(i, 0);
+    }
+}
+
+template <typename Functor>
+void dispatch(Functor inner)
+{
+    if (inner.p->get_size()[1] > 1) {
+        step_1_impl_tensor(inner);
+    } else {
+        step_1_impl_matrix(inner);
+    }
+}
+
+template <typename ValueType>
 void step_1(std::shared_ptr<const OmpExecutor> exec,
             matrix::Dense<ValueType> *p, const matrix::Dense<ValueType> *z,
             const matrix::Dense<ValueType> *rho,
             const matrix::Dense<ValueType> *prev_rho,
             const Array<stopping_status> *stop_status)
 {
-#pragma omp parallel for
-    for (size_type i = 0; i < p->get_size()[0]; ++i) {
-        for (size_type j = 0; j < p->get_size()[1]; ++j) {
-            if (stop_status->get_const_data()[j].has_stopped()) {
-                continue;
-            }
-            if (prev_rho->at(j) == zero<ValueType>()) {
-                p->at(i, j) = z->at(i, j);
-            } else {
-                auto tmp = rho->at(j) / prev_rho->at(j);
-                p->at(i, j) = z->at(i, j) + tmp * p->at(i, j);
-            }
-        }
-    }
+    auto functor =
+        CG_inner_step1<ValueType>(exec, p, z, rho, prev_rho, stop_status);
+    dispatch(functor);
 }
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_CG_STEP_1_KERNEL);
@@ -115,11 +183,11 @@ void step_2(std::shared_ptr<const OmpExecutor> exec,
             const Array<stopping_status> *stop_status)
 {
 #pragma omp parallel for
-    for (size_type i = 0; i < x->get_size()[0]; ++i) {
-        for (size_type j = 0; j < x->get_size()[1]; ++j) {
-            if (stop_status->get_const_data()[j].has_stopped()) {
-                continue;
-            }
+    for (size_type j = 0; j < x->get_size()[1]; ++j) {
+        if (stop_status->get_const_data()[j].has_stopped()) {
+            continue;
+        }
+        for (size_type i = 0; i < x->get_size()[0]; ++i) {
             if (beta->at(j) != zero<ValueType>()) {
                 auto tmp = rho->at(j) / beta->at(j);
                 x->at(i, j) += tmp * p->at(i, j);
