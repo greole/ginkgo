@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ protected:
 TEST_F(Rcm, CreatesAPermutation)
 {
     auto p = reorder_op_0->get_permutation();
-    
+
     ASSERT_PRED1(is_permutation, p.get());
 }
 

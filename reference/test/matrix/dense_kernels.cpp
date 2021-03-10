@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,8 @@ class Dense : public ::testing::Test {
 protected:
     using value_type = T;
     using Mtx = gko::matrix::Dense<value_type>;
+    using ComplexMtx = gko::to_complex<Mtx>;
+    using RealMtx = gko::remove_complex<Mtx>;
     Dense()
         : exec(gko::ReferenceExecutor::create()),
           mtx1(gko::initialize<Mtx>(4, {{1.0, 2.0, 3.0}, {1.5, 2.5, 3.5}},
@@ -104,7 +106,52 @@ protected:
 };
 
 
-TYPED_TEST_CASE(Dense, gko::test::ValueTypes);
+TYPED_TEST_SUITE(Dense, gko::test::ValueTypes);
+
+
+TYPED_TEST(Dense, CanBeFilledWithValue)
+{
+    using value_type = typename TestFixture::value_type;
+    auto m =
+        gko::initialize<gko::matrix::Dense<TypeParam>>({1.0, 2.0}, this->exec);
+    EXPECT_EQ(m->at(0), value_type{1});
+    EXPECT_EQ(m->at(1), value_type{2});
+
+    m->fill(value_type{42});
+
+    EXPECT_EQ(m->at(0), value_type{42});
+    EXPECT_EQ(m->at(1), value_type{42});
+}
+
+
+TYPED_TEST(Dense, CanBeFilledWithValueForStridedMatrices)
+{
+    using value_type = typename TestFixture::value_type;
+    using T = value_type;
+    auto m = gko::initialize<gko::matrix::Dense<TypeParam>>(
+        4, {I<T>{1.0, 2.0}, I<T>{3.0, 4.0}, I<T>{5.0, 6.0}}, this->exec);
+    auto in_stride = m->get_values()[3];
+    ASSERT_EQ(m->get_size(), gko::dim<2>(3, 2));
+    ASSERT_EQ(m->get_num_stored_elements(), 12);
+    EXPECT_EQ(m->at(0), value_type{1.0});
+    EXPECT_EQ(m->at(1), value_type{2.0});
+    EXPECT_EQ(m->at(2), value_type{3.0});
+    ASSERT_EQ(m->at(3), value_type{4.0});
+    EXPECT_EQ(m->at(4), value_type{5.0});
+    EXPECT_EQ(m->at(5), value_type{6.0});
+
+    m->fill(value_type{42});
+
+    ASSERT_EQ(m->get_size(), gko::dim<2>(3, 2));
+    EXPECT_EQ(m->get_num_stored_elements(), 12);
+    EXPECT_EQ(m->at(0), value_type{42.0});
+    EXPECT_EQ(m->at(1), value_type{42.0});
+    EXPECT_EQ(m->at(2), value_type{42.0});
+    ASSERT_EQ(m->at(3), value_type{42.0});
+    EXPECT_EQ(m->at(4), value_type{42.0});
+    EXPECT_EQ(m->at(5), value_type{42.0});
+    EXPECT_EQ(m->get_values()[3], in_stride);
+}
 
 
 TYPED_TEST(Dense, AppliesToDense)
@@ -1716,6 +1763,172 @@ TYPED_TEST(Dense, NonSquareMatrixIsTransposable)
 }
 
 
+TYPED_TEST(Dense, SquareMatrixCanGatherRows)
+{
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+    using Mtx = typename TestFixture::Mtx;
+    auto exec = this->mtx5->get_executor();
+    gko::Array<gko::int32> permute_idxs{exec, {1, 0}};
+
+    auto row_gathered = this->mtx5->row_gather(&permute_idxs);
+
+    // clang-format off
+    GKO_ASSERT_MTX_NEAR(row_gathered,
+                        l({{-2.0, 2.0, 4.5},
+                           {1.0, -1.0, -0.5}}), r<TypeParam>::value);
+    // clang-format on
+}
+
+
+TYPED_TEST(Dense, SquareMatrixCanGatherRowsIntoDense)
+{
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+    using Mtx = typename TestFixture::Mtx;
+    auto exec = this->mtx5->get_executor();
+    gko::Array<gko::int32> permute_idxs{exec, {1, 0}};
+    auto row_gathered = Mtx::create(exec, gko::dim<2>{2, 3});
+
+    this->mtx5->row_gather(&permute_idxs, row_gathered.get());
+
+    // clang-format off
+    GKO_ASSERT_MTX_NEAR(row_gathered,
+                        l({{-2.0, 2.0, 4.5},
+                           {1.0, -1.0, -0.5}}), r<TypeParam>::value);
+    // clang-format on
+}
+
+
+TYPED_TEST(Dense, SquareMatrixCanGatherRows64)
+{
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+    using Mtx = typename TestFixture::Mtx;
+    auto exec = this->mtx5->get_executor();
+    gko::Array<gko::int64> permute_idxs{exec, {1, 0}};
+
+    auto row_gathered = this->mtx5->row_gather(&permute_idxs);
+
+    // clang-format off
+    GKO_ASSERT_MTX_NEAR(row_gathered,
+                        l({{-2.0, 2.0, 4.5},
+                           {1.0, -1.0, -0.5}}), r<TypeParam>::value);
+    // clang-format on
+}
+
+
+TYPED_TEST(Dense, SquareMatrixCanGatherRowsIntoDense64)
+{
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+    using Mtx = typename TestFixture::Mtx;
+    auto exec = this->mtx5->get_executor();
+    gko::Array<gko::int64> permute_idxs{exec, {1, 0}};
+    auto row_gathered = Mtx::create(exec, gko::dim<2>{2, 3});
+
+    this->mtx5->row_gather(&permute_idxs, row_gathered.get());
+
+    // clang-format off
+    GKO_ASSERT_MTX_NEAR(row_gathered,
+                        l({{-2.0, 2.0, 4.5},
+                           {1.0, -1.0, -0.5}}), r<TypeParam>::value);
+    // clang-format on
+}
+
+
+TYPED_TEST(Dense, SquareMatrixIsPermutable)
+{
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+    using Mtx = typename TestFixture::Mtx;
+    auto exec = this->mtx5->get_executor();
+    gko::Array<gko::int32> permute_idxs{exec, {1, 2, 0}};
+
+    auto ref_permuted =
+        gko::as<Mtx>(gko::as<Mtx>(this->mtx5->row_permute(&permute_idxs))
+                         ->column_permute(&permute_idxs));
+    auto permuted = gko::as<Mtx>(this->mtx5->permute(&permute_idxs));
+
+    GKO_ASSERT_MTX_NEAR(ref_permuted, ref_permuted, r<TypeParam>::value);
+}
+
+
+TYPED_TEST(Dense, SquareMatrixIsInversePermutable)
+{
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+    using Mtx = typename TestFixture::Mtx;
+    auto exec = this->mtx5->get_executor();
+    gko::Array<gko::int32> permute_idxs{exec, {1, 2, 0}};
+
+    auto ref_permuted = gko::as<Mtx>(
+        gko::as<Mtx>(this->mtx5->inverse_row_permute(&permute_idxs))
+            ->inverse_column_permute(&permute_idxs));
+    auto permuted = gko::as<Mtx>(this->mtx5->inverse_permute(&permute_idxs));
+
+    GKO_ASSERT_MTX_NEAR(ref_permuted, ref_permuted, r<TypeParam>::value);
+}
+
+
+TYPED_TEST(Dense, SquareMatrixIsPermutable64)
+{
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+    using Mtx = typename TestFixture::Mtx;
+    auto exec = this->mtx5->get_executor();
+    gko::Array<gko::int64> permute_idxs{exec, {1, 2, 0}};
+
+    auto ref_permuted =
+        gko::as<Mtx>(gko::as<Mtx>(this->mtx5->row_permute(&permute_idxs))
+                         ->column_permute(&permute_idxs));
+    auto permuted = gko::as<Mtx>(this->mtx5->permute(&permute_idxs));
+
+    GKO_ASSERT_MTX_NEAR(ref_permuted, ref_permuted, r<TypeParam>::value);
+}
+
+
+TYPED_TEST(Dense, SquareMatrixIsInversePermutable64)
+{
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+    using Mtx = typename TestFixture::Mtx;
+    auto exec = this->mtx5->get_executor();
+    gko::Array<gko::int64> permute_idxs{exec, {1, 2, 0}};
+
+    auto ref_permuted = gko::as<Mtx>(
+        gko::as<Mtx>(this->mtx5->inverse_row_permute(&permute_idxs))
+            ->inverse_column_permute(&permute_idxs));
+    auto permuted = gko::as<Mtx>(this->mtx5->inverse_permute(&permute_idxs));
+
+    GKO_ASSERT_MTX_NEAR(ref_permuted, ref_permuted, r<TypeParam>::value);
+}
+
+
 TYPED_TEST(Dense, SquareMatrixIsRowPermutable)
 {
     // clang-format off
@@ -2095,15 +2308,223 @@ TYPED_TEST(Dense, OutplaceAbsoluteSubMatrix)
 }
 
 
+TYPED_TEST(Dense, AppliesToComplex)
+{
+    using value_type = typename TestFixture::value_type;
+    using complex_type = gko::to_complex<value_type>;
+    using Mtx = typename TestFixture::Mtx;
+    using Vec = typename gko::matrix::Dense<complex_type>;
+    auto exec = gko::ReferenceExecutor::create();
+
+    // clang-format off
+    auto b = gko::initialize<Vec>(
+        {{complex_type{1.0, 0.0}, complex_type{2.0, 1.0}},
+         {complex_type{2.0, 2.0}, complex_type{3.0, 3.0}},
+         {complex_type{3.0, 4.0}, complex_type{4.0, 5.0}}}, exec);
+    auto x = Vec::create(exec, gko::dim<2>{2,2});
+    // clang-format on
+
+    this->mtx1->apply(b.get(), x.get());
+
+    GKO_ASSERT_MTX_NEAR(
+        x,
+        l({{complex_type{14.0, 16.0}, complex_type{20.0, 22.0}},
+           {complex_type{17.0, 19.0}, complex_type{24.5, 26.5}}}),
+        0.0);
+}
+
+
+TYPED_TEST(Dense, AdvancedAppliesToComplex)
+{
+    using value_type = typename TestFixture::value_type;
+    using complex_type = gko::to_complex<value_type>;
+    using Mtx = typename TestFixture::Mtx;
+    using Vec = typename gko::matrix::Dense<complex_type>;
+    auto exec = gko::ReferenceExecutor::create();
+
+    // clang-format off
+    auto b = gko::initialize<Vec>(
+        {{complex_type{1.0, 0.0}, complex_type{2.0, 1.0}},
+         {complex_type{2.0, 2.0}, complex_type{3.0, 3.0}},
+         {complex_type{3.0, 4.0}, complex_type{4.0, 5.0}}}, exec);
+    auto x = gko::initialize<Vec>(
+        {{complex_type{1.0, 0.0}, complex_type{2.0, 1.0}},
+         {complex_type{2.0, 2.0}, complex_type{3.0, 3.0}}}, exec);
+    auto alpha = gko::initialize<Mtx>({-1.0}, this->exec);
+    auto beta = gko::initialize<Mtx>({2.0}, this->exec);
+    // clang-format on
+
+    this->mtx1->apply(alpha.get(), b.get(), beta.get(), x.get());
+
+    GKO_ASSERT_MTX_NEAR(
+        x,
+        l({{complex_type{-12.0, -16.0}, complex_type{-16.0, -20.0}},
+           {complex_type{-13.0, -15.0}, complex_type{-18.5, -20.5}}}),
+        0.0);
+}
+
+
+TYPED_TEST(Dense, MakeComplex)
+{
+    using T = typename TestFixture::value_type;
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto complex_mtx = this->mtx5->make_complex();
+
+    GKO_ASSERT_MTX_NEAR(complex_mtx, this->mtx5, 0);
+}
+
+
+TYPED_TEST(Dense, MakeComplexWithGivenResult)
+{
+    using T = typename TestFixture::value_type;
+    using ComplexMtx = typename TestFixture::ComplexMtx;
+    auto exec = this->mtx5->get_executor();
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto complex_mtx = ComplexMtx::create(exec, this->mtx5->get_size());
+    this->mtx5->make_complex(complex_mtx.get());
+
+    GKO_ASSERT_MTX_NEAR(complex_mtx, this->mtx5, 0);
+}
+
+
+TYPED_TEST(Dense, MakeComplexWithGivenResultFailsForWrongDimensions)
+{
+    using T = typename TestFixture::value_type;
+    using ComplexMtx = typename TestFixture::ComplexMtx;
+    auto exec = this->mtx5->get_executor();
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto complex_mtx = ComplexMtx::create(exec);
+
+    ASSERT_THROW(this->mtx5->make_complex(complex_mtx.get()),
+                 gko::DimensionMismatch);
+}
+
+
+TYPED_TEST(Dense, GetReal)
+{
+    using T = typename TestFixture::value_type;
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto real_mtx = this->mtx5->get_real();
+
+    GKO_ASSERT_MTX_NEAR(real_mtx, this->mtx5, 0);
+}
+
+
+TYPED_TEST(Dense, GetRealWithGivenResult)
+{
+    using T = typename TestFixture::value_type;
+    using RealMtx = typename TestFixture::RealMtx;
+    auto exec = this->mtx5->get_executor();
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto real_mtx = RealMtx::create(exec, this->mtx5->get_size());
+    this->mtx5->get_real(real_mtx.get());
+
+    GKO_ASSERT_MTX_NEAR(real_mtx, this->mtx5, 0);
+}
+
+
+TYPED_TEST(Dense, GetRealWithGivenResultFailsForWrongDimensions)
+{
+    using T = typename TestFixture::value_type;
+    using RealMtx = typename TestFixture::RealMtx;
+    auto exec = this->mtx5->get_executor();
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto real_mtx = RealMtx::create(exec);
+    ASSERT_THROW(this->mtx5->get_real(real_mtx.get()), gko::DimensionMismatch);
+}
+
+
+TYPED_TEST(Dense, GetImag)
+{
+    using T = typename TestFixture::value_type;
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto imag_mtx = this->mtx5->get_imag();
+
+    GKO_ASSERT_MTX_NEAR(
+        imag_mtx, l({{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}}), 0);
+}
+
+
+TYPED_TEST(Dense, GetImagWithGivenResult)
+{
+    using T = typename TestFixture::value_type;
+    using RealMtx = typename TestFixture::RealMtx;
+    auto exec = this->mtx5->get_executor();
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto imag_mtx = RealMtx::create(exec, this->mtx5->get_size());
+    this->mtx5->get_imag(imag_mtx.get());
+
+    GKO_ASSERT_MTX_NEAR(
+        imag_mtx, l({{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}}), 0);
+}
+
+
+TYPED_TEST(Dense, GetImagWithGivenResultFailsForWrongDimensions)
+{
+    using T = typename TestFixture::value_type;
+    using RealMtx = typename TestFixture::RealMtx;
+    auto exec = this->mtx5->get_executor();
+    // clang-format off
+    // {1.0, -1.0, -0.5},
+    // {-2.0, 2.0, 4.5},
+    // {2.1, 3.4, 1.2}
+    // clang-format on
+
+    auto imag_mtx = RealMtx::create(exec);
+    ASSERT_THROW(this->mtx5->get_imag(imag_mtx.get()), gko::DimensionMismatch);
+}
+
+
 template <typename T>
 class DenseComplex : public ::testing::Test {
 protected:
     using value_type = T;
     using Mtx = gko::matrix::Dense<value_type>;
+    using RealMtx = gko::matrix::Dense<gko::remove_complex<value_type>>;
 };
 
 
-TYPED_TEST_CASE(DenseComplex, gko::test::ComplexValueTypes);
+TYPED_TEST_SUITE(DenseComplex, gko::test::ComplexValueTypes);
 
 
 TYPED_TEST(DenseComplex, NonSquareMatrixIsConjugateTransposable)
@@ -2161,6 +2582,127 @@ TYPED_TEST(DenseComplex, OutplaceAbsolute)
 
     GKO_ASSERT_MTX_NEAR(
         abs_mtx, l({{1.0, 5.0, 2.0}, {5.0, 1.0, 0.0}, {0.0, 1.5, 2.0}}), 0.0);
+}
+
+
+TYPED_TEST(DenseComplex, MakeComplex)
+{
+    using Mtx = typename TestFixture::Mtx;
+    using T = typename TestFixture::value_type;
+    auto exec = gko::ReferenceExecutor::create();
+    // clang-format off
+    auto mtx = gko::initialize<Mtx>(
+        {{T{1.0, 0.0}, T{3.0, 4.0}, T{0.0, 2.0}},
+         {T{-4.0, -3.0}, T{-1.0, 0}, T{0.0, 0.0}},
+         {T{0.0, 0.0}, T{0.0, -1.5}, T{2.0, 0.0}}}, exec);
+    // clang-format on
+
+    auto complex_mtx = mtx->make_complex();
+
+    GKO_ASSERT_MTX_NEAR(complex_mtx, mtx, 0.0);
+}
+
+
+TYPED_TEST(DenseComplex, MakeComplexWithGivenResult)
+{
+    using Mtx = typename TestFixture::Mtx;
+    using T = typename TestFixture::value_type;
+    auto exec = gko::ReferenceExecutor::create();
+    // clang-format off
+    auto mtx = gko::initialize<Mtx>(
+        {{T{1.0, 0.0}, T{3.0, 4.0}, T{0.0, 2.0}},
+         {T{-4.0, -3.0}, T{-1.0, 0}, T{0.0, 0.0}},
+         {T{0.0, 0.0}, T{0.0, -1.5}, T{2.0, 0.0}}}, exec);
+    // clang-format on
+
+    auto complex_mtx = Mtx::create(exec, mtx->get_size());
+    mtx->make_complex(complex_mtx.get());
+
+    GKO_ASSERT_MTX_NEAR(complex_mtx, mtx, 0.0);
+}
+
+
+TYPED_TEST(DenseComplex, GetReal)
+{
+    using Mtx = typename TestFixture::Mtx;
+    using T = typename TestFixture::value_type;
+    auto exec = gko::ReferenceExecutor::create();
+    // clang-format off
+    auto mtx = gko::initialize<Mtx>(
+        {{T{1.0, 0.0}, T{3.0, 4.0}, T{0.0, 2.0}},
+         {T{-4.0, -3.0}, T{-1.0, 0}, T{0.0, 0.0}},
+         {T{0.0, 0.0}, T{0.0, -1.5}, T{2.0, 0.0}}}, exec);
+    // clang-format on
+
+    auto real_mtx = mtx->get_real();
+
+    GKO_ASSERT_MTX_NEAR(
+        real_mtx, l({{1.0, 3.0, 0.0}, {-4.0, -1.0, 0.0}, {0.0, 0.0, 2.0}}),
+        0.0);
+}
+
+
+TYPED_TEST(DenseComplex, GetRealWithGivenResult)
+{
+    using Mtx = typename TestFixture::Mtx;
+    using RealMtx = typename TestFixture::RealMtx;
+    using T = typename TestFixture::value_type;
+    auto exec = gko::ReferenceExecutor::create();
+    // clang-format off
+    auto mtx = gko::initialize<Mtx>(
+        {{T{1.0, 0.0}, T{3.0, 4.0}, T{0.0, 2.0}},
+         {T{-4.0, -3.0}, T{-1.0, 0}, T{0.0, 0.0}},
+         {T{0.0, 0.0}, T{0.0, -1.5}, T{2.0, 0.0}}}, exec);
+    // clang-format on
+
+    auto real_mtx = RealMtx::create(exec, mtx->get_size());
+    mtx->get_real(real_mtx.get());
+
+    GKO_ASSERT_MTX_NEAR(
+        real_mtx, l({{1.0, 3.0, 0.0}, {-4.0, -1.0, 0.0}, {0.0, 0.0, 2.0}}),
+        0.0);
+}
+
+
+TYPED_TEST(DenseComplex, GetImag)
+{
+    using Mtx = typename TestFixture::Mtx;
+    using T = typename TestFixture::value_type;
+    auto exec = gko::ReferenceExecutor::create();
+    // clang-format off
+    auto mtx = gko::initialize<Mtx>(
+        {{T{1.0, 0.0}, T{3.0, 4.0}, T{0.0, 2.0}},
+         {T{-4.0, -3.0}, T{-1.0, 0}, T{0.0, 0.0}},
+         {T{0.0, 0.0}, T{0.0, -1.5}, T{2.0, 0.0}}}, exec);
+    // clang-format on
+
+    auto imag_mtx = mtx->get_imag();
+
+    GKO_ASSERT_MTX_NEAR(
+        imag_mtx, l({{0.0, 4.0, 2.0}, {-3.0, 0.0, 0.0}, {0.0, -1.5, 0.0}}),
+        0.0);
+}
+
+
+TYPED_TEST(DenseComplex, GetImagWithGivenResult)
+{
+    using Mtx = typename TestFixture::Mtx;
+    using RealMtx = typename TestFixture::RealMtx;
+    using T = typename TestFixture::value_type;
+    auto exec = gko::ReferenceExecutor::create();
+    // clang-format off
+    auto mtx = gko::initialize<Mtx>(
+        {{T{1.0, 0.0}, T{3.0, 4.0}, T{0.0, 2.0}},
+         {T{-4.0, -3.0}, T{-1.0, 0}, T{0.0, 0.0}},
+         {T{0.0, 0.0}, T{0.0, -1.5}, T{2.0, 0.0}}}, exec);
+    // clang-format on
+
+    auto imag_mtx = RealMtx::create(exec, mtx->get_size());
+    mtx->get_imag(imag_mtx.get());
+
+    GKO_ASSERT_MTX_NEAR(
+        imag_mtx, l({{0.0, 4.0, 2.0}, {-3.0, 0.0, 0.0}, {0.0, -1.5, 0.0}}),
+        0.0);
 }
 
 

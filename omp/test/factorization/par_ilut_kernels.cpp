@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -279,7 +279,7 @@ protected:
     std::unique_ptr<Csr> dmtx_u;
 };
 
-TYPED_TEST_CASE(ParIlut, gko::test::ValueIndexTypes);
+TYPED_TEST_SUITE(ParIlut, gko::test::ValueIndexTypes);
 
 
 TYPED_TEST(ParIlut, KernelThresholdSelectIsEquivalentToRef)

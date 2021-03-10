@@ -7,6 +7,12 @@ function(ginkgo_default_includes name)
             $<BUILD_INTERFACE:${Ginkgo_SOURCE_DIR}>
             $<INSTALL_INTERFACE:include>
         )
+    if(GINKGO_HAVE_HWLOC)
+      target_include_directories("${name}"
+        PUBLIC 
+        $<BUILD_INTERFACE:${HWLOC_INCLUDE_DIRS}>
+        )
+    endif()
 endfunction()
 
 function(ginkgo_compile_features name)
@@ -86,12 +92,13 @@ function(ginkgo_check_headers target)
     if (HIP_SOURCES)
         set_source_files_properties(${HIP_SOURCES} PROPERTIES HIP_SOURCE_PROPERTY_FORMAT TRUE)
         hip_add_library(${target}_headers_hip ${HIP_SOURCES}) # the compiler options get set by linking to ginkgo_hip
-        target_link_libraries(${target}_headers_hip PRIVATE ${target} roc::hipblas roc::hipsparse)
+        target_link_libraries(${target}_headers_hip PRIVATE ${target} roc::hipblas roc::hipsparse hip::hiprand roc::rocrand)
         target_include_directories(${target}_headers_hip
             PRIVATE
             "${CMAKE_CURRENT_SOURCE_DIR}"
             "${GINKGO_HIP_THRUST_PATH}"
             "${HIPBLAS_INCLUDE_DIRS}"
+            "${hiprand_INCLUDE_DIRS}"
             "${HIPSPARSE_INCLUDE_DIRS}"
             "${ROCPRIM_INCLUDE_DIRS}")
     endif()
@@ -155,4 +162,24 @@ function(ginkgo_extract_clang_version CLANG_COMPILER GINKGO_CLANG_VERSION)
     set (${GINKGO_CLANG_VERSION} "${FOUND_CLANG_VERSION}" PARENT_SCOPE)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/extract_clang_ver.cpp)
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/extract_clang_ver)
+endfunction()
+
+# Extract the DPC++ version
+function(ginkgo_extract_dpcpp_version DPCPP_COMPILER GINKGO_DPCPP_VERSION)
+    set(DPCPP_VERSION_PROG "#include <CL/sycl.hpp>\n#include <iostream>\n"
+        "int main() {std::cout << __SYCL_COMPILER_VERSION << '\\n'\;"
+        "return 0\;}")
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/extract_dpcpp_ver.cpp" ${DPCPP_VERSION_PROG})
+    execute_process(COMMAND ${DPCPP_COMPILER} ${CMAKE_CURRENT_BINARY_DIR}/extract_dpcpp_ver.cpp
+        -o ${CMAKE_CURRENT_BINARY_DIR}/extract_dpcpp_ver
+        ERROR_VARIABLE DPCPP_EXTRACT_VER_ERROR)
+    execute_process(COMMAND ${CMAKE_CURRENT_BINARY_DIR}/extract_dpcpp_ver
+        OUTPUT_VARIABLE FOUND_DPCPP_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_STRIP_TRAILING_WHITESPACE
+        )
+
+    set (${GINKGO_DPCPP_VERSION} "${FOUND_DPCPP_VERSION}" PARENT_SCOPE)
+    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/extract_dpcpp_ver.cpp)
+    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/extract_dpcpp_ver)
 endfunction()

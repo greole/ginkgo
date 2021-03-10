@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif  // HAS_HIP
 
 
+#include "benchmark/utils/types.hpp"
+
+
 namespace formats {
 
 
@@ -66,10 +69,10 @@ std::string available_format =
 #endif  // defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
 #if defined(CUDA_VERSION) &&  \
     (CUDA_VERSION >= 11000 || \
-     ((CUDA_VERSION >= 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
+     ((CUDA_VERSION >= 10020) && !(defined(_WIN32) || defined(__CYGWIN__))))
     ", cusp_gcsr, cusp_gcsr2, cusp_gcoo"
 #endif  // defined(CUDA_VERSION) && (CUDA_VERSION >= 11000 || ((CUDA_VERSION >=
-        // 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
+        // 10020) && !(defined(_WIN32) || defined(__CYGWIN__))))
 #endif  // HAS_CUDA
 #ifdef HAS_HIP
     ", hipsp_csr, hipsp_csrmm, hipsp_coo, hipsp_ell, hipsp_hybrid"
@@ -112,7 +115,7 @@ std::string format_description =
     "cusp_csrex: benchmark CuSPARSE with the cusparseXcsrmvEx function."
 #if defined(CUDA_VERSION) &&  \
     (CUDA_VERSION >= 11000 || \
-     ((CUDA_VERSION >= 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
+     ((CUDA_VERSION >= 10020) && !(defined(_WIN32) || defined(__CYGWIN__))))
     "\n"
     "cusp_gcsr: benchmark CuSPARSE with the generic csr with default "
     "algorithm.\n"
@@ -121,7 +124,7 @@ std::string format_description =
     "cusp_gcoo: benchmark CuSPARSE with the generic coo with default "
     "algorithm.\n"
 #endif  // defined(CUDA_VERSION) && (CUDA_VERSION >= 11000 || ((CUDA_VERSION >=
-        // 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
+        // 10020) && !(defined(_WIN32) || defined(__CYGWIN__))))
 #endif  // HAS_CUDA
 #ifdef HAS_HIP
     "\n"
@@ -151,8 +154,8 @@ namespace formats {
 
 
 // some shortcuts
-using hybrid = gko::matrix::Hybrid<>;
-using csr = gko::matrix::Csr<>;
+using hybrid = gko::matrix::Hybrid<etype>;
+using csr = gko::matrix::Csr<etype>;
 
 /**
  * Creates a Ginkgo matrix from the intermediate data representation format
@@ -167,7 +170,8 @@ using csr = gko::matrix::Csr<>;
  */
 template <typename MatrixType>
 std::unique_ptr<MatrixType> read_matrix_from_data(
-    std::shared_ptr<const gko::Executor> exec, const gko::matrix_data<> &data)
+    std::shared_ptr<const gko::Executor> exec,
+    const gko::matrix_data<etype> &data)
 {
     auto mat = MatrixType::create(std::move(exec));
     mat->read(data);
@@ -180,26 +184,26 @@ std::unique_ptr<MatrixType> read_matrix_from_data(
  *
  * @param MATRIX_TYPE  the Ginkgo matrix type (such as `gko::matrix::Csr<>`)
  */
-#define READ_MATRIX(MATRIX_TYPE, ...)                                    \
-    [](std::shared_ptr<const gko::Executor> exec,                        \
-       const gko::matrix_data<> &data) -> std::unique_ptr<MATRIX_TYPE> { \
-        auto mat = MATRIX_TYPE::create(std::move(exec), __VA_ARGS__);    \
-        mat->read(data);                                                 \
-        return mat;                                                      \
+#define READ_MATRIX(MATRIX_TYPE, ...)                                         \
+    [](std::shared_ptr<const gko::Executor> exec,                             \
+       const gko::matrix_data<etype> &data) -> std::unique_ptr<MATRIX_TYPE> { \
+        auto mat = MATRIX_TYPE::create(std::move(exec), __VA_ARGS__);         \
+        mat->read(data);                                                      \
+        return mat;                                                           \
     }
 
 
 // clang-format off
 const std::map<std::string, std::function<std::unique_ptr<gko::LinOp>(
                                 std::shared_ptr<const gko::Executor>,
-                                const gko::matrix_data<> &)>>
+                                const gko::matrix_data<etype> &)>>
     matrix_factory{
         {"csr", READ_MATRIX(csr, std::make_shared<csr::automatical>())},
         {"csri", READ_MATRIX(csr, std::make_shared<csr::load_balance>())},
         {"csrm", READ_MATRIX(csr, std::make_shared<csr::merge_path>())},
         {"csrc", READ_MATRIX(csr, std::make_shared<csr::classical>())},
-        {"coo", read_matrix_from_data<gko::matrix::Coo<>>},
-        {"ell", read_matrix_from_data<gko::matrix::Ell<>>},
+        {"coo", read_matrix_from_data<gko::matrix::Coo<etype>>},
+        {"ell", read_matrix_from_data<gko::matrix::Ell<etype>>},
 #ifdef HAS_CUDA
 #if defined(CUDA_VERSION) && (CUDA_VERSION < 11000)
         {"cusp_csr", read_matrix_from_data<cusp_csr>},
@@ -216,12 +220,12 @@ const std::map<std::string, std::function<std::unique_ptr<gko::LinOp>(
         {"cusp_csrex", read_matrix_from_data<cusp_csrex>},
 #if defined(CUDA_VERSION) &&  \
     (CUDA_VERSION >= 11000 || \
-     ((CUDA_VERSION >= 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
+     ((CUDA_VERSION >= 10020) && !(defined(_WIN32) || defined(__CYGWIN__))))
         {"cusp_gcsr", read_matrix_from_data<cusp_gcsr>},
         {"cusp_gcsr2", read_matrix_from_data<cusp_gcsr2>},
         {"cusp_gcoo", read_matrix_from_data<cusp_gcoo>},
 #endif  // defined(CUDA_VERSION) && (CUDA_VERSION >= 11000 || ((CUDA_VERSION >=
-        // 10010) && !(defined(_WIN32) || defined(__CYGWIN__))))
+        // 10020) && !(defined(_WIN32) || defined(__CYGWIN__))))
 #endif  // HAS_CUDA
 #ifdef HAS_HIP
         {"hipsp_csr", read_matrix_from_data<hipsp_csr>},
@@ -256,7 +260,7 @@ const std::map<std::string, std::function<std::unique_ptr<gko::LinOp>(
         {"hybridminstorage",
          READ_MATRIX(hybrid,
                      std::make_shared<hybrid::minimal_storage_limit>())},
-        {"sellp", read_matrix_from_data<gko::matrix::Sellp<>>}};
+        {"sellp", read_matrix_from_data<gko::matrix::Sellp<etype>>}};
 // clang-format on
 
 

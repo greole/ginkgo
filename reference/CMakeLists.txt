@@ -6,8 +6,10 @@ target_sources(ginkgo_reference
     components/fill_array.cpp
     components/precision_conversion.cpp
     components/prefix_sum.cpp
-    factorization/ilu_kernels.cpp
     factorization/factorization_kernels.cpp
+    factorization/ic_kernels.cpp
+    factorization/ilu_kernels.cpp
+    factorization/par_ic_kernels.cpp
     factorization/par_ict_kernels.cpp
     factorization/par_ilu_kernels.cpp
     factorization/par_ilut_kernels.cpp
@@ -28,12 +30,15 @@ target_sources(ginkgo_reference
     solver/cgs_kernels.cpp
     solver/fcg_kernels.cpp
     solver/gmres_kernels.cpp
+    solver/cb_gmres_kernels.cpp
+    solver/idr_kernels.cpp
     solver/ir_kernels.cpp
     solver/lower_trs_kernels.cpp
     solver/upper_trs_kernels.cpp
     stop/criterion_kernels.cpp
     stop/residual_norm_kernels.cpp)
 
+target_link_libraries(ginkgo_reference PUBLIC ginkgo_core_device)
 ginkgo_compile_features(ginkgo_reference)
 ginkgo_default_includes(ginkgo_reference)
 ginkgo_install_library(ginkgo_reference reference)

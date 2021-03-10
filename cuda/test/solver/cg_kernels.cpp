@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -247,7 +247,7 @@ TEST_F(Cg, ApplyIsEquivalentToRef)
         gko::solver::Cg<>::build()
             .with_criteria(
                 gko::stop::Iteration::build().with_max_iters(50u).on(ref),
-                gko::stop::ResidualNormReduction<>::build()
+                gko::stop::ResidualNorm<>::build()
                     .with_reduction_factor(1e-14)
                     .on(ref))
             .on(ref);
@@ -255,7 +255,7 @@ TEST_F(Cg, ApplyIsEquivalentToRef)
         gko::solver::Cg<>::build()
             .with_criteria(
                 gko::stop::Iteration::build().with_max_iters(50u).on(cuda),
-                gko::stop::ResidualNormReduction<>::build()
+                gko::stop::ResidualNorm<>::build()
                     .with_reduction_factor(1e-14)
                     .on(cuda))
             .on(cuda);

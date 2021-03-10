@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,10 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "benchmark/utils/general.hpp"
 #include "benchmark/utils/spmv_common.hpp"
+#include "benchmark/utils/types.hpp"
 
 
-// some Ginkgo shortcuts
-using etype = double;
+#ifdef GINKGO_BENCHMARK_ENABLE_TUNING
+#include "benchmark/utils/tuning_variables.hpp"
+#endif  // GINKGO_BENCHMARK_ENABLE_TUNING
 
 
 // See en.wikipedia.org/wiki/Five-number_summary

@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -285,6 +285,16 @@ int main(int, char **)
                         .on(refExec);
     }
 
+    // core/solver/cb_gmres.hpp
+    {
+        using Solver = gko::solver::CbGmres<>;
+        auto test = Solver::build()
+                        .with_criteria(
+                            gko::stop::Iteration::build().with_max_iters(1u).on(
+                                refExec))
+                        .on(refExec);
+    }
+
     // core/solver/cg.hpp
     {
         using Solver = gko::solver::Cg<>;
@@ -353,17 +363,27 @@ int main(int, char **)
                         .on(refExec);
 
         // residual_norm.hpp
+        auto main_res = gko::stop::ResidualNorm<>::build()
+                            .with_reduction_factor(1e-10)
+                            .with_baseline(gko::stop::mode::absolute)
+                            .on(refExec);
+
+        auto implicit_res = gko::stop::ImplicitResidualNorm<>::build()
+                                .with_reduction_factor(1e-10)
+                                .with_baseline(gko::stop::mode::absolute)
+                                .on(refExec);
+
         auto res_red = gko::stop::ResidualNormReduction<>::build()
                            .with_reduction_factor(1e-10)
                            .on(refExec);
 
-        auto rel_res = gko::stop::RelativeResidualNorm<>::build()
-                           .with_tolerance(1e-10)
-                           .on(refExec);
+        auto rel_res =
+            gko::stop::RelativeResidualNorm<>::build().with_tolerance(1e-10).on(
+                refExec);
 
-        auto abs_res = gko::stop::AbsoluteResidualNorm<>::build()
-                           .with_tolerance(1e-10)
-                           .on(refExec);
+        auto abs_res =
+            gko::stop::AbsoluteResidualNorm<>::build().with_tolerance(1e-10).on(
+                refExec);
 
         // stopping_status.hpp
         auto stop_status = gko::stopping_status{};

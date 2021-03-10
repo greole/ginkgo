@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define GKO_CORE_PRECONDITIONER_ISAI_KERNELS_HPP_
 
 
-#include <ginkgo/core/matrix/csr.hpp>
 #include <ginkgo/core/preconditioner/isai.hpp>
+
+
+#include <ginkgo/core/matrix/csr.hpp>
 
 
 namespace gko {
@@ -109,6 +111,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 
 }  // namespace isai
 }  // namespace hip
+
+
+namespace dpcpp {
+namespace isai {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace isai
+}  // namespace dpcpp
 
 
 #undef GKO_DECLARE_ALL_AS_TEMPLATES

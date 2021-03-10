@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/matrix/coo.hpp>
 
 
+#include <algorithm>
 #include <memory>
 
 
@@ -70,6 +71,11 @@ protected:
         mtx = gko::initialize<Mtx>({{1.0, 3.0, 2.0},
                                      {0.0, 5.0, 0.0}}, exec);
         // clang-format on
+        uns_mtx = gko::clone(exec, mtx);
+        auto cols = uns_mtx->get_col_idxs();
+        auto vals = uns_mtx->get_values();
+        std::swap(cols[0], cols[1]);
+        std::swap(vals[0], vals[1]);
     }
 
     void assert_equal_to_mtx_in_csr_format(const Csr *m)
@@ -94,9 +100,10 @@ protected:
 
     std::shared_ptr<const gko::Executor> exec;
     std::unique_ptr<Mtx> mtx;
+    std::unique_ptr<Mtx> uns_mtx;
 };
 
-TYPED_TEST_CASE(Coo, gko::test::ValueIndexTypes);
+TYPED_TEST_SUITE(Coo, gko::test::ValueIndexTypes);
 
 
 TYPED_TEST(Coo, ConvertsToPrecision)
@@ -190,6 +197,23 @@ TYPED_TEST(Coo, ConvertsToDense)
     auto dense_mtx = Dense::create(this->mtx->get_executor());
 
     this->mtx->convert_to(dense_mtx.get());
+
+    // clang-format off
+    GKO_ASSERT_MTX_NEAR(dense_mtx,
+                    l({{1.0, 3.0, 2.0},
+                       {0.0, 5.0, 0.0}}), 0.0);
+    // clang-format on
+}
+
+
+TYPED_TEST(Coo, ConvertsToDenseUnsorted)
+{
+    using value_type = typename TestFixture::value_type;
+    using index_type = typename TestFixture::index_type;
+    using Dense = typename TestFixture::Vec;
+    auto dense_mtx = Dense::create(this->mtx->get_executor());
+
+    this->uns_mtx->convert_to(dense_mtx.get());
 
     // clang-format off
     GKO_ASSERT_MTX_NEAR(dense_mtx,
@@ -325,6 +349,18 @@ TYPED_TEST(Coo, AppliesToDenseVector)
 }
 
 
+TYPED_TEST(Coo, AppliesToDenseVectorUnsorted)
+{
+    using Vec = typename TestFixture::Vec;
+    auto x = gko::initialize<Vec>({2.0, 1.0, 4.0}, this->exec);
+    auto y = Vec::create(this->exec, gko::dim<2>{2, 1});
+
+    this->uns_mtx->apply(x.get(), y.get());
+
+    GKO_ASSERT_MTX_NEAR(y, l({13.0, 5.0}), 0.0);
+}
+
+
 TYPED_TEST(Coo, AppliesToDenseMatrix)
 {
     using Vec = typename TestFixture::Vec;
@@ -338,6 +374,28 @@ TYPED_TEST(Coo, AppliesToDenseMatrix)
     auto y = Vec::create(this->exec, gko::dim<2>{2, 2});
 
     this->mtx->apply(x.get(), y.get());
+
+    // clang-format off
+    GKO_ASSERT_MTX_NEAR(y,
+                        l({{13.0,  3.5},
+                           { 5.0, -7.5}}), 0.0);
+    // clang-format on
+}
+
+
+TYPED_TEST(Coo, AppliesToDenseMatrixUnsorted)
+{
+    using Vec = typename TestFixture::Vec;
+    using T = typename TestFixture::value_type;
+    // clang-format off
+    auto x = gko::initialize<Vec>(
+        {I<T>{2.0, 3.0},
+         I<T>{1.0, -1.5},
+         I<T>{4.0, 2.5}}, this->exec);
+    // clang-format on
+    auto y = Vec::create(this->exec, gko::dim<2>{2, 2});
+
+    this->uns_mtx->apply(x.get(), y.get());
 
     // clang-format off
     GKO_ASSERT_MTX_NEAR(y,
@@ -560,6 +618,93 @@ TYPED_TEST(Coo, OutplaceAbsolute)
 }
 
 
+TYPED_TEST(Coo, AppliesToComplex)
+{
+    using value_type = typename TestFixture::value_type;
+    using complex_type = gko::to_complex<value_type>;
+    using Mtx = typename TestFixture::Mtx;
+    using Vec = typename gko::matrix::Dense<complex_type>;
+    auto exec = gko::ReferenceExecutor::create();
+
+    // clang-format off
+    auto b = gko::initialize<Vec>(
+        {{complex_type{1.0, 0.0}, complex_type{2.0, 1.0}},
+         {complex_type{2.0, 2.0}, complex_type{3.0, 3.0}},
+         {complex_type{3.0, 4.0}, complex_type{4.0, 5.0}}}, exec);
+    auto x = Vec::create(exec, gko::dim<2>{2,2});
+    // clang-format on
+
+    this->mtx->apply(b.get(), x.get());
+
+    GKO_ASSERT_MTX_NEAR(
+        x,
+        l({{complex_type{13.0, 14.0}, complex_type{19.0, 20.0}},
+           {complex_type{10.0, 10.0}, complex_type{15.0, 15.0}}}),
+        0.0);
+}
+
+
+TYPED_TEST(Coo, AdvancedAppliesToComplex)
+{
+    using value_type = typename TestFixture::value_type;
+    using complex_type = gko::to_complex<value_type>;
+    using Mtx = typename TestFixture::Mtx;
+    using Scal = typename gko::matrix::Dense<value_type>;
+    using Vec = typename gko::matrix::Dense<complex_type>;
+    auto exec = gko::ReferenceExecutor::create();
+
+    // clang-format off
+    auto b = gko::initialize<Vec>(
+        {{complex_type{1.0, 0.0}, complex_type{2.0, 1.0}},
+         {complex_type{2.0, 2.0}, complex_type{3.0, 3.0}},
+         {complex_type{3.0, 4.0}, complex_type{4.0, 5.0}}}, exec);
+    auto x = gko::initialize<Vec>(
+        {{complex_type{1.0, 0.0}, complex_type{2.0, 1.0}},
+         {complex_type{2.0, 2.0}, complex_type{3.0, 3.0}}}, exec);
+    auto alpha = gko::initialize<Scal>({-1.0}, this->exec);
+    auto beta = gko::initialize<Scal>({2.0}, this->exec);
+    // clang-format on
+
+    this->mtx->apply(alpha.get(), b.get(), beta.get(), x.get());
+
+    GKO_ASSERT_MTX_NEAR(
+        x,
+        l({{complex_type{-11.0, -14.0}, complex_type{-15.0, -18.0}},
+           {complex_type{-6.0, -6.0}, complex_type{-9.0, -9.0}}}),
+        0.0);
+}
+
+
+TYPED_TEST(Coo, ApplyAddsToComplex)
+{
+    using value_type = typename TestFixture::value_type;
+    using complex_type = gko::to_complex<value_type>;
+    using Mtx = typename TestFixture::Mtx;
+    using Scal = typename gko::matrix::Dense<value_type>;
+    using Vec = typename gko::matrix::Dense<complex_type>;
+    auto exec = gko::ReferenceExecutor::create();
+
+    // clang-format off
+    auto b = gko::initialize<Vec>(
+        {{complex_type{1.0, 0.0}, complex_type{2.0, 1.0}},
+         {complex_type{2.0, 2.0}, complex_type{3.0, 3.0}},
+         {complex_type{3.0, 4.0}, complex_type{4.0, 5.0}}}, exec);
+    auto x = gko::initialize<Vec>(
+        {{complex_type{1.0, 0.0}, complex_type{2.0, 1.0}},
+         {complex_type{2.0, 2.0}, complex_type{3.0, 3.0}}}, exec);
+    auto alpha = gko::initialize<Scal>({-1.0}, this->exec);
+    // clang-format on
+
+    this->mtx->apply2(alpha.get(), b.get(), x.get());
+
+    GKO_ASSERT_MTX_NEAR(
+        x,
+        l({{complex_type{-12.0, -14.0}, complex_type{-17.0, -19.0}},
+           {complex_type{-8.0, -8.0}, complex_type{-12.0, -12.0}}}),
+        0.0);
+}
+
+
 template <typename ValueIndexType>
 class CooComplex : public ::testing::Test {
 protected:
@@ -570,7 +715,7 @@ protected:
     using Mtx = gko::matrix::Coo<value_type, index_type>;
 };
 
-TYPED_TEST_CASE(CooComplex, gko::test::ComplexValueIndexTypes);
+TYPED_TEST_SUITE(CooComplex, gko::test::ComplexValueIndexTypes);
 
 
 TYPED_TEST(CooComplex, OutplaceAbsolute)

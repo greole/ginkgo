@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ protected:
               Solver::build()
                   .with_criteria(
                       gko::stop::Iteration::build().with_max_iters(3u).on(exec),
-                      gko::stop::ResidualNormReduction<value_type>::build()
+                      gko::stop::ResidualNorm<value_type>::build()
                           .with_reduction_factor(gko::remove_complex<T>{1e-6})
                           .on(exec))
                   .on(exec)),
@@ -89,7 +89,7 @@ protected:
     }
 };
 
-TYPED_TEST_CASE(Bicgstab, gko::test::ValueTypes);
+TYPED_TEST_SUITE(Bicgstab, gko::test::ValueTypes);
 
 
 TYPED_TEST(Bicgstab, BicgstabFactoryKnowsItsExecutor)

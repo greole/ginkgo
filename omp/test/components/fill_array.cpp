@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@ protected:
     gko::Array<value_type> dvals;
 };
 
-TYPED_TEST_CASE(FillArray, gko::test::ValueAndIndexTypes);
+TYPED_TEST_SUITE(FillArray, gko::test::ValueAndIndexTypes);
 
 
 TYPED_TEST(FillArray, EqualsReference)

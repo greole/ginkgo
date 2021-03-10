@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************<GINKGO LICENSE>*******************************/
 
-#ifndef GKO_CORE_BASE_EXCEPTION_HPP_
-#define GKO_CORE_BASE_EXCEPTION_HPP_
+#ifndef GKO_PUBLIC_CORE_BASE_EXCEPTION_HPP_
+#define GKO_PUBLIC_CORE_BASE_EXCEPTION_HPP_
 
 
 #include <exception>
@@ -220,6 +220,29 @@ private:
 
 
 /**
+ * CurandError is thrown when a cuRAND routine throws a non-zero error code.
+ */
+class CurandError : public Error {
+public:
+    /**
+     * Initializes a cuRAND error.
+     *
+     * @param file  The name of the offending source file
+     * @param line  The source code line number where the error occurred
+     * @param func  The name of the cuRAND routine that failed
+     * @param error_code  The resulting cuRAND error code
+     */
+    CurandError(const std::string &file, int line, const std::string &func,
+                int64 error_code)
+        : Error(file, line, func + ": " + get_error(error_code))
+    {}
+
+private:
+    static std::string get_error(int64 error_code);
+};
+
+
+/**
  * CusparseError is thrown when a cuSPARSE routine throws a non-zero error code.
  */
 class CusparseError : public Error {
@@ -279,6 +302,29 @@ public:
      * @param error_code  The resulting hipBLAS error code
      */
     HipblasError(const std::string &file, int line, const std::string &func,
+                 int64 error_code)
+        : Error(file, line, func + ": " + get_error(error_code))
+    {}
+
+private:
+    static std::string get_error(int64 error_code);
+};
+
+
+/**
+ * HiprandError is thrown when a hipRAND routine throws a non-zero error code.
+ */
+class HiprandError : public Error {
+public:
+    /**
+     * Initializes a hipRAND error.
+     *
+     * @param file  The name of the offending source file
+     * @param line  The source code line number where the error occurred
+     * @param func  The name of the hipRAND routine that failed
+     * @param error_code  The resulting hipRAND error code
+     */
+    HiprandError(const std::string &file, int line, const std::string &func,
                  int64 error_code)
         : Error(file, line, func + ": " + get_error(error_code))
     {}
@@ -488,4 +534,4 @@ public:
 }  // namespace gko
 
 
-#endif  // GKO_CORE_BASE_EXCEPTION_HPP_
+#endif  // GKO_PUBLIC_CORE_BASE_EXCEPTION_HPP_

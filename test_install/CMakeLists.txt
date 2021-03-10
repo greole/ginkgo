@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.9)
 project(TestInstall LANGUAGES CXX)
 
 find_package(Ginkgo REQUIRED
-            PATHS # The Path where ginkgo was installed
-            # Alternatively, use `cmake -DCMAKE_PREFIX_PATH=<ginkgo_install_dir>` to specify the install directory
-            )
+    PATHS # The Path where ginkgo was installed
+    # Alternatively, use `cmake -DCMAKE_PREFIX_PATH=<ginkgo_install_dir>` to specify the install directory
+    )
 
 if(MSVC)
     if(GINKGO_BUILD_SHARED_LIBS)
@@ -37,10 +37,9 @@ if(GINKGO_BUILD_CUDA)
     target_link_libraries(test_install_cuda PRIVATE Ginkgo::ginkgo)
 endif()
 
-if(GINKGO_BUILD_HIP
-   AND GINKGO_HIP_PLATFORM MATCHES "hcc"
-   AND GINKGO_HIP_VERSION VERSION_GREATER_EQUAL "3.5"
-   AND NOT GINKGO_BUILD_SHARED_LIBS)
+if(GINKGO_BUILD_HIP AND GINKGO_HIP_PLATFORM MATCHES "hcc"
+        AND GINKGO_HIP_VERSION VERSION_GREATER_EQUAL "3.5"
+        AND NOT GINKGO_BUILD_SHARED_LIBS)
     # Compile options somehow add hip-clang specific flags. Wipe them.
     # Currently, the flags wiped out should be:
     # -x;hip;--hip-device-lib-path=/opt/rocm/lib;--cuda-gpu-arch=gfx900;

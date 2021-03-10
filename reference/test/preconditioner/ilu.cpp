@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ protected:
                       gko::stop::Time::build()
                           .with_time_limit(std::chrono::seconds(6))
                           .on(exec),
-                      gko::stop::ResidualNormReduction<value_type>::build()
+                      gko::stop::ResidualNorm<value_type>::build()
                           .with_reduction_factor(r<T>::value)
                           .on(exec))
                   .on(exec)),
@@ -100,7 +100,7 @@ protected:
                       gko::stop::Time::build()
                           .with_time_limit(std::chrono::seconds(6))
                           .on(exec),
-                      gko::stop::ResidualNormReduction<value_type>::build()
+                      gko::stop::ResidualNorm<value_type>::build()
                           .with_reduction_factor(r<T>::value)
                           .on(exec))
                   .on(exec)),
@@ -125,7 +125,7 @@ protected:
     std::shared_ptr<typename ilu_rev_prec_type::Factory> ilu_rev_pre_factory;
 };
 
-TYPED_TEST_CASE(Ilu, gko::test::ValueTypes);
+TYPED_TEST_SUITE(Ilu, gko::test::ValueTypes);
 
 
 TYPED_TEST(Ilu, BuildsDefaultWithoutThrowing)

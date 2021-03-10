@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -370,8 +370,7 @@ int main(int argc, char *argv[])
 
     // Figure out where to run the code
     if (argc == 2 && (std::string(argv[1]) == "--help")) {
-        std::cerr << "Usage: " << argv[0] << " [executor]"
-                  << std::endl;
+        std::cerr << "Usage: " << argv[0] << " [executor]" << std::endl;
         std::exit(-1);
     }
 
@@ -389,6 +388,11 @@ int main(int argc, char *argv[])
              [] {
                  return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
                                                  true);
+             }},
+            {"dpcpp",
+             [] {
+                 return gko::DpcppExecutor::create(0,
+                                                   gko::OmpExecutor::create());
              }},
             {"reference", [] { return gko::ReferenceExecutor::create(); }}};
 
@@ -422,7 +426,7 @@ int main(int argc, char *argv[])
     auto solver_factory =
         solver::build()
             .with_criteria(
-                gko::stop::ResidualNormReduction<ValueType>::build()
+                gko::stop::ResidualNorm<ValueType>::build()
                     .with_reduction_factor(reduction_factor)
                     .on(exec),
                 gko::stop::Iteration::build().with_max_iters(max_iters).on(

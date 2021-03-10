@@ -3,6 +3,7 @@ option(GINKGO_RUN_EXAMPLES " Compile run and validation targets for the examples
 
 set(EXAMPLES_EXEC_LIST
     adaptiveprecision-blockjacobi
+    cb-gmres
     custom-logger
     ginkgo-ranges
     ilu-preconditioned-solver
@@ -21,8 +22,10 @@ set(EXAMPLES_LIST
     custom-matrix-format
     custom-stopping-criterion
     ginkgo-overhead
+    heat-equation
     minimal-cuda-solver
     papi-logging
+    par-ilu-convergence
     performance-debugging
     preconditioner-export
     simple-solver-logging)

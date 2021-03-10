@@ -11,7 +11,9 @@ target_sources(ginkgo
     base/mtx_io.cpp
     base/perturbation.cpp
     base/version.cpp
+    factorization/ic.cpp
     factorization/ilu.cpp
+    factorization/par_ic.cpp
     factorization/par_ict.cpp
     factorization/par_ilu.cpp
     factorization/par_ilut.cpp
@@ -38,6 +40,8 @@ target_sources(ginkgo
     solver/cgs.cpp
     solver/fcg.cpp
     solver/gmres.cpp
+    solver/cb_gmres.cpp
+    solver/idr.cpp
     solver/ir.cpp
     solver/lower_trs.cpp
     solver/upper_trs.cpp
@@ -58,11 +62,12 @@ target_compile_options(ginkgo PRIVATE "${GINKGO_COMPILER_FLAGS}")
 # regardless of whether it is installed or added as a subdirectory
 add_library(Ginkgo::ginkgo ALIAS ginkgo)
 target_link_libraries(ginkgo
-    PUBLIC ginkgo_omp ginkgo_cuda ginkgo_reference ginkgo_hip)
+    PUBLIC ginkgo_core_device ginkgo_omp ginkgo_cuda ginkgo_reference ginkgo_hip ginkgo_dpcpp)
 # The PAPI dependency needs to be exposed to the user.
 if (GINKGO_HAVE_PAPI_SDE)
     target_link_libraries(ginkgo PUBLIC PAPI::PAPI)
 endif()
+
 ginkgo_default_includes(ginkgo)
 ginkgo_install_library(ginkgo core)
 

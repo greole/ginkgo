@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -349,13 +349,21 @@ int main(int, char **)
             .with_reduction_factor(1e-10)
             .on(cudaExec);
 
-        gko::stop::RelativeResidualNorm<>::build()
-            .with_tolerance(1e-10)
+        gko::stop::ResidualNorm<>::build()
+            .with_reduction_factor(1e-10)
+            .with_baseline(gko::stop::mode::absolute)
             .on(cudaExec);
 
-        gko::stop::AbsoluteResidualNorm<>::build()
-            .with_tolerance(1e-10)
+        gko::stop::ImplicitResidualNorm<>::build()
+            .with_reduction_factor(1e-10)
+            .with_baseline(gko::stop::mode::absolute)
             .on(cudaExec);
+
+        gko::stop::RelativeResidualNorm<>::build().with_tolerance(1e-10).on(
+            cudaExec);
+
+        gko::stop::AbsoluteResidualNorm<>::build().with_tolerance(1e-10).on(
+            cudaExec);
 
         // stopping_status.hpp
         gko::stopping_status{};

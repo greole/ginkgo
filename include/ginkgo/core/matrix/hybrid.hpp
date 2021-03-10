@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************<GINKGO LICENSE>*******************************/
 
-#ifndef GKO_CORE_MATRIX_HYBRID_HPP_
-#define GKO_CORE_MATRIX_HYBRID_HPP_
+#ifndef GKO_PUBLIC_CORE_MATRIX_HYBRID_HPP_
+#define GKO_PUBLIC_CORE_MATRIX_HYBRID_HPP_
 
 
 #include <algorithm>
@@ -89,6 +89,7 @@ class Hybrid
 public:
     using EnableLinOp<Hybrid>::convert_to;
     using EnableLinOp<Hybrid>::move_to;
+    using ReadableFromMatrixData<ValueType, IndexType>::read;
 
     using value_type = ValueType;
     using index_type = IndexType;
@@ -244,10 +245,10 @@ public:
          * @param percent  the row_nnz[floor(num_rows*percent)] is the number of
          *                 stored elements per row of the ell part
          */
-        explicit imbalance_limit(float percent = 0.8) : percent_(percent)
+        explicit imbalance_limit(double percent = 0.8) : percent_(percent)
         {
-            percent_ = std::min(percent_, 1.0f);
-            percent_ = std::max(percent_, 0.0f);
+            percent_ = std::min(percent_, 1.0);
+            percent_ = std::max(percent_, 0.0);
         }
 
         size_type compute_ell_num_stored_elements_per_row(
@@ -275,7 +276,7 @@ public:
         auto get_percentage() const { return percent_; }
 
     private:
-        float percent_;
+        double percent_;
     };
 
     /**
@@ -288,7 +289,7 @@ public:
         /**
          * Creates a imbalance_bounded_limit strategy.
          */
-        imbalance_bounded_limit(float percent = 0.8, float ratio = 0.0001)
+        imbalance_bounded_limit(double percent = 0.8, double ratio = 0.0001)
             : strategy_(imbalance_limit(percent)), ratio_(ratio)
         {}
 
@@ -318,7 +319,7 @@ public:
 
     private:
         imbalance_limit strategy_;
-        float ratio_;
+        double ratio_;
     };
 
 
@@ -790,4 +791,4 @@ Hybrid<ValueType, IndexType>::get_strategy() const
 }  // namespace gko
 
 
-#endif  // GKO_CORE_MATRIX_HYBRID_HPP_
+#endif  // GKO_PUBLIC_CORE_MATRIX_HYBRID_HPP_

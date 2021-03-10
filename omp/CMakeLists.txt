@@ -8,8 +8,10 @@ target_sources(ginkgo_omp
     components/fill_array.cpp
     components/precision_conversion.cpp
     components/prefix_sum.cpp
-    factorization/ilu_kernels.cpp
     factorization/factorization_kernels.cpp
+    factorization/ic_kernels.cpp
+    factorization/ilu_kernels.cpp
+    factorization/par_ic_kernels.cpp
     factorization/par_ict_kernels.cpp
     factorization/par_ilu_kernels.cpp
     factorization/par_ilut_kernels.cpp
@@ -30,6 +32,8 @@ target_sources(ginkgo_omp
     solver/cgs_kernels.cpp
     solver/fcg_kernels.cpp
     solver/gmres_kernels.cpp
+    solver/cb_gmres_kernels.cpp
+    solver/idr_kernels.cpp
     solver/ir_kernels.cpp
     solver/lower_trs_kernels.cpp
     solver/upper_trs_kernels.cpp
@@ -38,6 +42,7 @@ target_sources(ginkgo_omp
 
 ginkgo_compile_features(ginkgo_omp)
 
+target_link_libraries(ginkgo_omp PUBLIC ginkgo_core_device)
 target_link_libraries(ginkgo_omp PRIVATE "${OpenMP_CXX_LIBRARIES}")
 target_include_directories(ginkgo_omp PRIVATE "${OpenMP_CXX_INCLUDE_DIRS}")
 # We first separate the arguments, otherwise, the target_compile_options adds it as a string
@@ -50,6 +55,8 @@ target_compile_options(ginkgo_omp PRIVATE "${GINKGO_COMPILER_FLAGS}")
 target_link_libraries(ginkgo_omp PUBLIC ginkgo_cuda)
 # Need to link against ginkgo_hip for the `raw_copy_to(HipExecutor ...)` method
 target_link_libraries(ginkgo_omp PUBLIC ginkgo_hip)
+# Need to link against ginkgo_dpcpp for the `raw_copy_to(DpcppExecutor ...)` method
+target_link_libraries(ginkgo_omp PUBLIC ginkgo_dpcpp)
 
 ginkgo_default_includes(ginkgo_omp)
 ginkgo_install_library(ginkgo_omp omp)

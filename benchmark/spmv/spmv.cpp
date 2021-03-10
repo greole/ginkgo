@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "benchmark/utils/general.hpp"
 #include "benchmark/utils/loggers.hpp"
 #include "benchmark/utils/spmv_common.hpp"
+#include "benchmark/utils/timer.hpp"
+#include "benchmark/utils/types.hpp"
 
 
-using etype = double;
+#ifdef GINKGO_BENCHMARK_ENABLE_TUNING
+#include "benchmark/utils/tuning_variables.hpp"
+#endif  // GINKGO_BENCHMARK_ENABLE_TUNING
 
 
 // Command-line arguments
-
 DEFINE_uint32(nrhs, 1, "The number of right hand sides");
 
 
@@ -83,7 +86,7 @@ void apply_spmv(const char *format_name, std::shared_ptr<gko::Executor> exec,
             exec->synchronize();
             system_matrix->apply(lend(b), lend(x_clone));
             exec->synchronize();
-            double max_relative_norm2 =
+            auto max_relative_norm2 =
                 compute_max_relative_norm2(lend(x_clone), lend(answer));
             add_or_set_member(spmv_case[format_name], "max_relative_norm2",
                               max_relative_norm2, allocator);
@@ -95,22 +98,58 @@ void apply_spmv(const char *format_name, std::shared_ptr<gko::Executor> exec,
             system_matrix->apply(lend(b), lend(x_clone));
             exec->synchronize();
         }
-        std::chrono::nanoseconds time(0);
+
+        // tuning run
+#ifdef GINKGO_BENCHMARK_ENABLE_TUNING
+        auto &format_case = spmv_case[format_name];
+        if (!format_case.HasMember("tuning")) {
+            format_case.AddMember(
+                "tuning", rapidjson::Value(rapidjson::kObjectType), allocator);
+        }
+        auto &tuning_case = format_case["tuning"];
+        add_or_set_member(tuning_case, "time",
+                          rapidjson::Value(rapidjson::kArrayType), allocator);
+        add_or_set_member(tuning_case, "values",
+                          rapidjson::Value(rapidjson::kArrayType), allocator);
+
+        // Enable tuning for this portion of code
+        gko::_tuning_flag = true;
+        // Select some values we want to tune.
+        std::vector<gko::size_type> tuning_values{
+            1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096};
+        for (auto val : tuning_values) {
+            // Actually set the value that will be tuned. See
+            // cuda/components/format_conversion.cuh for an example of how this
+            // variable is used.
+            gko::_tuned_value = val;
+            auto tuning_timer = get_timer(exec, FLAGS_gpu_timer);
+            for (unsigned int i = 0; i < FLAGS_repetitions; i++) {
+                auto x_clone = clone(x);
+                exec->synchronize();
+                tuning_timer->tic();
+                system_matrix->apply(lend(b), lend(x_clone));
+                tuning_timer->toc();
+            }
+            tuning_case["time"].PushBack(tuning_timer->compute_average_time(),
+                                         allocator);
+            tuning_case["values"].PushBack(val, allocator);
+        }
+        // We put back the flag to false to use the default (non-tuned) values
+        // for the following
+        gko::_tuning_flag = false;
+#endif  // GINKGO_BENCHMARK_ENABLE_TUNING
+
         // timed run
+        auto timer = get_timer(exec, FLAGS_gpu_timer);
         for (unsigned int i = 0; i < FLAGS_repetitions; i++) {
             auto x_clone = clone(x);
             exec->synchronize();
-            auto tic = std::chrono::steady_clock::now();
+            timer->tic();
             system_matrix->apply(lend(b), lend(x_clone));
-
-            exec->synchronize();
-            auto toc = std::chrono::steady_clock::now();
-            time +=
-                std::chrono::duration_cast<std::chrono::nanoseconds>(toc - tic);
+            timer->toc();
         }
         add_or_set_member(spmv_case[format_name], "time",
-                          static_cast<double>(time.count()) / FLAGS_repetitions,
-                          allocator);
+                          timer->compute_average_time(), allocator);
 
         // compute and write benchmark data
         add_or_set_member(spmv_case[format_name], "completed", true, allocator);

@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/exception.hpp>
 #include <ginkgo/core/base/exception_helpers.hpp>
 
-
+#include "common/base/executor.hpp.inc"
 #include "hip/test/utils.hip.hpp"
 
 
@@ -73,6 +73,11 @@ public:
     void run(std::shared_ptr<const gko::CudaExecutor>) const override
     {
         value = -3;
+    }
+
+    void run(std::shared_ptr<const gko::DpcppExecutor>) const override
+    {
+        value = -4;
     }
 
     void run(std::shared_ptr<const gko::HipExecutor>) const override
@@ -248,7 +253,7 @@ TEST_F(HipExecutor, CopiesDataFromHipToHip)
     omp->copy_from(hip2.get(), 2, copy_hip2, copy);
     EXPECT_EQ(3, copy[0]);
     ASSERT_EQ(8, copy[1]);
-    hip->free(copy_hip2);
+    hip2->free(copy_hip2);
     hip->free(orig);
 }
 
@@ -257,6 +262,39 @@ TEST_F(HipExecutor, Synchronizes)
 {
     // Todo design a proper unit test once we support streams
     ASSERT_NO_THROW(hip->synchronize());
+}
+
+
+TEST_F(HipExecutor, ExecInfoSetsCorrectProperties)
+{
+    auto dev_id = hip->get_device_id();
+    auto num_sm = 0;
+    auto major = 0;
+    auto minor = 0;
+    auto max_threads_per_block = 0;
+    auto warp_size = 0;
+    GKO_ASSERT_NO_HIP_ERRORS(hipDeviceGetAttribute(
+        &num_sm, hipDeviceAttributeMultiprocessorCount, dev_id));
+    GKO_ASSERT_NO_HIP_ERRORS(hipDeviceGetAttribute(
+        &major, hipDeviceAttributeComputeCapabilityMajor, dev_id));
+    GKO_ASSERT_NO_HIP_ERRORS(hipDeviceGetAttribute(
+        &minor, hipDeviceAttributeComputeCapabilityMinor, dev_id));
+    GKO_ASSERT_NO_HIP_ERRORS(hipDeviceGetAttribute(
+        &max_threads_per_block, hipDeviceAttributeMaxThreadsPerBlock, dev_id));
+    GKO_ASSERT_NO_HIP_ERRORS(
+        hipDeviceGetAttribute(&warp_size, hipDeviceAttributeWarpSize, dev_id));
+#if GINKGO_HIP_PLATFORM_NVCC
+    auto num_cores = convert_sm_ver_to_cores(major, minor);
+#else
+    auto num_cores = warp_size * 4;
+#endif
+
+    ASSERT_EQ(hip->get_major_version(), major);
+    ASSERT_EQ(hip->get_minor_version(), minor);
+    ASSERT_EQ(hip->get_num_multiprocessor(), num_sm);
+    ASSERT_EQ(hip->get_warp_size(), warp_size);
+    ASSERT_EQ(hip->get_num_warps(), num_sm * (num_cores / warp_size));
+    ASSERT_EQ(hip->get_num_warps_per_sm(), num_cores / warp_size);
 }
 
 

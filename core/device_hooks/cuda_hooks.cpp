@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,12 @@ std::shared_ptr<CudaExecutor> CudaExecutor::create(
 }
 
 
+void CudaExecutor::populate_exec_info(const MachineTopology *mach_topo)
+{
+    // This method is always called, so cannot throw when not compiled.
+}
+
+
 void OmpExecutor::raw_copy_to(const CudaExecutor *, size_type num_bytes,
                               const void *src_ptr, void *dest_ptr) const
     GKO_NOT_COMPILED(cuda);
@@ -93,6 +99,11 @@ void CudaExecutor::raw_copy_to(const HipExecutor *, size_type num_bytes,
     GKO_NOT_COMPILED(cuda);
 
 
+void CudaExecutor::raw_copy_to(const DpcppExecutor *, size_type num_bytes,
+                               const void *src_ptr, void *dest_ptr) const
+    GKO_NOT_COMPILED(cuda);
+
+
 void CudaExecutor::synchronize() const GKO_NOT_COMPILED(cuda);
 
 
@@ -110,6 +121,12 @@ std::string CudaError::get_error(int64)
 
 
 std::string CublasError::get_error(int64)
+{
+    return "ginkgo CUDA module is not compiled";
+}
+
+
+std::string CurandError::get_error(int64)
 {
     return "ginkgo CUDA module is not compiled";
 }

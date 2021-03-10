@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************<GINKGO LICENSE>*******************************/
 
-#ifndef GKO_CORE_MATRIX_CSR_HPP_
-#define GKO_CORE_MATRIX_CSR_HPP_
+#ifndef GKO_PUBLIC_CORE_MATRIX_CSR_HPP_
+#define GKO_PUBLIC_CORE_MATRIX_CSR_HPP_
 
 
 #include <ginkgo/core/base/array.hpp>
@@ -145,6 +145,8 @@ class Csr : public EnableLinOp<Csr<ValueType, IndexType>>,
     friend class Csr<to_complex<ValueType>, IndexType>;
 
 public:
+    using ReadableFromMatrixData<ValueType, IndexType>::read;
+
     using value_type = ValueType;
     using index_type = IndexType;
     using transposed_type = Csr<ValueType, IndexType>;
@@ -237,9 +239,9 @@ public:
             }
             auto num_rows = mtx_row_ptrs.get_num_elems() - 1;
             max_length_per_row_ = 0;
-            for (index_type i = 1; i < num_rows + 1; i++) {
+            for (size_type i = 0; i < num_rows; i++) {
                 max_length_per_row_ = std::max(max_length_per_row_,
-                                               row_ptrs[i] - row_ptrs[i - 1]);
+                                               row_ptrs[i + 1] - row_ptrs[i]);
             }
         }
 
@@ -437,29 +439,29 @@ public:
         {
             if (warp_size_ > 0) {
                 int multiple = 8;
-                if (nnz >= 2e8) {
+                if (nnz >= static_cast<int64_t>(2e8)) {
                     multiple = 2048;
-                } else if (nnz >= 2e7) {
+                } else if (nnz >= static_cast<int64_t>(2e7)) {
                     multiple = 512;
-                } else if (nnz >= 2e6) {
+                } else if (nnz >= static_cast<int64_t>(2e6)) {
                     multiple = 128;
-                } else if (nnz >= 2e5) {
+                } else if (nnz >= static_cast<int64_t>(2e5)) {
                     multiple = 32;
                 }
 
 #if GINKGO_HIP_PLATFORM_HCC
                 if (!cuda_strategy_) {
                     multiple = 8;
-                    if (nnz >= 1e7) {
+                    if (nnz >= static_cast<int64_t>(1e7)) {
                         multiple = 64;
-                    } else if (nnz >= 1e6) {
+                    } else if (nnz >= static_cast<int64_t>(1e6)) {
                         multiple = 16;
                     }
                 }
 #endif  // GINKGO_HIP_PLATFORM_HCC
 
                 auto nwarps = nwarps_ * multiple;
-                return min(ceildiv(nnz, warp_size_), int64_t(nwarps));
+                return min(ceildiv(nnz, warp_size_), nwarps);
             } else {
                 return 0;
             }
@@ -484,13 +486,13 @@ public:
         const index_type nvidia_row_len_limit = 1024;
         /* Use imbalance strategy when the matrix has more more than 1e6 on
          * NVIDIA hardware */
-        const index_type nvidia_nnz_limit = 1e6;
+        const index_type nvidia_nnz_limit{static_cast<index_type>(1e6)};
         /* Use imbalance strategy when the maximum number of nonzero per row is
          * more than 768 on AMD hardware */
         const index_type amd_row_len_limit = 768;
         /* Use imbalance strategy when the matrix has more more than 1e8 on AMD
          * hardware */
-        const index_type amd_nnz_limit = 1e8;
+        const index_type amd_nnz_limit{static_cast<index_type>(1e8)};
 
         /**
          * Creates an automatical strategy.
@@ -575,8 +577,8 @@ public:
                 this->set_name(actual_strategy.get_name());
             } else {
                 index_type maxnum = 0;
-                for (index_type i = 1; i < num_rows + 1; i++) {
-                    maxnum = std::max(maxnum, row_ptrs[i] - row_ptrs[i - 1]);
+                for (size_type i = 0; i < num_rows; i++) {
+                    maxnum = std::max(maxnum, row_ptrs[i + 1] - row_ptrs[i]);
                 }
                 if (maxnum > row_len_limit) {
                     load_balance actual_strategy(nwarps_, warp_size_,
@@ -691,6 +693,12 @@ public:
     std::unique_ptr<LinOp> transpose() const override;
 
     std::unique_ptr<LinOp> conj_transpose() const override;
+
+    std::unique_ptr<LinOp> permute(
+        const Array<IndexType> *permutation_indices) const override;
+
+    std::unique_ptr<LinOp> inverse_permute(
+        const Array<IndexType> *inverse_permutation_indices) const override;
 
     std::unique_ptr<LinOp> row_permute(
         const Array<IndexType> *permutation_indices) const override;
@@ -1055,4 +1063,4 @@ void strategy_rebuild_helper(Csr<ValueType, IndexType> *result)
 }  // namespace gko
 
 
-#endif  // GKO_CORE_MATRIX_CSR_HPP_
+#endif  // GKO_PUBLIC_CORE_MATRIX_CSR_HPP_

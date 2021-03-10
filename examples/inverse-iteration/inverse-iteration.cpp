@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,11 @@ int main(int argc, char *argv[])
                  return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
                                                  true);
              }},
+            {"dpcpp",
+             [] {
+                 return gko::DpcppExecutor::create(0,
+                                                   gko::OmpExecutor::create());
+             }},
             {"reference", [] { return gko::ReferenceExecutor::create(); }}};
 
     // executor where Ginkgo will perform the computation
@@ -117,7 +122,7 @@ int main(int argc, char *argv[])
             .with_criteria(gko::stop::Iteration::build()
                                .with_max_iters(system_max_iterations)
                                .on(exec),
-                           gko::stop::ResidualNormReduction<precision>::build()
+                           gko::stop::ResidualNorm<precision>::build()
                                .with_reduction_factor(system_residual_goal)
                                .on(exec))
             .on(exec)

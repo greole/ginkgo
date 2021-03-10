@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -115,6 +115,20 @@ void apply(std::shared_ptr<const CudaExecutor> exec,
 }
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_APPLY_KERNEL);
+
+
+template <typename ValueType>
+void fill(std::shared_ptr<const DefaultExecutor> exec,
+          matrix::Dense<ValueType> *mat, ValueType value)
+{
+    const auto num_blocks =
+        ceildiv(mat->get_size()[0] * mat->get_size()[1], default_block_size);
+    kernel::strided_fill<<<num_blocks, default_block_size>>>(
+        mat->get_size()[0], mat->get_size()[1], mat->get_stride(),
+        as_cuda_type(mat->get_values()), as_cuda_type(value));
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_FILL_KERNEL);
 
 
 template <typename ValueType>
@@ -574,7 +588,7 @@ void transpose(std::shared_ptr<const CudaExecutor> exec,
     }
 };
 
-GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_TRANSPOSE_KERNEL);
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_TRANSPOSE_KERNEL);
 
 
 template <typename ValueType>
@@ -599,27 +613,64 @@ void conj_transpose(std::shared_ptr<const CudaExecutor> exec,
     }
 }
 
-GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_CONJ_TRANSPOSE_KERNEL);
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_CONJ_TRANSPOSE_KERNEL);
 
 
 template <typename ValueType, typename IndexType>
-void row_permute(std::shared_ptr<const CudaExecutor> exec,
-                 const Array<IndexType> *permutation_indices,
-                 const matrix::Dense<ValueType> *orig,
-                 matrix::Dense<ValueType> *row_permuted)
+void symm_permute(std::shared_ptr<const CudaExecutor> exec,
+                  const Array<IndexType> *permutation_indices,
+                  const matrix::Dense<ValueType> *orig,
+                  matrix::Dense<ValueType> *permuted)
 {
-    constexpr auto block_size = default_block_size;
-    const dim3 grid_dim =
-        ceildiv(orig->get_size()[0] * orig->get_size()[1], block_size);
-    const dim3 block_dim{config::warp_size, 1, block_size / config::warp_size};
-    kernel::row_permute<block_size><<<grid_dim, block_dim>>>(
+    const auto num_blocks =
+        ceildiv(orig->get_size()[0] * orig->get_size()[1], default_block_size);
+    kernel::symm_permute<<<num_blocks, default_block_size>>>(
         orig->get_size()[0], orig->get_size()[1],
-        as_cuda_type(permutation_indices->get_const_data()),
+        permutation_indices->get_const_data(),
         as_cuda_type(orig->get_const_values()), orig->get_stride(),
-        as_cuda_type(row_permuted->get_values()), row_permuted->get_stride());
+        as_cuda_type(permuted->get_values()), permuted->get_stride());
 }
 
-GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_DECLARE_ROW_PERMUTE_KERNEL);
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_DENSE_SYMM_PERMUTE_KERNEL);
+
+
+template <typename ValueType, typename IndexType>
+void inv_symm_permute(std::shared_ptr<const CudaExecutor> exec,
+                      const Array<IndexType> *permutation_indices,
+                      const matrix::Dense<ValueType> *orig,
+                      matrix::Dense<ValueType> *permuted)
+{
+    const auto num_blocks =
+        ceildiv(orig->get_size()[0] * orig->get_size()[1], default_block_size);
+    kernel::inv_symm_permute<<<num_blocks, default_block_size>>>(
+        orig->get_size()[0], orig->get_size()[1],
+        permutation_indices->get_const_data(),
+        as_cuda_type(orig->get_const_values()), orig->get_stride(),
+        as_cuda_type(permuted->get_values()), permuted->get_stride());
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_DENSE_INV_SYMM_PERMUTE_KERNEL);
+
+
+template <typename ValueType, typename IndexType>
+void row_gather(std::shared_ptr<const CudaExecutor> exec,
+                const Array<IndexType> *row_indices,
+                const matrix::Dense<ValueType> *orig,
+                matrix::Dense<ValueType> *row_gathered)
+{
+    auto out_num_rows = row_indices->get_num_elems();
+    const auto num_blocks =
+        ceildiv(out_num_rows * orig->get_size()[1], default_block_size);
+    kernel::row_gather<<<num_blocks, default_block_size>>>(
+        out_num_rows, orig->get_size()[1], row_indices->get_const_data(),
+        as_cuda_type(orig->get_const_values()), orig->get_stride(),
+        as_cuda_type(row_gathered->get_values()), row_gathered->get_stride());
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
+    GKO_DECLARE_DENSE_ROW_GATHER_KERNEL);
 
 
 template <typename ValueType, typename IndexType>
@@ -628,20 +679,18 @@ void column_permute(std::shared_ptr<const CudaExecutor> exec,
                     const matrix::Dense<ValueType> *orig,
                     matrix::Dense<ValueType> *column_permuted)
 {
-    constexpr auto block_size = default_block_size;
-    const dim3 grid_dim =
-        ceildiv(orig->get_size()[0] * orig->get_size()[1], block_size);
-    const dim3 block_dim{config::warp_size, 1, block_size / config::warp_size};
-    kernel::column_permute<block_size><<<grid_dim, block_dim>>>(
+    const auto num_blocks =
+        ceildiv(orig->get_size()[0] * orig->get_size()[1], default_block_size);
+    kernel::column_permute<<<num_blocks, default_block_size>>>(
         orig->get_size()[0], orig->get_size()[1],
-        as_cuda_type(permutation_indices->get_const_data()),
+        permutation_indices->get_const_data(),
         as_cuda_type(orig->get_const_values()), orig->get_stride(),
         as_cuda_type(column_permuted->get_values()),
         column_permuted->get_stride());
 }
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
-    GKO_DECLARE_COLUMN_PERMUTE_KERNEL);
+    GKO_DECLARE_DENSE_COLUMN_PERMUTE_KERNEL);
 
 
 template <typename ValueType, typename IndexType>
@@ -650,19 +699,17 @@ void inverse_row_permute(std::shared_ptr<const CudaExecutor> exec,
                          const matrix::Dense<ValueType> *orig,
                          matrix::Dense<ValueType> *row_permuted)
 {
-    constexpr auto block_size = default_block_size;
-    const dim3 grid_dim =
-        ceildiv(orig->get_size()[0] * orig->get_size()[1], block_size);
-    const dim3 block_dim{config::warp_size, 1, block_size / config::warp_size};
-    kernel::inverse_row_permute<block_size><<<grid_dim, block_dim>>>(
+    const auto num_blocks =
+        ceildiv(orig->get_size()[0] * orig->get_size()[1], default_block_size);
+    kernel::inverse_row_permute<<<num_blocks, default_block_size>>>(
         orig->get_size()[0], orig->get_size()[1],
-        as_cuda_type(permutation_indices->get_const_data()),
+        permutation_indices->get_const_data(),
         as_cuda_type(orig->get_const_values()), orig->get_stride(),
         as_cuda_type(row_permuted->get_values()), row_permuted->get_stride());
 }
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
-    GKO_DECLARE_INVERSE_ROW_PERMUTE_KERNEL);
+    GKO_DECLARE_DENSE_INV_ROW_PERMUTE_KERNEL);
 
 
 template <typename ValueType, typename IndexType>
@@ -671,20 +718,18 @@ void inverse_column_permute(std::shared_ptr<const CudaExecutor> exec,
                             const matrix::Dense<ValueType> *orig,
                             matrix::Dense<ValueType> *column_permuted)
 {
-    constexpr auto block_size = default_block_size;
-    const dim3 grid_dim =
-        ceildiv(orig->get_size()[0] * orig->get_size()[1], block_size);
-    const dim3 block_dim{config::warp_size, 1, block_size / config::warp_size};
-    kernel::inverse_column_permute<block_size><<<grid_dim, block_dim>>>(
+    const auto num_blocks =
+        ceildiv(orig->get_size()[0] * orig->get_size()[1], default_block_size);
+    kernel::inverse_column_permute<<<num_blocks, default_block_size>>>(
         orig->get_size()[0], orig->get_size()[1],
-        as_cuda_type(permutation_indices->get_const_data()),
+        permutation_indices->get_const_data(),
         as_cuda_type(orig->get_const_values()), orig->get_stride(),
         as_cuda_type(column_permuted->get_values()),
         column_permuted->get_stride());
 }
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_AND_INDEX_TYPE(
-    GKO_DECLARE_INVERSE_COLUMN_PERMUTE_KERNEL);
+    GKO_DECLARE_DENSE_INV_COLUMN_PERMUTE_KERNEL);
 
 
 template <typename ValueType>
@@ -698,7 +743,7 @@ void extract_diagonal(std::shared_ptr<const CudaExecutor> exec,
         orig->get_stride(), as_cuda_type(diag->get_values()));
 }
 
-GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_EXTRACT_DIAGONAL_KERNEL);
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_DENSE_EXTRACT_DIAGONAL_KERNEL);
 
 
 template <typename ValueType>
@@ -731,6 +776,57 @@ void outplace_absolute_dense(std::shared_ptr<const CudaExecutor> exec,
 }
 
 GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_OUTPLACE_ABSOLUTE_DENSE_KERNEL);
+
+
+template <typename ValueType>
+void make_complex(std::shared_ptr<const CudaExecutor> exec,
+                  const matrix::Dense<ValueType> *source,
+                  matrix::Dense<to_complex<ValueType>> *result)
+{
+    auto dim = source->get_size();
+    const dim3 grid_dim = ceildiv(dim[0] * dim[1], default_block_size);
+
+    kernel::make_complex<<<grid_dim, default_block_size>>>(
+        dim[0], dim[1], as_cuda_type(source->get_const_values()),
+        source->get_stride(), as_cuda_type(result->get_values()),
+        result->get_stride());
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_MAKE_COMPLEX_KERNEL);
+
+
+template <typename ValueType>
+void get_real(std::shared_ptr<const CudaExecutor> exec,
+              const matrix::Dense<ValueType> *source,
+              matrix::Dense<remove_complex<ValueType>> *result)
+{
+    auto dim = source->get_size();
+    const dim3 grid_dim = ceildiv(dim[0] * dim[1], default_block_size);
+
+    kernel::get_real<<<grid_dim, default_block_size>>>(
+        dim[0], dim[1], as_cuda_type(source->get_const_values()),
+        source->get_stride(), as_cuda_type(result->get_values()),
+        result->get_stride());
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_GET_REAL_KERNEL);
+
+
+template <typename ValueType>
+void get_imag(std::shared_ptr<const CudaExecutor> exec,
+              const matrix::Dense<ValueType> *source,
+              matrix::Dense<remove_complex<ValueType>> *result)
+{
+    auto dim = source->get_size();
+    const dim3 grid_dim = ceildiv(dim[0] * dim[1], default_block_size);
+
+    kernel::get_imag<<<grid_dim, default_block_size>>>(
+        dim[0], dim[1], as_cuda_type(source->get_const_values()),
+        source->get_stride(), as_cuda_type(result->get_values()),
+        result->get_stride());
+}
+
+GKO_INSTANTIATE_FOR_EACH_VALUE_TYPE(GKO_DECLARE_GET_IMAG_KERNEL);
 
 
 }  // namespace dense

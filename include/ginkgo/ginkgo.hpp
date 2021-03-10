@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/exception_helpers.hpp>
 #include <ginkgo/core/base/executor.hpp>
 #include <ginkgo/core/base/lin_op.hpp>
+#include <ginkgo/core/base/machine_topology.hpp>
 #include <ginkgo/core/base/math.hpp>
+#include <ginkgo/core/base/matrix_assembly_data.hpp>
 #include <ginkgo/core/base/matrix_data.hpp>
 #include <ginkgo/core/base/mtx_io.hpp>
 #include <ginkgo/core/base/name_demangling.hpp>
@@ -55,11 +57,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/range.hpp>
 #include <ginkgo/core/base/range_accessors.hpp>
 #include <ginkgo/core/base/std_extensions.hpp>
+#include <ginkgo/core/base/temporary_clone.hpp>
 #include <ginkgo/core/base/types.hpp>
 #include <ginkgo/core/base/utils.hpp>
+#include <ginkgo/core/base/utils_helper.hpp>
 #include <ginkgo/core/base/version.hpp>
 
+#include <ginkgo/core/factorization/ic.hpp>
 #include <ginkgo/core/factorization/ilu.hpp>
+#include <ginkgo/core/factorization/par_ic.hpp>
 #include <ginkgo/core/factorization/par_ict.hpp>
 #include <ginkgo/core/factorization/par_ilu.hpp>
 #include <ginkgo/core/factorization/par_ilut.hpp>
@@ -81,6 +87,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/matrix/sellp.hpp>
 #include <ginkgo/core/matrix/sparsity_csr.hpp>
 
+#include <ginkgo/core/preconditioner/ic.hpp>
 #include <ginkgo/core/preconditioner/ilu.hpp>
 #include <ginkgo/core/preconditioner/isai.hpp>
 #include <ginkgo/core/preconditioner/jacobi.hpp>
@@ -90,12 +97,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ginkgo/core/solver/bicg.hpp>
 #include <ginkgo/core/solver/bicgstab.hpp>
+#include <ginkgo/core/solver/cb_gmres.hpp>
 #include <ginkgo/core/solver/cg.hpp>
 #include <ginkgo/core/solver/cgs.hpp>
 #include <ginkgo/core/solver/fcg.hpp>
 #include <ginkgo/core/solver/gmres.hpp>
+#include <ginkgo/core/solver/idr.hpp>
 #include <ginkgo/core/solver/ir.hpp>
 #include <ginkgo/core/solver/lower_trs.hpp>
+#include <ginkgo/core/solver/solver_traits.hpp>
 #include <ginkgo/core/solver/upper_trs.hpp>
 
 #include <ginkgo/core/stop/combined.hpp>

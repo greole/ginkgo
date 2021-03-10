@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,8 +51,8 @@ namespace kernels {
 
 
 #define GKO_DECLARE_ALL_AS_TEMPLATES \
-    template <typename IndexType>    \
-    GKO_DECLARE_FILL_ARRAY_KERNEL(IndexType)
+    template <typename ValueType>    \
+    GKO_DECLARE_FILL_ARRAY_KERNEL(ValueType)
 
 
 namespace omp {
@@ -89,6 +89,15 @@ GKO_DECLARE_ALL_AS_TEMPLATES;
 
 }  // namespace components
 }  // namespace hip
+
+
+namespace dpcpp {
+namespace components {
+
+GKO_DECLARE_ALL_AS_TEMPLATES;
+
+}  // namespace components
+}  // namespace dpcpp
 
 
 #undef GKO_DECLARE_ALL_AS_TEMPLATES

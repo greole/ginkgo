@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************<GINKGO LICENSE>*******************************/
 
-#ifndef GKO_CORE_MATRIX_DENSE_HPP_
-#define GKO_CORE_MATRIX_DENSE_HPP_
+#ifndef GKO_PUBLIC_CORE_MATRIX_DENSE_HPP_
+#define GKO_PUBLIC_CORE_MATRIX_DENSE_HPP_
 
 
 #include <initializer_list>
 
 
 #include <ginkgo/core/base/array.hpp>
+#include <ginkgo/core/base/exception_helpers.hpp>
 #include <ginkgo/core/base/executor.hpp>
 #include <ginkgo/core/base/lin_op.hpp>
 #include <ginkgo/core/base/mtx_io.hpp>
@@ -133,6 +134,8 @@ class Dense
 public:
     using EnableLinOp<Dense>::convert_to;
     using EnableLinOp<Dense>::move_to;
+    using ReadableFromMatrixData<ValueType, int32>::read;
+    using ReadableFromMatrixData<ValueType, int64>::read;
 
     using value_type = ValueType;
     using index_type = int64;
@@ -140,6 +143,7 @@ public:
     using mat_data = gko::matrix_data<ValueType, int64>;
     using mat_data32 = gko::matrix_data<ValueType, int32>;
     using absolute_type = remove_complex<Dense>;
+    using complex_type = to_complex<Dense>;
 
     using row_major_range = gko::range<gko::accessor::row_major<ValueType, 2>>;
 
@@ -223,11 +227,67 @@ public:
 
     std::unique_ptr<LinOp> conj_transpose() const override;
 
+    std::unique_ptr<LinOp> permute(
+        const Array<int32> *permutation_indices) const override;
+
+    std::unique_ptr<LinOp> permute(
+        const Array<int64> *permutation_indices) const override;
+
+    std::unique_ptr<LinOp> inverse_permute(
+        const Array<int32> *permutation_indices) const override;
+
+    std::unique_ptr<LinOp> inverse_permute(
+        const Array<int64> *permutation_indices) const override;
+
     std::unique_ptr<LinOp> row_permute(
         const Array<int32> *permutation_indices) const override;
 
     std::unique_ptr<LinOp> row_permute(
         const Array<int64> *permutation_indices) const override;
+
+    /**
+     * Fill the dense matrix with a given value.
+     *
+     * @param value  the value to be filled
+     */
+    void fill(const ValueType value);
+
+    /**
+     * Create a Dense matrix consisting of the given rows from this matrix.
+     *
+     * @param gather_indices  pointer to an array containing row indices
+     *                        from this matrix. It may contain duplicates.
+     * @return  Dense matrix on the same executor with the same number of
+     *          columns and `gather_indices->get_num_elems()` rows containing
+     *          the gathered rows from this matrix:
+     *          `output(i,j) = input(gather_indices(i), j)`
+     */
+    std::unique_ptr<Dense> row_gather(const Array<int32> *gather_indices) const;
+
+    /**
+     * @copydoc row_gather(const Array<int32>*) const
+     */
+    std::unique_ptr<Dense> row_gather(const Array<int64> *gather_indices) const;
+
+    /**
+     * Copies the given rows from this matrix into `row_gathered`
+     *
+     * @param gather_indices  pointer to an array containing row indices
+     *                        from this matrix. It may contain duplicates.
+     * @param row_gathered  pointer to a Dense matrix that will store the
+     *                      gathered rows:
+     *                      `output(i,j) = input(gather_indices(i), j)`
+     *                      It must have the same number of columns as this
+     *                      matrix and `gather_indices->get_num_elems()` rows.
+     */
+    void row_gather(const Array<int32> *gather_indices,
+                    Dense *row_gathered) const;
+
+    /**
+     * @copydoc row_gather(const Array<int32>*, Dense*) const
+     */
+    void row_gather(const Array<int64> *gather_indices,
+                    Dense *row_gathered) const;
 
     std::unique_ptr<LinOp> column_permute(
         const Array<int32> *permutation_indices) const override;
@@ -236,22 +296,58 @@ public:
         const Array<int64> *permutation_indices) const override;
 
     std::unique_ptr<LinOp> inverse_row_permute(
-        const Array<int32> *inverse_permutation_indices) const override;
+        const Array<int32> *permutation_indices) const override;
 
     std::unique_ptr<LinOp> inverse_row_permute(
-        const Array<int64> *inverse_permutation_indices) const override;
+        const Array<int64> *permutation_indices) const override;
 
     std::unique_ptr<LinOp> inverse_column_permute(
-        const Array<int32> *inverse_permutation_indices) const override;
+        const Array<int32> *permutation_indices) const override;
 
     std::unique_ptr<LinOp> inverse_column_permute(
-        const Array<int64> *inverse_permutation_indices) const override;
+        const Array<int64> *permutation_indices) const override;
 
     std::unique_ptr<Diagonal<ValueType>> extract_diagonal() const override;
 
     std::unique_ptr<absolute_type> compute_absolute() const override;
 
     void compute_absolute_inplace() override;
+
+    /**
+     * Creates a complex copy of the original matrix. If the original matrix
+     * was real, the imaginary part of the result will be zero.
+     */
+    std::unique_ptr<complex_type> make_complex() const;
+
+    /**
+     * Writes a complex copy of the original matrix to a given complex matrix.
+     * If the original matrix was real, the imaginary part of the result will
+     * be zero.
+     */
+    void make_complex(Dense<to_complex<ValueType>> *result) const;
+
+    /**
+     * Creates a new real matrix and extracts the real part of the original
+     * matrix into that.
+     */
+    std::unique_ptr<absolute_type> get_real() const;
+
+    /**
+     * Extracts the real part of the original matrix into a given real matrix.
+     */
+    void get_real(Dense<remove_complex<ValueType>> *result) const;
+
+    /**
+     * Creates a new real matrix and extracts the imaginary part of the
+     * original matrix into that.
+     */
+    std::unique_ptr<absolute_type> get_imag() const;
+
+    /**
+     * Extracts the imaginary part of the original matrix into a given real
+     * matrix.
+     */
+    void get_imag(Dense<remove_complex<ValueType>> *result) const;
 
     /**
      * Returns a pointer to the array of values of the matrix.
@@ -429,7 +525,7 @@ public:
             stride);
     }
 
-    /*
+    /**
      * Create a submatrix from the original matrix.
      *
      * @param rows     row span
@@ -439,6 +535,54 @@ public:
                                             const span &columns)
     {
         return create_submatrix(rows, columns, this->get_stride());
+    }
+
+    /**
+     * Create a real view of the (potentially) complex original matrix.
+     * If the original matrix is real, nothing changes. If the original matrix
+     * is complex, the result is created by viewing the complex matrix with as
+     * real with a reinterpret_cast with twice the number of columns and
+     * double the stride.
+     */
+    std::unique_ptr<Dense<remove_complex<ValueType>>> create_real_view()
+    {
+        const auto num_rows = this->get_size()[0];
+        const bool complex = is_complex<ValueType>();
+        const auto num_cols =
+            complex ? 2 * this->get_size()[1] : this->get_size()[1];
+        const auto stride =
+            complex ? 2 * this->get_stride() : this->get_stride();
+
+        return Dense<remove_complex<ValueType>>::create(
+            this->get_executor(), dim<2>{num_rows, num_cols},
+            Array<remove_complex<ValueType>>::view(
+                this->get_executor(), num_rows * stride,
+                reinterpret_cast<remove_complex<ValueType> *>(
+                    this->get_values())),
+            stride);
+    }
+
+    /**
+     * @copydoc create_real_view()
+     */
+    std::unique_ptr<const Dense<remove_complex<ValueType>>> create_real_view()
+        const
+    {
+        const auto num_rows = this->get_size()[0];
+        const bool complex = is_complex<ValueType>();
+        const auto num_cols =
+            complex ? 2 * this->get_size()[1] : this->get_size()[1];
+        const auto stride =
+            complex ? 2 * this->get_stride() : this->get_stride();
+
+        return Dense<remove_complex<ValueType>>::create(
+            this->get_executor(), dim<2>{num_rows, num_cols},
+            Array<remove_complex<ValueType>>::view(
+                this->get_executor(), num_rows * stride,
+                const_cast<remove_complex<ValueType> *>(
+                    reinterpret_cast<const remove_complex<ValueType> *>(
+                        this->get_const_values()))),
+            stride);
     }
 
 protected:
@@ -557,7 +701,7 @@ protected:
 private:
     Array<value_type> values_;
     size_type stride_;
-};  // namespace matrix
+};
 
 
 }  // namespace matrix
@@ -718,4 +862,4 @@ std::unique_ptr<Matrix> initialize(
 }  // namespace gko
 
 
-#endif  // GKO_CORE_MATRIX_DENSE_HPP_
+#endif  // GKO_PUBLIC_CORE_MATRIX_DENSE_HPP_

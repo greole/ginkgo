@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@ protected:
     std::shared_ptr<Mtx> product;
 };
 
-TYPED_TEST_CASE(Composition, gko::test::ValueTypes);
+TYPED_TEST_SUITE(Composition, gko::test::ValueTypes);
 
 
 TYPED_TEST(Composition, AppliesSingleToVector)

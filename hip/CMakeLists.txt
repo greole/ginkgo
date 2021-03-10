@@ -1,3 +1,7 @@
+if (GINKGO_HIP_PLATFORM MATCHES "nvcc" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 9.2)
+    message(FATAL_ERROR "Ginkgo HIP backend requires CUDA >= 9.2.")
+endif()
+
 if(NOT DEFINED ROCM_PATH)
     if(DEFINED ENV{ROCM_PATH})
         set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCM has been installed")
@@ -13,6 +17,22 @@ if(NOT DEFINED HIPBLAS_PATH)
         set(HIPBLAS_PATH $ENV{HIPBLAS_PATH} CACHE PATH "Path to which HIPBLAS has been installed")
     else()
         set(HIPBLAS_PATH "${ROCM_PATH}/hipblas" CACHE PATH "Path to which HIPBLAS has been installed")
+    endif()
+endif()
+
+if(NOT DEFINED HIPRAND_PATH)
+    if(DEFINED ENV{HIPRAND_PATH})
+        set(HIPRAND_PATH $ENV{HIPRAND_PATH} CACHE PATH "Path to which HIPRAND has been installed")
+    else()
+        set(HIPRAND_PATH "${ROCM_PATH}/hiprand" CACHE PATH "Path to which HIPRAND has been installed")
+    endif()
+endif()
+
+if(NOT DEFINED ROCRAND_PATH)
+    if(DEFINED ENV{ROCRAND_PATH})
+        set(ROCRAND_PATH $ENV{ROCRAND_PATH} CACHE PATH "Path to which ROCRAND has been installed")
+    else()
+        set(ROCRAND_PATH "${ROCM_PATH}/rocrand" CACHE PATH "Path to which ROCRAND has been installed")
     endif()
 endif()
 
@@ -116,7 +136,9 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${HIP_PATH}/cmake")
 list(APPEND CMAKE_PREFIX_PATH
     "${HIPBLAS_PATH}/lib/cmake"
+    "${HIPRAND_PATH}/lib/cmake"
     "${HIPSPARSE_PATH}/lib/cmake"
+    "${ROCRAND_PATH}/lib/cmake"
 )
 # Set CMAKE_MODULE_PATH and CMAKE_PREFIX_PATH as PARENT_SCOPE to easily find HIP again
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" PARENT_SCOPE)
@@ -131,7 +153,10 @@ set(HIP_HIPCC_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE STR
 
 find_package(HIP REQUIRED)
 find_package(hipblas REQUIRED)
+find_package(hiprand REQUIRED)
 find_package(hipsparse REQUIRED)
+# At the moment, for hiprand to work also rocrand is required.
+find_package(rocrand REQUIRED)
 find_path(GINKGO_HIP_THRUST_PATH "thrust/complex.h"
     PATHS "${HIP_PATH}/../include"
     ENV HIP_THRUST_PATH)
@@ -147,8 +172,10 @@ set(GINKGO_HIP_SOURCES
     components/fill_array.hip.cpp
     components/precision_conversion.hip.cpp
     components/prefix_sum.hip.cpp
-    factorization/ilu_kernels.hip.cpp
     factorization/factorization_kernels.hip.cpp
+    factorization/ic_kernels.hip.cpp
+    factorization/ilu_kernels.hip.cpp
+    factorization/par_ic_kernels.hip.cpp
     factorization/par_ict_kernels.hip.cpp
     factorization/par_ilu_kernels.hip.cpp
     factorization/par_ilut_approx_filter_kernel.hip.cpp
@@ -177,6 +204,8 @@ set(GINKGO_HIP_SOURCES
     solver/cgs_kernels.hip.cpp
     solver/fcg_kernels.hip.cpp
     solver/gmres_kernels.hip.cpp
+    solver/cb_gmres_kernels.hip.cpp
+    solver/idr_kernels.hip.cpp
     solver/ir_kernels.hip.cpp
     solver/lower_trs_kernels.hip.cpp
     solver/upper_trs_kernels.hip.cpp
@@ -195,11 +224,7 @@ if (GINKGO_HIP_PLATFORM MATCHES "nvcc")
     endif()
 
     # Remove false positive CUDA warnings when calling one<T>() and zero<T>()
-    # This creates a compilation bug on nvcc 9.0.102 *with* the new array_deleter
-    # merged at commit ed12b3df5d26
-    if(NOT CMAKE_CUDA_COMPILER_VERSION MATCHES "9.0")
-        set(GINKGO_HIP_NVCC_ADDITIONAL_FLAGS --expt-relaxed-constexpr)
-    endif()
+    set(GINKGO_HIP_NVCC_ADDITIONAL_FLAGS --expt-relaxed-constexpr)
 
     if (GINKGO_HIP_PLATFROM MATCHES "nvcc" AND CMAKE_CUDA_COMPILER_VERSION
             MATCHES "9.2" AND CMAKE_CUDA_HOST_COMPILER MATCHES ".*clang.*" )
@@ -216,10 +241,19 @@ if (GINKGO_HIP_PLATFORM MATCHES "nvcc")
         ARCHITECTURES ${GINKGO_CUDA_ARCHITECTURES}
         UNSUPPORTED "20" "21")
 endif()
+
+# `target_compile_options` do not work with hip_add_library
+# Thus, we need to pass the flags to `hip_add_library` itself
+if(GINKGO_HIP_AMDGPU)
+    foreach(target ${GINKGO_HIP_AMDGPU})
+        list(APPEND GINKGO_AMD_ARCH_FLAGS --amdgpu-target=${target})
+    endforeach()
+endif()
+
 set(GINKGO_HIPCC_OPTIONS ${GINKGO_HIP_COMPILER_FLAGS})
 set(GINKGO_HIP_NVCC_OPTIONS ${GINKGO_HIP_NVCC_COMPILER_FLAGS} ${GINKGO_HIP_NVCC_ARCH} ${GINKGO_HIP_NVCC_ADDITIONAL_FLAGS})
-set(GINKGO_HIP_HCC_OPTIONS ${GINKGO_HIP_HCC_COMPILER_FLAGS})
-set(GINKGO_HIP_CLANG_OPTIONS ${GINKGO_HIP_CLANG_COMPILER_FLAGS})
+set(GINKGO_HIP_HCC_OPTIONS ${GINKGO_HIP_HCC_COMPILER_FLAGS} ${GINKGO_AMD_ARCH_FLAGS})
+set(GINKGO_HIP_CLANG_OPTIONS ${GINKGO_HIP_CLANG_COMPILER_FLAGS} ${GINKGO_AMD_ARCH_FLAGS})
 
 set_source_files_properties(${GINKGO_HIP_SOURCES} PROPERTIES HIP_SOURCE_PROPERTY_FORMAT TRUE)
 if (GINKGO_HIP_VERSION VERSION_GREATER_EQUAL "3.5")
@@ -237,12 +271,6 @@ else()
         ${GINKGO_STATIC_OR_SHARED})
 endif()
 
-if(GINKGO_HIP_AMDGPU AND GINKGO_HIP_PLATFORM MATCHES "hcc")
-    foreach(target ${GINKGO_HIP_AMDGPU})
-        target_compile_options(ginkgo_hip PRIVATE --amdgpu-target=${target})
-        target_link_libraries(ginkgo_hip PRIVATE --amdgpu-target=${target})
-    endforeach()
-endif()
 
 target_compile_options(ginkgo_hip PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${GINKGO_COMPILER_FLAGS}>)
 if(GINKGO_WITH_CLANG_TIDY AND GINKGO_CLANG_TIDY_PATH)
@@ -267,12 +295,14 @@ if(GINKGO_HIP_PLATFORM MATCHES "hcc")
     endif()
     target_link_libraries(ginkgo_hip PRIVATE hip::device)
 elseif(GINKGO_HIP_PLATFORM MATCHES "nvcc")
-    find_package(CUDA 9.0 REQUIRED)
+    find_package(CUDA 9.2 REQUIRED)
     target_link_libraries(ginkgo_hip PUBLIC ${CUDA_LIBRARIES})
     set(HIP_CUDA_LIBRARIES ${CUDA_LIBRARIES} PARENT_SCOPE)
 endif()
 
-target_link_libraries(ginkgo_hip PRIVATE roc::hipblas roc::hipsparse)
+target_link_libraries(ginkgo_hip PRIVATE roc::hipblas roc::hipsparse hip::hiprand roc::rocrand)
+
+target_link_libraries(ginkgo_hip PUBLIC ginkgo_core_device)
 
 target_include_directories(ginkgo_hip
     PUBLIC
@@ -280,6 +310,7 @@ target_include_directories(ginkgo_hip
     PRIVATE
         ${GINKGO_HIP_THRUST_PATH}
         ${HIPBLAS_INCLUDE_DIRS}
+        ${hiprand_INCLUDE_DIRS}
         ${HIPSPARSE_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${ROCPRIM_INCLUDE_DIRS}>)
 
@@ -301,6 +332,5 @@ if(GINKGO_BUILD_TESTS)
             set(GINKGO_RPATH_FOR_HIP "${GINKGO_RPATH_FOR_HIP}:$<TARGET_FILE_DIR:${target}>")
         endif()
     endforeach()
-
     add_subdirectory(test)
 endif()

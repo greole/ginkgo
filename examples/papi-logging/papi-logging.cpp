@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -140,8 +140,7 @@ int main(int argc, char *argv[])
     std::cout << gko::version_info::get() << std::endl;
 
     if (argc == 2 && (std::string(argv[1]) == "--help")) {
-        std::cerr << "Usage: " << argv[0] << " [executor]"
-                  << std::endl;
+        std::cerr << "Usage: " << argv[0] << " [executor]" << std::endl;
         std::exit(-1);
     }
 
@@ -160,6 +159,11 @@ int main(int argc, char *argv[])
                  return gko::HipExecutor::create(0, gko::OmpExecutor::create(),
                                                  true);
              }},
+            {"dpcpp",
+             [] {
+                 return gko::DpcppExecutor::create(0,
+                                                   gko::OmpExecutor::create());
+             }},
             {"reference", [] { return gko::ReferenceExecutor::create(); }}};
 
     // executor where Ginkgo will perform the computation
@@ -176,7 +180,7 @@ int main(int argc, char *argv[])
         cg::build()
             .with_criteria(
                 gko::stop::Iteration::build().with_max_iters(20u).on(exec),
-                gko::stop::ResidualNormReduction<ValueType>::build()
+                gko::stop::ResidualNorm<ValueType>::build()
                     .with_reduction_factor(reduction_factor)
                     .on(exec))
             .on(exec);

@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ginkgo/core/base/exception.hpp>
 #include <ginkgo/core/base/exception_helpers.hpp>
 
-
+#include "common/base/executor.hpp.inc"
 #include "cuda/test/utils.hpp"
 
 
@@ -67,6 +67,11 @@ public:
     void run(std::shared_ptr<const gko::HipExecutor>) const override
     {
         value = -3;
+    }
+
+    void run(std::shared_ptr<const gko::DpcppExecutor>) const override
+    {
+        value = -4;
     }
 
     void run(std::shared_ptr<const gko::CudaExecutor>) const override
@@ -239,7 +244,7 @@ TEST_F(CudaExecutor, CopiesDataFromCudaToCuda)
     omp->copy_from(cuda2.get(), 2, copy_cuda2, copy);
     EXPECT_EQ(3, copy[0]);
     ASSERT_EQ(8, copy[1]);
-    cuda->free(copy_cuda2);
+    cuda2->free(copy_cuda2);
     cuda->free(orig);
 }
 
@@ -248,6 +253,35 @@ TEST_F(CudaExecutor, Synchronizes)
 {
     // Todo design a proper unit test once we support streams
     ASSERT_NO_THROW(cuda->synchronize());
+}
+
+
+TEST_F(CudaExecutor, ExecInfoSetsCorrectProperties)
+{
+    auto dev_id = cuda->get_device_id();
+    auto num_sm = 0;
+    auto major = 0;
+    auto minor = 0;
+    auto max_threads_per_block = 0;
+    auto warp_size = 0;
+    GKO_ASSERT_NO_CUDA_ERRORS(cudaDeviceGetAttribute(
+        &num_sm, cudaDevAttrMultiProcessorCount, dev_id));
+    GKO_ASSERT_NO_CUDA_ERRORS(cudaDeviceGetAttribute(
+        &major, cudaDevAttrComputeCapabilityMajor, dev_id));
+    GKO_ASSERT_NO_CUDA_ERRORS(cudaDeviceGetAttribute(
+        &minor, cudaDevAttrComputeCapabilityMinor, dev_id));
+    GKO_ASSERT_NO_CUDA_ERRORS(cudaDeviceGetAttribute(
+        &max_threads_per_block, cudaDevAttrMaxThreadsPerBlock, dev_id));
+    GKO_ASSERT_NO_CUDA_ERRORS(
+        cudaDeviceGetAttribute(&warp_size, cudaDevAttrWarpSize, dev_id));
+    auto num_cores = convert_sm_ver_to_cores(major, minor);
+
+    ASSERT_EQ(cuda->get_major_version(), major);
+    ASSERT_EQ(cuda->get_minor_version(), minor);
+    ASSERT_EQ(cuda->get_num_multiprocessor(), num_sm);
+    ASSERT_EQ(cuda->get_warp_size(), warp_size);
+    ASSERT_EQ(cuda->get_num_warps(), num_sm * (num_cores / warp_size));
+    ASSERT_EQ(cuda->get_num_warps_per_sm(), num_cores / warp_size);
 }
 
 

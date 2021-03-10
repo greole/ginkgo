@@ -1,5 +1,5 @@
 /*******************************<GINKGO LICENSE>******************************
-Copyright (c) 2017-2020, the Ginkgo authors
+Copyright (c) 2017-2021, the Ginkgo authors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************<GINKGO LICENSE>*******************************/
 
-#ifndef GKO_CORE_SOLVER_GMRES_HPP_
-#define GKO_CORE_SOLVER_GMRES_HPP_
+#ifndef GKO_PUBLIC_CORE_SOLVER_GMRES_HPP_
+#define GKO_PUBLIC_CORE_SOLVER_GMRES_HPP_
 
 
 #include <vector>
@@ -61,7 +61,7 @@ constexpr size_type default_krylov_dim = 100u;
  *
  * The implementation in Ginkgo makes use of the merged kernel to make the best
  * use of data locality. The inner operations in one iteration of GMRES are
- * merged into 2 separate steps.
+ * merged into 2 separate steps. Modified Gram-Schmidt is used.
  *
  * @tparam ValueType  precision of matrix elements
  *
@@ -214,4 +214,4 @@ private:
 }  // namespace gko
 
 
-#endif  // GKO_CORE_SOLVER_GMRES_HPP_
+#endif  // GKO_PUBLIC_CORE_SOLVER_GMRES_HPP_
