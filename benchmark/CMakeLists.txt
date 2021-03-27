@@ -45,18 +45,6 @@ function(ginkgo_benchmark_hipsp_linops name)
         ${HSA_HEADER} ${HIP_INCLUDE_DIRS}
         ${HIPBLAS_INCLUDE_DIRS} ${HIPSPARSE_INCLUDE_DIRS})
 
-    if(GINKGO_HIP_PLATFORM MATCHES "hcc")
-        ginkgo_hip_ban_link_hcflag(hcc::hccrt)
-        ginkgo_hip_ban_link_hcflag(hcc::hc_am)
-        ginkgo_hip_ban_link_hcflag(hcc::mcwamp)
-        ginkgo_hip_ban_compile_hcflag(hcc::hccrt)
-        ginkgo_hip_ban_compile_hcflag(hcc::hc_am)
-        ginkgo_hip_ban_compile_hcflag(hcc::mcwamp)
-        ginkgo_hip_clang_ban_hip_device_flags()
-        target_link_libraries("${name}" hip::device)
-    else()
-        target_link_libraries("${name}" ${HIP_CUDA_LIBRARIES})
-    endif()
     target_link_libraries("${name}" ${HIPSPARSE_LIBRARIES})
 endfunction()
 
@@ -96,13 +84,13 @@ endfunction(ginkgo_add_single_benchmark_executable)
 # All remaining arguments will be treated as source files
 function(ginkgo_add_typed_benchmark_executables name use_lib_linops)
     ginkgo_add_single_benchmark_executable(
-        "${name}" use_lib_linops "GKO_BENCHMARK_USE_DOUBLE_PRECISION" ${ARGN})
+        "${name}" "${use_lib_linops}" "GKO_BENCHMARK_USE_DOUBLE_PRECISION" ${ARGN})
     ginkgo_add_single_benchmark_executable(
-        "${name}_single" use_lib_linops "GKO_BENCHMARK_USE_SINGLE_PRECISION" ${ARGN})
+        "${name}_single" "${use_lib_linops}" "GKO_BENCHMARK_USE_SINGLE_PRECISION" ${ARGN})
     ginkgo_add_single_benchmark_executable(
-        "${name}_dcomplex" use_lib_linops "GKO_BENCHMARK_USE_DOUBLE_COMPLEX_PRECISION" ${ARGN})
+        "${name}_dcomplex" "${use_lib_linops}" "GKO_BENCHMARK_USE_DOUBLE_COMPLEX_PRECISION" ${ARGN})
     ginkgo_add_single_benchmark_executable(
-        "${name}_scomplex" use_lib_linops "GKO_BENCHMARK_USE_SINGLE_COMPLEX_PRECISION" ${ARGN})
+        "${name}_scomplex" "${use_lib_linops}" "GKO_BENCHMARK_USE_SINGLE_COMPLEX_PRECISION" ${ARGN})
 endfunction(ginkgo_add_typed_benchmark_executables)
 
 

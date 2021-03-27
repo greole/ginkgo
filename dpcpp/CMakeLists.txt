@@ -30,6 +30,7 @@ target_sources(ginkgo_dpcpp
     matrix/hybrid_kernels.dp.cpp
     matrix/sellp_kernels.dp.cpp
     matrix/sparsity_csr_kernels.dp.cpp
+    multigrid/amgx_pgm_kernels.dp.cpp
     preconditioner/isai_kernels.dp.cpp
     preconditioner/jacobi_kernels.dp.cpp
     reorder/rcm_kernels.dp.cpp
@@ -53,10 +54,10 @@ set(GINKGO_DPCPP_FLAGS ${GINKGO_COMPILER_FLAGS} -fsycl -fsycl-device-lib=libc)
 set(GINKGO_DPCPP_FLAGS ${GINKGO_DPCPP_FLAGS} PARENT_SCOPE)
 target_compile_options(ginkgo_dpcpp PRIVATE "${GINKGO_DPCPP_FLAGS}")
 target_compile_features(ginkgo_dpcpp PRIVATE cxx_std_17)
-target_link_libraries(ginkgo_dpcpp PUBLIC ginkgo_core_device)
+target_link_libraries(ginkgo_dpcpp PUBLIC ginkgo_device)
 
 ginkgo_default_includes(ginkgo_dpcpp)
-ginkgo_install_library(ginkgo_dpcpp dpcpp)
+ginkgo_install_library(ginkgo_dpcpp)
 
 if (GINKGO_CHECK_CIRCULAR_DEPS)
     ginkgo_check_headers(ginkgo_dpcpp)

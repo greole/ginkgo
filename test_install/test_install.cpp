@@ -129,7 +129,6 @@ int main(int, char **)
         auto test = gko::name_demangling::get_static_type(testVar);
     }
 
-
     // core/base/polymorphic_object.hpp
     {
         auto test = gko::layout_type::array;
@@ -256,6 +255,11 @@ int main(int, char **)
     {
         using Mtx = gko::matrix::SparsityCsr<>;
         auto test = Mtx::create(refExec, gko::dim<2>{2, 2});
+    }
+
+    // core/multigrid/amgx_pgm.hpp
+    {
+        auto test = gko::multigrid::AmgxPgm<>::build().on(refExec);
     }
 
     // core/preconditioner/ilu.hpp

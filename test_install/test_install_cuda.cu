@@ -131,7 +131,6 @@ int main(int, char **)
         gko::name_demangling::get_static_type(testVar);
     }
 
-
     // core/base/polymorphic_object.hpp
     {
         gko::PolymorphicObject *test;
@@ -260,6 +259,11 @@ int main(int, char **)
     {
         using Mtx = gko::matrix::SparsityCsr<>;
         Mtx::create(cudaExec, gko::dim<2>{2, 2});
+    }
+
+    // core/multigrid/amgx_pgm.hpp
+    {
+        gko::multigrid::AmgxPgm<>::build().on(cudaExec);
     }
 
     // core/preconditioner/ilu.hpp
