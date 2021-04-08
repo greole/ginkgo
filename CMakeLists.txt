@@ -11,7 +11,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
     cmake_policy(SET CMP0104 OLD)
 endif()
 
-project(Ginkgo LANGUAGES C CXX VERSION 1.3.0 DESCRIPTION "A numerical linear algebra library targeting many-core architectures")
+project(Ginkgo LANGUAGES C CXX VERSION 1.4.0 DESCRIPTION "A numerical linear algebra library targeting many-core architectures")
 set(Ginkgo_VERSION_TAG "develop")
 set(PROJECT_VERSION_TAG ${Ginkgo_VERSION_TAG})
 
@@ -39,6 +39,7 @@ option(GINKGO_EXPORT_BUILD_DIR
     OFF)
 option(GINKGO_WITH_CLANG_TIDY "Make Ginkgo call `clang-tidy` to find programming issues." OFF)
 option(GINKGO_WITH_IWYU "Make Ginkgo call `iwyu` (Include What You Use) to find include issues." OFF)
+option(GINKGO_WITH_CCACHE "Use ccache if available to speed up C++ and CUDA rebuilds by caching compilations." ON)
 option(GINKGO_CHECK_CIRCULAR_DEPS
     "Enable compile-time checks detecting circular dependencies between libraries and non-self-sufficient headers."
     OFF)
@@ -77,6 +78,17 @@ option(GINKGO_INSTALL_RPATH_ORIGIN "Add $ORIGIN (Linux) or @loader_path (MacOS) 
 option(GINKGO_INSTALL_RPATH_DEPENDENCIES "Add dependencies to the installation RPATH." OFF)
 
 set(GINKGO_CIRCULAR_DEPS_FLAGS "-Wl,--no-undefined")
+
+# Use ccache as compilation launcher
+if(GINKGO_WITH_CCACHE)
+    find_program(CCACHE_PROGRAM ccache)
+    if(CCACHE_PROGRAM)
+        set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+        if(GINKGO_BUILD_CUDA)
+            set(CMAKE_CUDA_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+        endif()
+    endif()
+endif()
 
 if(GINKGO_BENCHMARK_ENABLE_TUNING)
     # In this state, the tests and examples cannot be compiled without extra
@@ -169,6 +181,8 @@ if(MSVC OR WIN32 OR CYGWIN OR APPLE)
     set(GINKGO_HAVE_HWLOC 0)
 endif()
 
+# We keep using NVCC/HCC for consistency with previous releases even if AMD
+# updated everything to use NVIDIA/AMD in ROCM 4.1
 set(GINKGO_HIP_PLATFORM_NVCC 0)
 set(GINKGO_HIP_PLATFORM_HCC 0)
 
@@ -184,10 +198,12 @@ if(GINKGO_BUILD_HIP)
             "Set and export the environment variable HIP_PLATFORM.")
     endif()
     message(STATUS "HIP platform set to ${GINKGO_HIP_PLATFORM}")
+    set(HIP_PLATFORM_AMD_REGEX "hcc|amd")
+    set(HIP_PLATFORM_NVIDIA_REGEX "nvcc|nvidia")
 
-    if (GINKGO_HIP_PLATFORM STREQUAL "hcc")
+    if (GINKGO_HIP_PLATFORM MATCHES "${HIP_PLATFORM_AMD_REGEX}")
         set(GINKGO_HIP_PLATFORM_HCC 1)
-    elseif (GINKGO_HIP_PLATFORM STREQUAL "nvcc")
+    elseif (GINKGO_HIP_PLATFORM MATCHES "${HIP_PLATFORM_NVIDIA_REGEX}")
         set(GINKGO_HIP_PLATFORM_NVCC 1)
     endif()
 endif()
