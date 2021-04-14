@@ -38,9 +38,9 @@ int main()
     // Instantiate a CUDA executor
     auto gpu = gko::CudaExecutor::create(0, gko::OmpExecutor::create(), true);
     // Read data
-    auto A = gko::read<gko::matrix::Csr<>>(std::cin, gpu);
-    auto b = gko::read<gko::matrix::Dense<>>(std::cin, gpu);
-    auto x = gko::read<gko::matrix::Dense<>>(std::cin, gpu);
+    auto A = gko::read<gko::matrix::Csr<>>(std::ifstream("data/A.mtx"), gpu);
+    auto b = gko::read<gko::matrix::Dense<>>(std::ifstream("data/b.mtx"), gpu);
+    auto x = gko::read<gko::matrix::Dense<>>(std::ifstream("data/x.mtx"), gpu);
     // Create the solver
     auto solver =
         gko::solver::Cg<>::build()
