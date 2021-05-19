@@ -61,6 +61,7 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
             return std::abs((v1.value - v2.value) / v1.value) < tolerance;
         });
 }
+#define PASS_ON(...) __VA_ARGS__
 
 #define GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, T1, T2, ...) \
     _macro(T1, T2, ##__VA_ARGS__)
@@ -88,15 +89,19 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
     GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(                             \
         _macro, std::complex<double>, int64, ##__VA_ARGS__)
 
-#define GKO_CALL_AND_RETURN_IF_CASTABLE(T1, T2, func, matrix, ...)    \
+#define GKO_CALL_AND_RETURN_IF_CASTABLE_2(T1, T2, func, matrix, tolerance) \
+    if (dynamic_cast<const WritableToMatrixData<T1, T2> *>(matrix)) {      \
+        return func<T1, T2>(matrix, tolerance);                            \
+    }
+#define GKO_CALL_AND_RETURN_IF_CASTABLE_1(T1, T2, func, matrix)       \
     if (dynamic_cast<const WritableToMatrixData<T1, T2> *>(matrix)) { \
-        return func<T1, T2>(matrix, ##__VA_ARGS__);                   \
+        return func<T1, T2>(matrix);                                  \
     }
 
 bool is_symmetric(const LinOp *matrix, const float tolerance)
 {
     // clang-format off
-    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE, \
+    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE_2, \
                                            is_symmetric_impl, matrix, tolerance)
     // clang-format on
     return false;
@@ -120,7 +125,7 @@ bool has_non_zero_diagonal_impl(const LinOp *matrix)
 bool has_non_zero_diagonal(const LinOp *matrix)
 {
     // clang-format off
-    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE, \
+    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE_1, \
                                            has_non_zero_diagonal_impl, matrix)
     // clang-format on
     return false;
