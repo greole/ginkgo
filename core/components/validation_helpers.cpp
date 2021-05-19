@@ -64,7 +64,7 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
 #define PASS_ON(...) __VA_ARGS__
 
 #define GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, T1, T2, ...) \
-    _macro(T1, T2, ##__VA_ARGS__)
+    PASS_ON(PASS_ON(_macro)(T1, T2, ##__VA_ARGS__))
 
 
 #define GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ...) \
