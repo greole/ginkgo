@@ -97,7 +97,7 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
 bool is_symmetric(const LinOp *matrix, const float tolerance)
 {
     // clang-format off
-    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE,
+    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE, \
                                            is_symmetric_impl, matrix, tolerance)
     // clang-format on
     return false;
