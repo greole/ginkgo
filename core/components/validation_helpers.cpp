@@ -74,24 +74,19 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
 #define GKO_APPLY_MACRO(_macro, ...) PASS_ON(PASS_ON(_macro)(__VA_ARGS__))
 
 
-#define GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ...)      \
-    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, float, int32, ##__VA_ARGS__));  \
-    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, double, int32, ##__VA_ARGS__)); \
-    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, float, int64, ##__VA_ARGS__));  \
-    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, double, int64, ##__VA_ARGS__))
+#define GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ...) \
+    GKO_APPLY_MACRO(_macro, float, int32, ##__VA_ARGS__);               \
+    GKO_APPLY_MACRO(_macro, double, int32, ##__VA_ARGS__);              \
+    GKO_APPLY_MACRO(_macro, float, int64, ##__VA_ARGS__);               \
+    GKO_APPLY_MACRO(_macro, double, int64, ##__VA_ARGS__)
 
 
-#define GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(_macro, ...)               \
-    PASS_ON(PASS_ON(GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE)(  \
-        _macro, ##__VA_ARGS__));                                          \
-    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, std::complex<float>, int32,  \
-                                     ##__VA_ARGS__));                     \
-    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, std::complex<float>, int64,  \
-                                     ##__VA_ARGS__));                     \
-    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, std::complex<double>, int32, \
-                                     ##__VA_ARGS__));                     \
-    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, std::complex<double>, int64, \
-                                     ##__VA_ARGS__))
+#define GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(_macro, ...)                    \
+    GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ##__VA_ARGS__); \
+    GKO_APPLY_MACRO(_macro, std::complex<float>, int32, ##__VA_ARGS__);        \
+    GKO_APPLY_MACRO(_macro, std::complex<float>, int64, ##__VA_ARGS__);        \
+    GKO_APPLY_MACRO(_macro, std::complex<double>, int32, ##__VA_ARGS__);       \
+    GKO_APPLY_MACRO(_macro, std::complex<double>, int64, ##__VA_ARGS__)
 
 #define GKO_CALL_AND_RETURN_IF_CASTABLE_2(T1, T2, func, matrix, tolerance) \
     if (dynamic_cast<const WritableToMatrixData<T1, T2> *>(matrix)) {      \
