@@ -62,32 +62,50 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
         });
 }
 
-#define GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, T1, T2, prefix, \
-                                                      ...)                    \
-    prefix _macro(T1, T2, ##__VA_ARGS__)
+
+/**
+ * This helper macro handles consistent expansion of __VA_ARGS__ for MSVC and
+ * other compilers.
+ *
+ * Consider the following example given on https://bit.ly/3wp8PqT
+ *
+ * #define MACRO_WITH_3_PARAMS(p1, p2, p3) P1 = p1 | P2 = p2 | P3 = p3
+ * #define MACRO_VA_ARGS(...) MACRO_WITH_3_PARAMS( __VA_ARGS__)
+ * MACRO_VA_ARGS(foo, bar, baz)
+ *
+ * On MSVC this is expanded into
+ * P1 = foo, bar, baz | P2 =  | P3 =
+ *
+ * In order to expand the macro consitently PASS_ON can be applied
+ * #define MACRO_VA_ARGS(...) PASS_ON(PASS_ON(MACRO_WITH_3_PARAMS)(
+ * __VA_ARGS__))
+ */
+#define PASS_ON(...) __VA_ARGS__
+
+/**
+ * Calls a macro with variable number of arguments.
+ *
+ * The macro uses PASS_ON to expand __VA_ARGS__. This is needed to have
+ * consistent behaviour among MSVC and other compilers.
+ *
+ * @param _macro  The macro which is to be expanded.
+ */
+#define GKO_APPLY_MACRO(_macro, ...) PASS_ON(PASS_ON(_macro)(__VA_ARGS__))
 
 
-#define GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ...)    \
-    GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, float, int32, ,  \
-                                                  ##__VA_ARGS__);          \
-    GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, double, int32, , \
-                                                  ##__VA_ARGS__);          \
-    GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, float, int64, ,  \
-                                                  ##__VA_ARGS__);          \
-    GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, double, int64, , \
-                                                  ##__VA_ARGS__)
+#define GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ...) \
+    GKO_APPLY_MACRO(_macro, float, int32, ##__VA_ARGS__);               \
+    GKO_APPLY_MACRO(_macro, double, int32, ##__VA_ARGS__);              \
+    GKO_APPLY_MACRO(_macro, float, int64, ##__VA_ARGS__);               \
+    GKO_APPLY_MACRO(_macro, double, int64, ##__VA_ARGS__)
 
 
 #define GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(_macro, ...)                    \
     GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ##__VA_ARGS__); \
-    GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, std::complex<float>, \
-                                                  int32, , ##__VA_ARGS__);     \
-    GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, std::complex<float>, \
-                                                  int64, , ##__VA_ARGS__);     \
-    GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(                             \
-        _macro, std::complex<double>, int32, , ##__VA_ARGS__);                 \
-    GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(                             \
-        _macro, std::complex<double>, int64, , ##__VA_ARGS__)
+    GKO_APPLY_MACRO(_macro, std::complex<float>, int32, ##__VA_ARGS__);        \
+    GKO_APPLY_MACRO(_macro, std::complex<float>, int64, ##__VA_ARGS__);        \
+    GKO_APPLY_MACRO(_macro, std::complex<double>, int32, ##__VA_ARGS__);       \
+    GKO_APPLY_MACRO(_macro, std::complex<double>, int64, ##__VA_ARGS__)
 
 #define GKO_CALL_AND_RETURN_IF_CASTABLE(T1, T2, func, matrix, ...)    \
     if (dynamic_cast<const WritableToMatrixData<T1, T2> *>(matrix)) { \
