@@ -63,32 +63,35 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
 }
 #define PASS_ON(...) __VA_ARGS__
 
-#define GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS(_macro, T1, T2, ...) \
-    PASS_ON(PASS_ON(_macro)(T1, T2, ##__VA_ARGS__))
+/**
+ * Calls a macro with variable number of arguments.
+ *
+ * The macro uses PASS_ON to expand __VA_ARGS__. This is needed to have
+ * consistent behaviour among MSVC and other compilers.
+ *
+ * @param _macro  The macro which is to be expanded.
+ */
+#define GKO_APPLY_MACRO(_macro, ...) PASS_ON(PASS_ON(_macro)(__VA_ARGS__))
 
 
-#define GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ...) \
-    PASS_ON(PASS_ON(GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS)(     \
-        _macro, float, int32, ##__VA_ARGS__));                          \
-    PASS_ON(PASS_ON(GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS)(     \
-        _macro, double, int32, ##__VA_ARGS__));                         \
-    PASS_ON(PASS_ON(GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS)(     \
-        _macro, float, int64, ##__VA_ARGS__));                          \
-    PASS_ON(PASS_ON(GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS)(     \
-        _macro, double, int64, ##__VA_ARGS__))
+#define GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE(_macro, ...)      \
+    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, float, int32, ##__VA_ARGS__));  \
+    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, double, int32, ##__VA_ARGS__)); \
+    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, float, int64, ##__VA_ARGS__));  \
+    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, double, int64, ##__VA_ARGS__))
 
 
-#define GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(_macro, ...)              \
-    PASS_ON(PASS_ON(GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE)( \
-        _macro, ##__VA_ARGS__));                                         \
-    PASS_ON(PASS_ON(GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS)(      \
-        _macro, std::complex<float>, int32, ##__VA_ARGS__));             \
-    PASS_ON(PASS_ON(GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS)(      \
-        _macro, std::complex<float>, int64, ##__VA_ARGS__));             \
-    PASS_ON(PASS_ON(GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS)(      \
-        _macro, std::complex<double>, int32, ##__VA_ARGS__));            \
-    PASS_ON(PASS_ON(GKO_CALL_PREFIXED_DOUBLE_TYPE_MACRO_WITH_ARGS)(      \
-        _macro, std::complex<double>, int64, ##__VA_ARGS__))
+#define GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(_macro, ...)               \
+    PASS_ON(PASS_ON(GKO_CALL_FOR_EACH_NON_COMPLEX_VALUE_AND_INDEX_TYPE)(  \
+        _macro, ##__VA_ARGS__));                                          \
+    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, std::complex<float>, int32,  \
+                                     ##__VA_ARGS__));                     \
+    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, std::complex<float>, int64,  \
+                                     ##__VA_ARGS__));                     \
+    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, std::complex<double>, int32, \
+                                     ##__VA_ARGS__));                     \
+    PASS_ON(PASS_ON(GKO_APPLY_MACRO)(_macro, std::complex<double>, int64, \
+                                     ##__VA_ARGS__))
 
 #define GKO_CALL_AND_RETURN_IF_CASTABLE_2(T1, T2, func, matrix, tolerance) \
     if (dynamic_cast<const WritableToMatrixData<T1, T2> *>(matrix)) {      \
@@ -101,10 +104,8 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
 
 bool is_symmetric(const LinOp *matrix, const float tolerance)
 {
-    // clang-format off
-    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE_2, \
+    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE_2,
                                            is_symmetric_impl, matrix, tolerance)
-    // clang-format on
     return false;
 }
 
@@ -125,10 +126,8 @@ bool has_non_zero_diagonal_impl(const LinOp *matrix)
 
 bool has_non_zero_diagonal(const LinOp *matrix)
 {
-    // clang-format off
-    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE_1, \
+    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE_1,
                                            has_non_zero_diagonal_impl, matrix)
-    // clang-format on
     return false;
 }
 #undef GKO_CALL_AND_RETURN_IF_CASTABLE
