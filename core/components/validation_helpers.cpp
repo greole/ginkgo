@@ -61,6 +61,25 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
             return std::abs((v1.value - v2.value) / v1.value) < tolerance;
         });
 }
+
+
+/**
+ * This helper macro handles consistent expansion of __VA_ARGS__ for MSVC and
+ * other compilers.
+ *
+ * Consider the following example given on https://bit.ly/3wp8PqT
+ *
+ * #define MACRO_WITH_3_PARAMS(p1, p2, p3) P1 = p1 | P2 = p2 | P3 = p3
+ * #define MACRO_VA_ARGS(...) MACRO_WITH_3_PARAMS( __VA_ARGS__)
+ * MACRO_VA_ARGS(foo, bar, baz)
+ *
+ * On MSVC this is expanded into
+ * P1 = foo, bar, baz | P2 =  | P3 =
+ *
+ * In order to expand the macro consitently PASS_ON can be applied
+ * #define MACRO_VA_ARGS(...) PASS_ON(PASS_ON(MACRO_WITH_3_PARAMS)(
+ * __VA_ARGS__))
+ */
 #define PASS_ON(...) __VA_ARGS__
 
 /**
@@ -88,18 +107,14 @@ bool is_symmetric_impl(const LinOp *matrix, const float tolerance)
     GKO_APPLY_MACRO(_macro, std::complex<double>, int32, ##__VA_ARGS__);       \
     GKO_APPLY_MACRO(_macro, std::complex<double>, int64, ##__VA_ARGS__)
 
-#define GKO_CALL_AND_RETURN_IF_CASTABLE_2(T1, T2, func, matrix, tolerance) \
-    if (dynamic_cast<const WritableToMatrixData<T1, T2> *>(matrix)) {      \
-        return func<T1, T2>(matrix, tolerance);                            \
-    }
-#define GKO_CALL_AND_RETURN_IF_CASTABLE_1(T1, T2, func, matrix)       \
+#define GKO_CALL_AND_RETURN_IF_CASTABLE(T1, T2, func, matrix, ...)    \
     if (dynamic_cast<const WritableToMatrixData<T1, T2> *>(matrix)) { \
-        return func<T1, T2>(matrix);                                  \
+        return func<T1, T2>(matrix, ##__VA_ARGS__);                   \
     }
 
 bool is_symmetric(const LinOp *matrix, const float tolerance)
 {
-    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE_2,
+    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE,
                                            is_symmetric_impl, matrix, tolerance)
     return false;
 }
@@ -121,7 +136,7 @@ bool has_non_zero_diagonal_impl(const LinOp *matrix)
 
 bool has_non_zero_diagonal(const LinOp *matrix)
 {
-    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE_1,
+    GKO_CALL_FOR_EACH_VALUE_AND_INDEX_TYPE(GKO_CALL_AND_RETURN_IF_CASTABLE,
                                            has_non_zero_diagonal_impl, matrix)
     return false;
 }
