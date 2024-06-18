@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="unstructuredMesh" href="unstructuredMesh.html" /><link rel="prev" title="Executor" href="executor.html" />
-        <link rel="canonical" href="https://exasim-project.com/NeoFOAM/basics/containers.html" />
+        <link rel="canonical" href="https://greole.github.io/ginkgo/basics/containers.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
         <title>containers - NeoFOAM documentation</title>
@@ -284,12 +284,12 @@
 <p>The Field classes are the central elements for implementing a platform portable CFD framework. Fields are able to perform basic algebraic operations such as addition or subtraction of two fields, or scalar operations like the multiplication of a field with a scalar. The Field classes store the data in a platform-independent way and the executor, which is used to dispatch the operations to the correct device. The Field classes are implemented in the <code class="docutils literal notranslate"><span class="pre">Field.hpp</span></code> header file and mainly store a pointer to the data, the size of the data, and the executor.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>doxygenclass: Cannot find class “NeoFOAM::Field” in doxygen xml output for project “NeoFOAM” from directory: _build/xml/</p>
+<p>doxygenclass: breathe_default_project value ‘Ginkgo’ does not seem to be a valid key for the breathe_projects dictionary</p>
 </div>
 <p>To run a function on the GPU, the data and function need to be trivially copyable. This is not the case with the existing OpenFOAM Field class , and it can be viewed as a wrapper around the data. To solve this issue, the  NeoFOAM field class has a public member function called <code class="docutils literal notranslate"><span class="pre">field()</span></code> that returns a span that can be used to access the data on the CPU and GPU.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>doxygenclass: Cannot find class “NeoFOAM::Field” in doxygen xml output for project “NeoFOAM” from directory: _build/xml/</p>
+<p>doxygenclass: breathe_default_project value ‘Ginkgo’ does not seem to be a valid key for the breathe_projects dictionary</p>
 </div>
 <p>The following example shows how to use the field function to access the data of a field and set all the values to 1.0. However, the for loop is only executed on the single CPU core and not on the GPU.</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">NeoFOAM</span><span class="o">::</span><span class="n">CPUExecutor</span><span class="w"> </span><span class="n">cpuExec</span><span class="w"> </span><span class="p">{};</span>
@@ -385,7 +385,7 @@ implement the boundaryFields see other commit</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>doxygenclass: Cannot find class “NeoFOAM::BoundaryFields” in doxygen xml output for project “NeoFOAM” from directory: _build/xml/</p>
+<p>doxygenclass: breathe_default_project value ‘Ginkgo’ does not seem to be a valid key for the breathe_projects dictionary</p>
 </div>
 </section>
 <section id="domainfield">
@@ -398,7 +398,7 @@ implement the DomainField see other commit</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>doxygenclass: Cannot find class “NeoFOAM::DomainField” in doxygen xml output for project “NeoFOAM” from directory: _build/xml/</p>
+<p>doxygenclass: breathe_default_project value ‘Ginkgo’ does not seem to be a valid key for the breathe_projects dictionary</p>
 </div>
 </section>
 </section>
