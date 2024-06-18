@@ -1,17 +1,17 @@
 <!doctype html>
-<html class="no-js" lang="en" data-content_root="../">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Building Ginkgo in Windows" href="build-install.windows.html" /><link rel="prev" title="Third Party Libraries and Packages" href="build-install.tpl.html" />
-        <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/build-install.hip.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+        <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/distributed/matrices.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>Building Ginkgo with HIP support - Ginkgo 1.9.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=387cc868" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+        <title>&lt;no title&gt; - Ginkgo 1.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -181,7 +181,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Ginkgo 1.9.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Ginkgo 1.9.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -193,7 +193,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -202,33 +202,39 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
   <span class="sidebar-brand-text">Ginkgo 1.9.0 documentation</span>
   
-</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
-<ul class="current">
-<li class="toctree-l1 has-children"><a class="reference internal" href="getting-started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../getting-started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="build-install.html">Configuring, Building, and Installing</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="build-install.system-requirements.html">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.cmake-options.html">CMake Option List</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.tpl.html">Third Party Libraries and Packages</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Building Ginkgo with HIP support</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.windows.html">Building Ginkgo in Windows</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../build-install.html">Configuring, Building, and Installing</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/system-requirements.html">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/cmake-options.html">CMake Option List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/tpl.html">Third Party Libraries and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/hip.html">Building Ginkgo with HIP support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arrays.html">Arrays</a></li>
-<li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
-<li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../matrices.html">Matrices</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../linear-operators.html">Linear Operators</a></li>
 </ul>
 
 </div>
@@ -249,7 +255,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/user-guide/build-install.hip.md.txt" title="View this page">
+  <a class="muted-link" href="../../_sources/user-guide/distributed/matrices.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -263,84 +269,20 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="building-ginkgo-with-hip-support">
-<h1>Building Ginkgo with HIP support<a class="headerlink" href="#building-ginkgo-with-hip-support" title="Link to this heading">¶</a></h1>
-<p>Ginkgo provides a <a class="reference external" href="https://github.com/ROCm-Developer-Tools/HIP">HIP</a> backend.
-This allows to compile optimized versions of the kernels for either AMD or
-NVIDIA GPUs. The CMake configuration step will try to auto-detect the presence
-of HIP either at <code class="docutils literal notranslate"><span class="pre">/opt/rocm/hip</span></code> or at the path specified by <code class="docutils literal notranslate"><span class="pre">HIP_PATH</span></code> as a
-CMake parameter (<code class="docutils literal notranslate"><span class="pre">-DHIP_PATH=</span></code>) or environment variable (<code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">HIP_PATH=</span></code>),
-unless <code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_HIP=ON/OFF</span></code> is set explicitly.</p>
-<section id="changing-the-paths-to-search-for-hip-and-other-packages">
-<h2>Changing the paths to search for HIP and other packages<a class="headerlink" href="#changing-the-paths-to-search-for-hip-and-other-packages" title="Link to this heading">¶</a></h2>
-<p>All HIP installation paths can be configured through the use of environment
-variables or CMake variables. This way of configuring the paths is currently
-imposed by the <code class="docutils literal notranslate"><span class="pre">HIP</span></code> tool suite. The variables are the following:</p>
-<ul class="simple">
-<li><p>CMake <code class="docutils literal notranslate"><span class="pre">-DROCM_PATH=</span></code> or environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">ROCM_PATH=</span></code>: sets the <code class="docutils literal notranslate"><span class="pre">ROCM</span></code>
-installation path. The default value is <code class="docutils literal notranslate"><span class="pre">/opt/rocm/</span></code>.</p></li>
-<li><p>CMake <code class="docutils literal notranslate"><span class="pre">-DHIP_CLANG_PATH</span></code> or environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">HIP_CLANG_PATH=</span></code>: sets the
-<code class="docutils literal notranslate"><span class="pre">HIP</span></code> compatible <code class="docutils literal notranslate"><span class="pre">clang</span></code> binary path. The default value is
-<code class="docutils literal notranslate"><span class="pre">${ROCM_PATH}/llvm/bin</span></code>.</p></li>
-<li><p>CMake <code class="docutils literal notranslate"><span class="pre">-DHIP_PATH=</span></code> or environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">HIP_PATH=</span></code>: sets the <code class="docutils literal notranslate"><span class="pre">HIP</span></code>
-installation path. The default value is <code class="docutils literal notranslate"><span class="pre">${ROCM_PATH}/hip</span></code>.</p></li>
-<li><p>CMake <code class="docutils literal notranslate"><span class="pre">-DHIPBLAS_PATH=</span></code> or environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">HIPBLAS_PATH=</span></code>: sets the
-<code class="docutils literal notranslate"><span class="pre">hipBLAS</span></code> installation path. The default value is <code class="docutils literal notranslate"><span class="pre">${ROCM_PATH}/hipblas</span></code>.</p></li>
-<li><p>CMake <code class="docutils literal notranslate"><span class="pre">-DHIPSPARSE_PATH=</span></code> or environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">HIPSPARSE_PATH=</span></code>: sets the
-<code class="docutils literal notranslate"><span class="pre">hipSPARSE</span></code> installation path. The default value is <code class="docutils literal notranslate"><span class="pre">${ROCM_PATH}/hipsparse</span></code>.</p></li>
-<li><p>CMake <code class="docutils literal notranslate"><span class="pre">-DHIPFFT_PATH=</span></code> or environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">HIPFFT_PATH=</span></code>: sets the
-<code class="docutils literal notranslate"><span class="pre">hipFFT</span></code> installation path. The default value is <code class="docutils literal notranslate"><span class="pre">${ROCM_PATH}/hipfft</span></code>.</p></li>
-<li><p>CMake <code class="docutils literal notranslate"><span class="pre">-DROCRAND_PATH=</span></code> or environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">ROCRAND_PATH=</span></code>: sets the
-<code class="docutils literal notranslate"><span class="pre">rocRAND</span></code> installation path. The default value is <code class="docutils literal notranslate"><span class="pre">${ROCM_PATH}/rocrand</span></code>.</p></li>
-<li><p>CMake <code class="docutils literal notranslate"><span class="pre">-DHIPRAND_PATH=</span></code> or environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">HIPRAND_PATH=</span></code>: sets the
-<code class="docutils literal notranslate"><span class="pre">hipRAND</span></code> installation path. The default value is <code class="docutils literal notranslate"><span class="pre">${ROCM_PATH}/hiprand</span></code>.</p></li>
-<li><p>environment <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">CUDA_PATH=</span></code>: where <code class="docutils literal notranslate"><span class="pre">hipcc</span></code> can find <code class="docutils literal notranslate"><span class="pre">CUDA</span></code> if it is not in
-the default <code class="docutils literal notranslate"><span class="pre">/usr/local/cuda</span></code> path.</p></li>
-</ul>
-</section>
-<section id="hip-platform-detection-of-amd-and-nvidia">
-<h2>HIP platform detection of AMD and NVIDIA<a class="headerlink" href="#hip-platform-detection-of-amd-and-nvidia" title="Link to this heading">¶</a></h2>
-<p>Ginkgo relies on CMake to decide which compiler to use for HIP.
-To choose <code class="docutils literal notranslate"><span class="pre">nvcc</span></code> instead of the default ROCm <code class="docutils literal notranslate"><span class="pre">clang++</span></code>, set the corresponding
-environment variable:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">HIPCXX</span><span class="o">=</span>nvcc
-</pre></div>
-</div>
-<p>Note that this option is currently not being tested in our CI pipelines.</p>
-</section>
-</section>
-
+          
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="build-install.windows.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Building Ginkgo in Windows</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="build-install.tpl.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Third Party Libraries and Packages</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -359,35 +301,15 @@ environment variable:</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Building Ginkgo with HIP support</a><ul>
-<li><a class="reference internal" href="#changing-the-paths-to-search-for-hip-and-other-packages">Changing the paths to search for HIP and other packages</a></li>
-<li><a class="reference internal" href="#hip-platform-detection-of-amd-and-nvidia">HIP platform detection of AMD and NVIDIA</a></li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=c4cb232b"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/furo.js?v=4e2eecee"></script>
+</div><script src="../../_static/documentation_options.js?v=c4cb232b"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
     </body>
 </html>

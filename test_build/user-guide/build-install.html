@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="System Requirements" href="build-install.system-requirements.html" /><link rel="prev" title="Getting Started" href="getting-started.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="System Requirements" href="build-install/system-requirements.html" /><link rel="prev" title="Getting Started" href="getting-started.html" />
         <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/build-install.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
@@ -219,15 +219,21 @@
 </ul>
 </li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Configuring, Building, and Installing</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="build-install.system-requirements.html">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.cmake-options.html">CMake Option List</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.tpl.html">Third Party Libraries and Packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.hip.html">Building Ginkgo with HIP support</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.windows.html">Building Ginkgo in Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/system-requirements.html">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/cmake-options.html">CMake Option List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/tpl.html">Third Party Libraries and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/hip.html">Building Ginkgo with HIP support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arrays.html">Arrays</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
 </ul>
 
@@ -280,7 +286,7 @@ cmake<span class="w"> </span>--install<span class="w"> </span>&lt;path-to-build-
 </div>
 <p>Ginkgo requires both <strong>CMake 3.16+</strong> and a <strong>C++17 compiler</strong> to be available.
 Each backend might have additional requirements.
-A full list of the requirements can be found in <a class="reference internal" href="build-install.system-requirements.html"><span class="std std-doc">System Requirements</span></a>.</p>
+A full list of the requirements can be found in <a class="reference internal" href="build-install/system-requirements.html"><span class="std std-doc">System Requirements</span></a>.</p>
 <section id="selecting-backends">
 <h2>Selecting Backends<a class="headerlink" href="#selecting-backends" title="Link to this heading">¶</a></h2>
 <p>The default configuration will try to detect and enable all available backends.
@@ -315,7 +321,7 @@ CMake will return an error, if the requirements for enabling a backend are not s
 <section id="configuration-options">
 <h2>Configuration Options<a class="headerlink" href="#configuration-options" title="Link to this heading">¶</a></h2>
 <p>Ginkgo has more options than the backend selection to configure its build.
-The full list of options is available in <a class="reference internal" href="build-install.cmake-options.html"><span class="std std-doc">CMake Option List</span></a></p>
+The full list of options is available in <a class="reference internal" href="build-install/cmake-options.html"><span class="std std-doc">CMake Option List</span></a></p>
 </section>
 <section id="linking-ginkgo">
 <h2>Linking Ginkgo<a class="headerlink" href="#linking-ginkgo" title="Link to this heading">¶</a></h2>
@@ -341,9 +347,9 @@ To explicitly set this directory either provide a prefix path to the install ste
 <h2>Advanced Topics<a class="headerlink" href="#advanced-topics" title="Link to this heading">¶</a></h2>
 <p>Details on more advanced topics can be found here:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="build-install.tpl.html"><span class="std std-doc">Third Party Libraries and Packages</span></a></p></li>
-<li><p><a class="reference internal" href="build-install.hip.html"><span class="std std-doc">Building Ginkgo with HIP support</span></a></p></li>
-<li><p><a class="reference internal" href="build-install.windows.html"><span class="std std-doc">Building Ginkgo in Windows</span></a></p></li>
+<li><p><a class="reference internal" href="build-install/tpl.html"><span class="std std-doc">Third Party Libraries and Packages</span></a></p></li>
+<li><p><a class="reference internal" href="build-install/hip.html"><span class="std std-doc">Building Ginkgo with HIP support</span></a></p></li>
+<li><p><a class="reference internal" href="build-install/windows.html"><span class="std std-doc">Building Ginkgo in Windows</span></a></p></li>
 </ul>
 <div class="toctree-wrapper compound">
 </div>
@@ -355,7 +361,7 @@ To explicitly set this directory either provide a prefix path to the install ste
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="build-install.system-requirements.html">
+          <a class="next-page" href="build-install/system-requirements.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>

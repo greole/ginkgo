@@ -1,17 +1,17 @@
 <!doctype html>
-<html class="no-js" lang="en" data-content_root="../">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Arrays" href="arrays.html" /><link rel="prev" title="Building Ginkgo with HIP support" href="build-install.hip.html" />
-        <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/build-install.windows.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+        <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/distributed/solvers.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>Building Ginkgo in Windows - Ginkgo 1.9.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=387cc868" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+        <title>Solvers - Ginkgo 1.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -181,7 +181,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Ginkgo 1.9.0 documentation</div></a>
+      <a href="../../index.html"><div class="brand">Ginkgo 1.9.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -202,33 +202,39 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
   <span class="sidebar-brand-text">Ginkgo 1.9.0 documentation</span>
   
-</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
-<ul class="current">
-<li class="toctree-l1 has-children"><a class="reference internal" href="getting-started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../getting-started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="build-install.html">Configuring, Building, and Installing</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="build-install.system-requirements.html">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.cmake-options.html">CMake Option List</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.tpl.html">Third Party Libraries and Packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.hip.html">Building Ginkgo with HIP support</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Building Ginkgo in Windows</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../build-install.html">Configuring, Building, and Installing</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/system-requirements.html">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/cmake-options.html">CMake Option List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/tpl.html">Third Party Libraries and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/hip.html">Building Ginkgo with HIP support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arrays.html">Arrays</a></li>
-<li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
-<li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../matrices.html">Matrices</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../linear-operators.html">Linear Operators</a></li>
 </ul>
 
 </div>
@@ -249,7 +255,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/user-guide/build-install.windows.md.txt" title="View this page">
+  <a class="muted-link" href="../../_sources/user-guide/distributed/solvers.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -269,19 +275,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="building-ginkgo-in-windows">
-<h1>Building Ginkgo in Windows<a class="headerlink" href="#building-ginkgo-in-windows" title="Link to this heading">¶</a></h1>
-<p>Depending on the configuration settings, some manual work might be required:</p>
-<ul class="simple">
-<li><p>Build Ginkgo with Debug mode:
-Some Debug build specific issues can appear depending on the machine and environment:
-When you encounter the error message <code class="docutils literal notranslate"><span class="pre">ld:</span> <span class="pre">error:</span> <span class="pre">export</span> <span class="pre">ordinal</span> <span class="pre">too</span> <span class="pre">large</span></code>, add the compilation flag <code class="docutils literal notranslate"><span class="pre">-O1</span></code>
-by adding <code class="docutils literal notranslate"><span class="pre">-DCMAKE_CXX_FLAGS=-O1</span></code> to the CMake invocation.</p></li>
-<li><p>Build Ginkgo in <em>MinGW</em>:<br />
-If encountering the issue <code class="docutils literal notranslate"><span class="pre">cc1plus.exe:</span> <span class="pre">out</span> <span class="pre">of</span> <span class="pre">memory</span> <span class="pre">allocating</span> <span class="pre">65536</span> <span class="pre">bytes</span></code>, please follow the workaround in
-<a class="reference external" href="https://www.intel.com/content/www/us/en/programmable/support/support-resources/knowledge-base/embedded/2016/cc1plus-exe--out-of-memory-allocating-65536-bytes.html">reference</a>,
-or trying to compile ginkgo again might work.</p></li>
-</ul>
+          <section class="tex2jax_ignore mathjax_ignore" id="solvers">
+<h1>Solvers<a class="headerlink" href="#solvers" title="Link to this heading">¶</a></h1>
 </section>
 
         </article>
@@ -289,26 +284,8 @@ or trying to compile ginkgo again might work.</p></li>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="arrays.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Arrays</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="build-install.hip.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Building Ginkgo with HIP support</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -333,9 +310,9 @@ or trying to compile ginkgo again might work.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=c4cb232b"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/furo.js?v=4e2eecee"></script>
+</div><script src="../../_static/documentation_options.js?v=c4cb232b"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
     </body>
 </html>

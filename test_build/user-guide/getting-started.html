@@ -219,15 +219,21 @@
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="build-install.html">Configuring, Building, and Installing</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="build-install.system-requirements.html">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.cmake-options.html">CMake Option List</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.tpl.html">Third Party Libraries and Packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.hip.html">Building Ginkgo with HIP support</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.windows.html">Building Ginkgo in Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/system-requirements.html">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/cmake-options.html">CMake Option List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/tpl.html">Third Party Libraries and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/hip.html">Building Ginkgo with HIP support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arrays.html">Arrays</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
 </ul>
 
@@ -295,7 +301,7 @@ The following backends are provided in Ginkgo:</p>
 </dd>
 </dl>
 <p>Multiple backends can be used at the same time.
-Which backends can be used only depends on the system, see <a class="reference internal" href="build-install.system-requirements.html"><span class="std std-doc">System Requirements</span></a> for more details.</p>
+Which backends can be used only depends on the system, see <a class="reference internal" href="#build-install.system-requirements.md"><code class="xref myst docutils literal notranslate"><span class="pre">build-install.system-requirements.md</span></code></a> for more details.</p>
 <p>The particular backend Ginkgo code runs on is chosen at runtime through an implementation of the <code class="docutils literal notranslate"><span class="pre">Executor</span></code> interface.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>

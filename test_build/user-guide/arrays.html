@@ -3,11 +3,11 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Matrices" href="matrices.html" /><link rel="prev" title="Building Ginkgo in Windows" href="build-install.windows.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Ownership" href="arrays/ownership.html" /><link rel="prev" title="Matrices" href="matrices.html" />
         <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/arrays.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>Arrays - Ginkgo 1.9.0 documentation</title>
+        <title>gko::array - Ginkgo 1.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
@@ -219,15 +219,21 @@
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="build-install.html">Configuring, Building, and Installing</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="build-install.system-requirements.html">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.cmake-options.html">CMake Option List</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.tpl.html">Third Party Libraries and Packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.hip.html">Building Ginkgo with HIP support</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.windows.html">Building Ginkgo in Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/system-requirements.html">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/cmake-options.html">CMake Option List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/tpl.html">Third Party Libraries and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/hip.html">Building Ginkgo with HIP support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Arrays</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Arrays</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
 </ul>
 
@@ -269,8 +275,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="arrays">
-<h1>Arrays<a class="headerlink" href="#arrays" title="Link to this heading">¶</a></h1>
+          <section class="tex2jax_ignore mathjax_ignore" id="gko-array">
+<h1><code class="docutils literal notranslate"><span class="pre">gko::array</span></code><a class="headerlink" href="#gko-array" title="Link to this heading">¶</a></h1>
 <p>The basic container for contiguous storage is the <code class="docutils literal notranslate"><span class="pre">array&lt;T&gt;</span></code> class.
 It is templated by the storage type.
 This type should be built-in type, or a struct of built-in types,
@@ -284,8 +290,8 @@ Handling constant data is done through const-qualifying the whole array.</p>
 The restrictions will be noted below.
 Wrongful usage will only be caught at link-time, where the error might be similar to: <code class="docutils literal notranslate"><span class="pre">undefined</span> <span class="pre">reference</span> <span class="pre">to</span> <span class="pre">gko::array&lt;T&gt;::fill(T)</span></code>.</p>
 </div>
-<section id="construction">
-<h2>Construction<a class="headerlink" href="#construction" title="Link to this heading">¶</a></h2>
+<section id="creating">
+<h2>Creating<a class="headerlink" href="#creating" title="Link to this heading">¶</a></h2>
 <p>An array is constructed from an <code class="docutils literal notranslate"><span class="pre">Executor</span></code> and the number of stored objects:</p>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">Executor</span><span class="o">&gt;</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="n">gko</span><span class="o">::</span><span class="n">size_type</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
@@ -317,6 +323,8 @@ The data from the container is then copied into the array.</p>
 <p>The first array <code class="docutils literal notranslate"><span class="pre">d</span></code> stores zero elements, and it is not associated with any executor.
 The second array <code class="docutils literal notranslate"><span class="pre">e</span></code> also stores zero elements, but it is associated with the executor <code class="docutils literal notranslate"><span class="pre">exec</span></code>.
 The difference between both is mostly relevant for <a class="reference internal" href="#copy-move">copy and move operations</a>.</p>
+<p>It is also possible to create an array that doesn’t allocate data, and instead takes existing data as input.
+More details are in <a class="reference internal" href="arrays/ownership.html"><span class="std std-doc">Ownership</span></a>.</p>
 </section>
 <section id="using">
 <h2>Using<a class="headerlink" href="#using" title="Link to this heading">¶</a></h2>
@@ -383,7 +391,7 @@ If the <code class="docutils literal notranslate"><span class="pre">size</span><
 <div class="warning admonition">
 <p class="admonition-title">Exceptions</p>
 <p>This throws an exception if the array is not associated with an executor, e.g. if it was default constructed.
-It will also throw if the array is non-owning, see <a class="reference internal" href="#ownership"><span class="std std-ref">Ownership</span></a>.</p>
+It will also throw if the array is non-owning, see <a class="reference internal" href="arrays/ownership.html#ownership"><span class="std std-ref">Ownership</span></a>.</p>
 </div>
 <p>To set the number of elements to zero, the function <code class="docutils literal notranslate"><span class="pre">clear</span></code> can be used.
 Afterward, the accessors <code class="docutils literal notranslate"><span class="pre">get_data</span></code> and <code class="docutils literal notranslate"><span class="pre">get_const_data</span></code> will return <code class="docutils literal notranslate"><span class="pre">nullptr</span></code>.</p>
@@ -399,46 +407,18 @@ If the new executor is different from the current executor, the data will be cop
 </div>
 </section>
 </section>
-<section id="ownership">
-<span id="id1"></span><h2>Ownership<a class="headerlink" href="#ownership" title="Link to this heading">¶</a></h2>
-<p>The class supports two modes of ownership over the stored data.
-Ownership of the data is defined here as being responsible for freeing the data when it’s not used anymore.
-Usually, the array owns it’s data, meaning the array will free the data, once the array itself is freed.
-But it is also possible to create arrays, which do not own their data.
-This allows data that is managed outside to be used within Ginkgo.
-Non-owning arrays are called views in Ginkgo.</p>
-<p>A non-owning array can be created with the helper function <code class="docutils literal notranslate"><span class="pre">make_array_view&lt;T&gt;(std::shared_ptr&lt;const</span> <span class="pre">Executor&gt;</span> <span class="pre">exec,</span> <span class="pre">size_type</span> <span class="pre">size,</span> <span class="pre">T*</span> <span class="pre">data)</span></code>.
-The memory <code class="docutils literal notranslate"><span class="pre">data</span></code> is <em>required</em> to be accessible by the executor <code class="docutils literal notranslate"><span class="pre">exec</span></code>.
-Also, the size must be less or equal to the number of elements allocated at <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Executor</span><span class="o">&gt;</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
-<span class="n">gko</span><span class="o">::</span><span class="n">size_type</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
-<span class="kt">double</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span><span class="w">  </span><span class="c1">//&lt; has to be accessible by exec</span>
-<span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">make_array_view</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>The above function only works with pointers to mutable data.
-If a view on const data needs to be created, then the function <code class="docutils literal notranslate"><span class="pre">make_const_array_view</span></code> has to be used.
-This will create an ‘array-like’ view object, which can then either copied into a mutable array, or passed into Ginkgo functions that can handle this type.
-Typically this will be <code class="docutils literal notranslate"><span class="pre">create_const</span></code> functions which the Ginkgo matrix types provide.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Executor</span><span class="o">&gt;</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
-<span class="n">gko</span><span class="o">::</span><span class="n">size_type</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
-<span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">make_const_array_view</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span><span class="w">  </span><span class="c1">//&lt; the returned type is an implementation detail </span>
-<span class="w">                                                           </span><span class="c1">//&lt; and should not be relied upon</span>
-</pre></div>
-</div>
-<p>The owning status of an</p>
-<p>Certain functionality will not be available for non-owning arrays.
-The <code class="docutils literal notranslate"><span class="pre">reset_and_resize</span></code> function will throw, if the new size is different from the current size.</p>
-</section>
 <section id="copy-move">
-<span id="id2"></span><h2>Copy &amp; Move<a class="headerlink" href="#copy-move" title="Link to this heading">¶</a></h2>
+<span id="id1"></span><h2>Copy &amp; Move<a class="headerlink" href="#copy-move" title="Link to this heading">¶</a></h2>
+<p>It is important to note that a copy or move assignment will <strong>never</strong> change the executor of either array.
+This allows an convenient approach to cross-device memory movement.</p>
 <ul class="simple">
 <li><p>executor conservation</p></li>
 <li><p>cross executor copy/move</p></li>
 <li><p>view behavior</p></li>
 <li><p>const views</p></li>
 </ul>
+<div class="toctree-wrapper compound">
+</div>
 </section>
 </section>
 
@@ -447,23 +427,23 @@ The <code class="docutils literal notranslate"><span class="pre">reset_and_resiz
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="matrices.html">
+          <a class="next-page" href="arrays/ownership.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Matrices</div>
+                <div class="title">Ownership</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="build-install.windows.html">
+          <a class="prev-page" href="matrices.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Building Ginkgo in Windows</div>
+                <div class="title">Matrices</div>
                 
               </div>
             </a>
@@ -497,13 +477,12 @@ The <code class="docutils literal notranslate"><span class="pre">reset_and_resiz
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Arrays</a><ul>
-<li><a class="reference internal" href="#construction">Construction</a></li>
+<li><a class="reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">gko::array</span></code></a><ul>
+<li><a class="reference internal" href="#creating">Creating</a></li>
 <li><a class="reference internal" href="#using">Using</a><ul>
 <li><a class="reference internal" href="#resetting-and-resizing">Resetting and Resizing</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ownership">Ownership</a></li>
 <li><a class="reference internal" href="#copy-move">Copy &amp; Move</a></li>
 </ul>
 </li>

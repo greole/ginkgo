@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Linear Operators" href="linear-operators.html" /><link rel="prev" title="Arrays" href="arrays.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="gko::array" href="arrays.html" /><link rel="prev" title="&lt;no title&gt;" href="vectors/user-data.html" />
         <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/matrices.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
@@ -219,15 +219,21 @@
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="build-install.html">Configuring, Building, and Installing</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="build-install.system-requirements.html">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.cmake-options.html">CMake Option List</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.tpl.html">Third Party Libraries and Packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.hip.html">Building Ginkgo with HIP support</a></li>
-<li class="toctree-l2"><a class="reference internal" href="build-install.windows.html">Building Ginkgo in Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/system-requirements.html">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/cmake-options.html">CMake Option List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/tpl.html">Third Party Libraries and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/hip.html">Building Ginkgo with HIP support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arrays.html">Arrays</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Matrices</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
 </ul>
 
@@ -249,7 +255,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/user-guide/matrices.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/user-guide/matrices.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -269,14 +275,18 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="matrices">
+          <section class="tex2jax_ignore mathjax_ignore" id="matrices">
 <h1>Matrices<a class="headerlink" href="#matrices" title="Link to this heading">¶</a></h1>
 <ul class="simple">
 <li><p>getting data into matrices</p></li>
-<li><p>special cases:
-- matrix * matrix
-- identity + matrix
-- diagonal matrix * matrix</p></li>
+<li><p>special cases:</p>
+<ul>
+<li><p>matrix * matrix</p></li>
+<li><p>identity + matrix</p></li>
+<li><p>diagonal matrix * matrix</p></li>
+</ul>
+</li>
+<li><p>only discuss csr here</p></li>
 </ul>
 </section>
 
@@ -285,23 +295,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="linear-operators.html">
+          <a class="next-page" href="arrays.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Linear Operators</div>
+                <div class="title"><code class="docutils literal notranslate"><span class="pre">gko::array</span></code></div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="arrays.html">
+          <a class="prev-page" href="vectors/user-data.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Arrays</div>
+                <div class="title">&lt;no title&gt;</div>
                 
               </div>
             </a>
