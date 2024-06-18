@@ -1,0 +1,524 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Matrices" href="matrices.html" /><link rel="prev" title="Building Ginkgo in Windows" href="build-install.windows.html" />
+        <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/arrays.html" />
+
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
+        <title>Arrays - Ginkgo 1.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=387cc868" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" /
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Ginkgo 1.9.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Ginkgo 1.9.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="getting-started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="build-install.html">Configuring, Building, and Installing</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="build-install.system-requirements.html">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install.cmake-options.html">CMake Option List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install.tpl.html">Third Party Libraries and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install.hip.html">Building Ginkgo with HIP support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install.windows.html">Building Ginkgo in Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/user-guide/arrays.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="arrays">
+<h1>Arrays<a class="headerlink" href="#arrays" title="Link to this heading">¶</a></h1>
+<p>The basic container for contiguous storage is the <code class="docutils literal notranslate"><span class="pre">array&lt;T&gt;</span></code> class.
+It is templated by the storage type.
+This type should be built-in type, or a struct of built-in types,
+which includes for example <code class="docutils literal notranslate"><span class="pre">double</span></code>, <code class="docutils literal notranslate"><span class="pre">single</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">std::complex&lt;T&gt;</span></code>.
+Such a type is often referred to as  a <a class="reference external" href="https://en.cppreference.com/w/cpp/language/classes#POD_class">POD type</a>.
+The type <strong>may not</strong> be const-qualified.
+Handling constant data is done through const-qualifying the whole array.</p>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>Some functionality is not available for all storage types.
+The restrictions will be noted below.
+Wrongful usage will only be caught at link-time, where the error might be similar to: <code class="docutils literal notranslate"><span class="pre">undefined</span> <span class="pre">reference</span> <span class="pre">to</span> <span class="pre">gko::array&lt;T&gt;::fill(T)</span></code>.</p>
+</div>
+<section id="construction">
+<h2>Construction<a class="headerlink" href="#construction" title="Link to this heading">¶</a></h2>
+<p>An array is constructed from an <code class="docutils literal notranslate"><span class="pre">Executor</span></code> and the number of stored objects:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">Executor</span><span class="o">&gt;</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">size_type</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>After construction, the stored memory of the array is <em>not</em> initialized.</p>
+</div>
+<p>To create an array that is already filled with data, an initializer list can be passed instead of the size parameter.
+An array with the elements <code class="docutils literal notranslate"><span class="pre">[1.0,</span> <span class="pre">2.0,</span> <span class="pre">3.0]</span></code> can be created as shown in the following.
+Note that although the initializer list lives in CPU memory, the created array will put the elements into the memory
+space defined by the executor.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">});</span>
+</pre></div>
+</div>
+<p>An alternative is to use begin and end iterators from a container with CPU data.
+The data from the container is then copied into the array.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="w"> </span><span class="n">std_c</span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">};</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">std_c</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">std_c</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</pre></div>
+</div>
+<p>It is also possible to default create an array:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">d</span><span class="p">;</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">e</span><span class="p">(</span><span class="n">exec</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The first array <code class="docutils literal notranslate"><span class="pre">d</span></code> stores zero elements, and it is not associated with any executor.
+The second array <code class="docutils literal notranslate"><span class="pre">e</span></code> also stores zero elements, but it is associated with the executor <code class="docutils literal notranslate"><span class="pre">exec</span></code>.
+The difference between both is mostly relevant for <a class="reference internal" href="#copy-move">copy and move operations</a>.</p>
+</section>
+<section id="using">
+<h2>Using<a class="headerlink" href="#using" title="Link to this heading">¶</a></h2>
+<p>The main access to the stored data of an array is through the functions <code class="docutils literal notranslate"><span class="pre">get_data</span></code>, and <code class="docutils literal notranslate"><span class="pre">get_const_data</span></code>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="o">*</span><span class="w"> </span><span class="n">a_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">get_data</span><span class="p">();</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="o">*</span><span class="w"> </span><span class="n">a_const_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">get_const_data</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">get_data</span></code> function is only available on non-const arrays.
+If the array has been default allocated, or the size is zero, then the returned pointers will be <code class="docutils literal notranslate"><span class="pre">nullptr</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The pattern of having two accessors <code class="docutils literal notranslate"><span class="pre">get_&lt;something&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">get_const_&lt;something&gt;</span></code>,
+one for mutable and one for const access respectively, is very common for Ginkgo types.
+For <code class="docutils literal notranslate"><span class="pre">const</span></code> objects, this means that only the <code class="docutils literal notranslate"><span class="pre">get_const_&lt;something&gt;</span></code> accessor will be available,
+making mutable access (nearly) impossible.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The memory addresses returned by both functions will be on the backend defined by the executor.
+For example, if the array was created with an <code class="docutils literal notranslate"><span class="pre">CudaExecutor</span></code>, then the memory will be on the GPU device.
+Thus the memory can only be accessed on the device.</p>
+</div>
+<p>The number of stored elements can be queried with <code class="docutils literal notranslate"><span class="pre">get_size</span></code>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">size_type</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">get_size</span><span class="p">();</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">size</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>It is also possible to get back the <code class="docutils literal notranslate"><span class="pre">Executor</span></code> used to create an array with <code class="docutils literal notranslate"><span class="pre">get_executor</span></code>.
+In case of a default constructed array without executor, this will return a <code class="docutils literal notranslate"><span class="pre">nullptr</span></code>.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">Executor</span><span class="o">&gt;</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">get_executor</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The whole array might be set to a single value with <code class="docutils literal notranslate"><span class="pre">fill(T</span> <span class="pre">value)</span></code>.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+<span class="n">a</span><span class="p">.</span><span class="n">fill</span><span class="p">(</span><span class="mf">1.1</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Since this operation might require kernel calls depending on the backend, it is not available for any storage type.
+The supported types are:</p>
+<ul class="simple">
+<li><p>real and complex floating point types, i.e. <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">double</span></code>, <code class="docutils literal notranslate"><span class="pre">std::complex&lt;float&gt;</span></code>, and <code class="docutils literal notranslate"><span class="pre">std::complex&lt;double&gt;</span></code></p></li>
+<li><p>index and size types, i.e. <code class="docutils literal notranslate"><span class="pre">int32</span></code>, <code class="docutils literal notranslate"><span class="pre">int64</span></code>, and <code class="docutils literal notranslate"><span class="pre">size_type</span></code></p></li>
+</ul>
+<p>So the following would result in an error at link-time:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">POD</span><span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">POD</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pod_arr</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+<span class="n">pod_arr</span><span class="p">.</span><span class="n">fill</span><span class="p">(</span><span class="n">POD</span><span class="p">{</span><span class="mi">4</span><span class="p">});</span><span class="w">  </span><span class="c1">//&lt; this will result in a link-time error</span>
+</pre></div>
+</div>
+<section id="resetting-and-resizing">
+<h3>Resetting and Resizing<a class="headerlink" href="#resetting-and-resizing" title="Link to this heading">¶</a></h3>
+<p>The array may be resized with the function <code class="docutils literal notranslate"><span class="pre">resize_and_reset(gko::size_type</span> <span class="pre">size)</span></code>.
+As the name suggest, the stored content will be reset.
+If the <code class="docutils literal notranslate"><span class="pre">size</span></code> is the same as the current number of stored, the array will not be changed.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="p">.</span><span class="n">resize_and_reset</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">get_size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="warning admonition">
+<p class="admonition-title">Exceptions</p>
+<p>This throws an exception if the array is not associated with an executor, e.g. if it was default constructed.
+It will also throw if the array is non-owning, see <a class="reference internal" href="#ownership"><span class="std std-ref">Ownership</span></a>.</p>
+</div>
+<p>To set the number of elements to zero, the function <code class="docutils literal notranslate"><span class="pre">clear</span></code> can be used.
+Afterward, the accessors <code class="docutils literal notranslate"><span class="pre">get_data</span></code> and <code class="docutils literal notranslate"><span class="pre">get_const_data</span></code> will return <code class="docutils literal notranslate"><span class="pre">nullptr</span></code>.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">get_size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>It is also possible to change the associated executor with <code class="docutils literal notranslate"><span class="pre">set_executor(std::shared_ptr&lt;const</span> <span class="pre">Executor&gt;</span> <span class="pre">exec)</span></code>.
+If the new executor is different from the current executor, the data will be copied over to the memory space defined by the new executor.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">(</span><span class="n">omp_exec</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">});</span>
+<span class="n">a</span><span class="p">.</span><span class="n">set_executor</span><span class="p">(</span><span class="n">hip_exec</span><span class="p">);</span><span class="w">  </span><span class="c1">//&lt; the values [1.0, 2.0, 3.0] are now in GPU memory</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ownership">
+<span id="id1"></span><h2>Ownership<a class="headerlink" href="#ownership" title="Link to this heading">¶</a></h2>
+<p>The class supports two modes of ownership over the stored data.
+Ownership of the data is defined here as being responsible for freeing the data when it’s not used anymore.
+Usually, the array owns it’s data, meaning the array will free the data, once the array itself is freed.
+But it is also possible to create arrays, which do not own their data.
+This allows data that is managed outside to be used within Ginkgo.
+Non-owning arrays are called views in Ginkgo.</p>
+<p>A non-owning array can be created with the helper function <code class="docutils literal notranslate"><span class="pre">make_array_view&lt;T&gt;(std::shared_ptr&lt;const</span> <span class="pre">Executor&gt;</span> <span class="pre">exec,</span> <span class="pre">size_type</span> <span class="pre">size,</span> <span class="pre">T*</span> <span class="pre">data)</span></code>.
+The memory <code class="docutils literal notranslate"><span class="pre">data</span></code> is <em>required</em> to be accessible by the executor <code class="docutils literal notranslate"><span class="pre">exec</span></code>.
+Also, the size must be less or equal to the number of elements allocated at <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Executor</span><span class="o">&gt;</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">size_type</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="kt">double</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span><span class="w">  </span><span class="c1">//&lt; has to be accessible by exec</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">make_array_view</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The above function only works with pointers to mutable data.
+If a view on const data needs to be created, then the function <code class="docutils literal notranslate"><span class="pre">make_const_array_view</span></code> has to be used.
+This will create an ‘array-like’ view object, which can then either copied into a mutable array, or passed into Ginkgo functions that can handle this type.
+Typically this will be <code class="docutils literal notranslate"><span class="pre">create_const</span></code> functions which the Ginkgo matrix types provide.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">Executor</span><span class="o">&gt;</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">size_type</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">make_const_array_view</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span><span class="w">  </span><span class="c1">//&lt; the returned type is an implementation detail </span>
+<span class="w">                                                           </span><span class="c1">//&lt; and should not be relied upon</span>
+</pre></div>
+</div>
+<p>The owning status of an</p>
+<p>Certain functionality will not be available for non-owning arrays.
+The <code class="docutils literal notranslate"><span class="pre">reset_and_resize</span></code> function will throw, if the new size is different from the current size.</p>
+</section>
+<section id="copy-move">
+<span id="id2"></span><h2>Copy &amp; Move<a class="headerlink" href="#copy-move" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>executor conservation</p></li>
+<li><p>cross executor copy/move</p></li>
+<li><p>view behavior</p></li>
+<li><p>const views</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="matrices.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Matrices</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="build-install.windows.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Building Ginkgo in Windows</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, The Ginkgo Authors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Arrays</a><ul>
+<li><a class="reference internal" href="#construction">Construction</a></li>
+<li><a class="reference internal" href="#using">Using</a><ul>
+<li><a class="reference internal" href="#resetting-and-resizing">Resetting and Resizing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ownership">Ownership</a></li>
+<li><a class="reference internal" href="#copy-move">Copy &amp; Move</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c4cb232b"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=4e2eecee"></script>
+    </body>
+</html>

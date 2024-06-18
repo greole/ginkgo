@@ -1,0 +1,473 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Third Party Libraries and Packages" href="build-install.tpl.html" /><link rel="prev" title="System Requirements" href="build-install.system-requirements.html" />
+        <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/build-install.cmake-options.html" />
+
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
+        <title>CMake Option List - Ginkgo 1.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=387cc868" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" /
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Ginkgo 1.9.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Ginkgo 1.9.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="getting-started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="build-install.html">Configuring, Building, and Installing</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Configuring, Building, and Installing</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="build-install.system-requirements.html">System Requirements</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">CMake Option List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install.tpl.html">Third Party Libraries and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install.hip.html">Building Ginkgo with HIP support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-install.windows.html">Building Ginkgo in Windows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="arrays.html">Arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/user-guide/build-install.cmake-options.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="cmake-option-list">
+<h1>CMake Option List<a class="headerlink" href="#cmake-option-list" title="Link to this heading">¶</a></h1>
+<p>The following discusses CMake options that are relevant to building Ginkgo.
+They are used by passing them to the configuration step by:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>-S<span class="w"> </span>&lt;...&gt;<span class="w"> </span>-B<span class="w"> </span>&lt;...&gt;<span class="w"> </span>-DOPTION1<span class="o">=</span>VAL1<span class="w"> </span>-DOPTION2<span class="o">=</span>VAL2<span class="w"> </span>...
+</pre></div>
+</div>
+<section id="ginkgo-specific-options">
+<h2>Ginkgo-Specific Options<a class="headerlink" href="#ginkgo-specific-options" title="Link to this heading">¶</a></h2>
+<p>All Ginkgo specific options are prefixed with <code class="docutils literal notranslate"><span class="pre">GINKGO_</span></code>.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_DEVEL_TOOLS={ON,</span> <span class="pre">OFF}</span></code> sets up the build system for development
+(requires pre-commit, will also download the clang-format pre-commit hook),
+default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>. The default behavior installs a pre-commit hook, which
+disables git commits.  If it is set to <code class="docutils literal notranslate"><span class="pre">ON</span></code>, a new pre-commit hook for
+formatting will be installed (enabling commits again). In both cases the
+hook may overwrite a user defined pre-commit hook when Ginkgo is used as
+a submodule.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_MIXED_PRECISION={ON,</span> <span class="pre">OFF}</span></code> compiles true mixed-precision kernels
+instead of converting data on the fly, default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.
+Enabling this flag increases the library size, but improves performance of
+mixed-precision kernels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_TESTS={ON,</span> <span class="pre">OFF}</span></code> builds Ginkgo’s tests
+(will download googletest), default is <code class="docutils literal notranslate"><span class="pre">ON</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_FAST_TESTS={ON,</span> <span class="pre">OFF}</span></code> reduces the input sizes for a few slow tests
+to speed them up, default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_BENCHMARKS={ON,</span> <span class="pre">OFF}</span></code> builds Ginkgo’s benchmarks
+(will download gflags and nlohmann-json), default is <code class="docutils literal notranslate"><span class="pre">ON</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_EXAMPLES={ON,</span> <span class="pre">OFF}</span></code> builds Ginkgo’s examples, default is <code class="docutils literal notranslate"><span class="pre">ON</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_EXTLIB_EXAMPLE={ON,</span> <span class="pre">OFF}</span></code> builds the interfacing example
+with deal.II, default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_REFERENCE={ON,</span> <span class="pre">OFF}</span></code> build reference implementations of the
+kernels, useful for testing, default is <code class="docutils literal notranslate"><span class="pre">ON</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_OMP={ON,</span> <span class="pre">OFF}</span></code> builds optimized OpenMP versions of the kernels,
+default is <code class="docutils literal notranslate"><span class="pre">ON</span></code> if the selected C++ compiler supports OpenMP, <code class="docutils literal notranslate"><span class="pre">OFF</span></code> otherwise.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_CUDA={ON,</span> <span class="pre">OFF}</span></code> builds optimized cuda versions of the kernels
+(requires CUDA), default is <code class="docutils literal notranslate"><span class="pre">ON</span></code> if a CUDA compiler could be detected,
+<code class="docutils literal notranslate"><span class="pre">OFF</span></code> otherwise.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_DPCPP={ON,</span> <span class="pre">OFF}</span></code> is deprecated. Please use <code class="docutils literal notranslate"><span class="pre">GINKGO_BUILD_SYCL</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_SYCL={ON,</span> <span class="pre">OFF}</span></code> builds optimized SYCL versions of the
+kernels (requires <code class="docutils literal notranslate"><span class="pre">CMAKE_CXX_COMPILER</span></code> to be set to the <code class="docutils literal notranslate"><span class="pre">dpcpp</span></code> or <code class="docutils literal notranslate"><span class="pre">icpx</span></code> compiler).
+The default is <code class="docutils literal notranslate"><span class="pre">ON</span></code> if <code class="docutils literal notranslate"><span class="pre">CMAKE_CXX_COMPILER</span></code> is a SYCL compiler, <code class="docutils literal notranslate"><span class="pre">OFF</span></code>
+otherwise. Due to some differences in IEEE 754 floating point numberhandling in the Intel
+SYCL compilers, Ginkgo tests may fail unless compiled with
+<code class="docutils literal notranslate"><span class="pre">-DCMAKE_CXX_FLAGS=-ffp-model=precise</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_HIP={ON,</span> <span class="pre">OFF}</span></code> builds optimized HIP versions of the kernels
+(requires HIP), default is <code class="docutils literal notranslate"><span class="pre">ON</span></code> if an installation of HIP could be detected,
+<code class="docutils literal notranslate"><span class="pre">OFF</span></code> otherwise.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_HWLOC={ON,</span> <span class="pre">OFF}</span></code> builds Ginkgo with HWLOC. Default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_BUILD_DOC={ON,</span> <span class="pre">OFF}</span></code> creates an HTML version of Ginkgo’s documentation
+from inline comments in the code. The default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_DOC_GENERATE_EXAMPLES={ON,</span> <span class="pre">OFF}</span></code> generates the documentation of examples
+in Ginkgo. The default is <code class="docutils literal notranslate"><span class="pre">ON</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_DOC_GENERATE_PDF={ON,</span> <span class="pre">OFF}</span></code> generates a PDF version of Ginkgo’s
+documentation from inline comments in the code. The default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_DOC_GENERATE_DEV={ON,</span> <span class="pre">OFF}</span></code> generates the developer version of
+Ginkgo’s documentation. The default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_WITH_CLANG_TIDY={ON,</span> <span class="pre">OFF}</span></code> makes Ginkgo call <code class="docutils literal notranslate"><span class="pre">clang-tidy</span></code> to find
+programming issues. The path can be manually controlled with the CMake
+variable <code class="docutils literal notranslate"><span class="pre">-DGINKGO_CLANG_TIDY_PATH=&lt;path&gt;</span></code>. The default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_WITH_IWYU={ON,</span> <span class="pre">OFF}</span></code> makes Ginkgo call <code class="docutils literal notranslate"><span class="pre">iwyu</span></code> to find include
+issues. The path can be manually controlled with the CMake variable
+<code class="docutils literal notranslate"><span class="pre">-DGINKGO_IWYU_PATH=&lt;path&gt;</span></code>. The default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_CHECK_CIRCULAR_DEPS={ON,</span> <span class="pre">OFF}</span></code> enables compile-time checks for
+circular dependencies between different Ginkgo libraries and self-sufficient
+headers. Should only be used for development purposes. The default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_VERBOSE_LEVEL={0,</span> <span class="pre">1}</span></code> sets the verbosity of Ginkgo.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> disables all output in the main libraries,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> enables a few important messages related to unexpected behavior (default).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GINKGO_INSTALL_RPATH</span></code> allows setting any RPATH information when installing
+the Ginkgo libraries. If this is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>, the behavior is the same as if all
+other RPATH flags are set to <code class="docutils literal notranslate"><span class="pre">OFF</span></code> as well. The default is <code class="docutils literal notranslate"><span class="pre">ON</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GINKGO_INSTALL_RPATH_ORIGIN</span></code> adds $ORIGIN (Linux) or &#64;loader_path (MacOS)
+to the installation RPATH. The default is <code class="docutils literal notranslate"><span class="pre">ON</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GINKGO_INSTALL_RPATH_DEPENDENCIES</span></code> adds the dependencies to the
+installation RPATH. The default is <code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_JACOBI_FULL_OPTIMIZATIONS={ON,</span> <span class="pre">OFF}</span></code> use all the optimizations
+for the CUDA Jacobi algorithm. <code class="docutils literal notranslate"><span class="pre">OFF</span></code> by default. Setting this option to <code class="docutils literal notranslate"><span class="pre">ON</span></code>
+may lead to very slow compile time (&gt;20 minutes) for the
+<code class="docutils literal notranslate"><span class="pre">jacobi_generate_kernels.cu</span></code> file and high memory usage.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DGINKGO_CUDA_ARCHITECTURES=&lt;list&gt;</span></code> where <code class="docutils literal notranslate"><span class="pre">&lt;list&gt;</span></code> is a semicolon (<code class="docutils literal notranslate"><span class="pre">;</span></code>) separated
+list of architectures. Supported values are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Auto</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Kepler</span></code>, <code class="docutils literal notranslate"><span class="pre">Maxwell</span></code>, <code class="docutils literal notranslate"><span class="pre">Pascal</span></code>, <code class="docutils literal notranslate"><span class="pre">Volta</span></code>, <code class="docutils literal notranslate"><span class="pre">Turing</span></code>, <code class="docutils literal notranslate"><span class="pre">Ampere</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">Auto</span></code> will automatically detect the present CUDA-enabled GPU architectures
+in the system. <code class="docutils literal notranslate"><span class="pre">Kepler</span></code>, <code class="docutils literal notranslate"><span class="pre">Maxwell</span></code>, <code class="docutils literal notranslate"><span class="pre">Pascal</span></code>, <code class="docutils literal notranslate"><span class="pre">Volta</span></code> and <code class="docutils literal notranslate"><span class="pre">Ampere</span></code> will add flags for
+all architectures of that particular NVIDIA GPU generation. It is advised to use
+the non-Ginkgo option <code class="docutils literal notranslate"><span class="pre">CMAKE_CUDA_ARCHITECTURES</span></code> as described below instead.</p>
+</li>
+</ul>
+</section>
+<section id="important-non-ginkgo-specific-options">
+<h2>Important Non-Ginkgo-Specific Options<a class="headerlink" href="#important-non-ginkgo-specific-options" title="Link to this heading">¶</a></h2>
+<p>These are options that as defined by CMake.
+Only a selection of the most relevant options is given here, the full list is available
+<a class="reference external" href="https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html">here</a>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-DCMAKE_BUILD_TYPE=type</span></code> specifies which configuration will be used for
+this build of Ginkgo. The default is <code class="docutils literal notranslate"><span class="pre">RELEASE</span></code>. Supported values are CMake’s
+standard build types such as <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code> and <code class="docutils literal notranslate"><span class="pre">RELEASE</span></code> and the Ginkgo specific
+<code class="docutils literal notranslate"><span class="pre">COVERAGE</span></code>, <code class="docutils literal notranslate"><span class="pre">ASAN</span></code> (AddressSanitizer), <code class="docutils literal notranslate"><span class="pre">LSAN</span></code> (LeakSanitizer), <code class="docutils literal notranslate"><span class="pre">TSAN</span></code>
+(ThreadSanitizer) and <code class="docutils literal notranslate"><span class="pre">UBSAN</span></code> (undefined behavior sanitizer) types. <a class="reference external" href="https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html#variable:CMAKE_BUILD_TYPE">link</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DCMAKE_CXX_COMPILER=path</span></code>, <code class="docutils literal notranslate"><span class="pre">-DCMAKE_CUDA_COMPILER=path</span></code>, <code class="docutils literal notranslate"><span class="pre">-DCMAKE_HIP_COMPILER=path</span></code> set
+the compiler for the respective language. <a class="reference external" href="https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER.html">link</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DCMAKE_&lt;LANG&gt;_HOST_COMPILER=path</span></code> instructs the build system to explicitly
+set <LANG>’s (either CUDA or HIP) host compiler to the path given as argument. By default, <LANG>
+uses its toolchain’s host compiler. Setting this option may help if you’re
+experiencing linking errors due to ABI incompatibilities. <a class="reference external" href="https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_HOST_COMPILER.html#variable:CMAKE_%3CLANG%3E_HOST_COMPILER">link</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DCMAKE_CUDA_ARCHITECTURES=&quot;gpuarch1;gpuarch2&quot;</span></code> the NVIDIA targets to be passed to the compiler.
+If empty, compiler chooses based on the available GPUs. <a class="reference external" href="https://cmake.org/cmake/help/latest/variable/CMAKE_CUDA_ARCHITECTURES.html#cmake-cuda-architectures">link</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DCMAKE_HIP_ARCHITECTURES=&quot;gpuarch1;gpuarch2&quot;</span></code> the AMDGPU targets to be passed to the compiler.
+If empty, compiler chooses based on the available GPUs. <a class="reference external" href="https://cmake.org/cmake/help/latest/variable/CMAKE_HIP_ARCHITECTURES.html#cmake-hip-architectures">link</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DCMAKE_INSTALL_PREFIX=path</span></code> sets the installation path for <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code>.
+The default value is usually something like <code class="docutils literal notranslate"><span class="pre">/usr/local</span></code>. <a class="reference external" href="https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html#variable:CMAKE_INSTALL_PREFIX">link</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DBUILD_SHARED_LIBS={ON,</span> <span class="pre">OFF}</span></code> builds ginkgo as shared libraries (<code class="docutils literal notranslate"><span class="pre">OFF</span></code>)
+or as dynamic libraries (<code class="docutils literal notranslate"><span class="pre">ON</span></code>), default is <code class="docutils literal notranslate"><span class="pre">ON</span></code>. <a class="reference external" href="https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html#variable:BUILD_SHARED_LIBS">link</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-DCMAKE_EXPORT_PACKAGE_REGISTRY={ON,OFF}</span></code> if set to <code class="docutils literal notranslate"><span class="pre">ON</span></code> the build directory will
+be stored in the current user’s CMake package registry. <a class="reference external" href="https://cmake.org/cmake/help/latest/variable/CMAKE_EXPORT_PACKAGE_REGISTRY.html#cmake-export-package-registry">link</a></p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="build-install.tpl.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Third Party Libraries and Packages</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="build-install.system-requirements.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">System Requirements</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, The Ginkgo Authors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">CMake Option List</a><ul>
+<li><a class="reference internal" href="#ginkgo-specific-options">Ginkgo-Specific Options</a></li>
+<li><a class="reference internal" href="#important-non-ginkgo-specific-options">Important Non-Ginkgo-Specific Options</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c4cb232b"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=4e2eecee"></script>
+    </body>
+</html>
