@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="gko::array" href="arrays.html" /><link rel="prev" title="&lt;no title&gt;" href="vectors/user-data.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="&lt;no title&gt;" href="matrices/coo.html" /><link rel="prev" title="&lt;no title&gt;" href="vectors/user-data.html" />
         <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/matrices.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
@@ -193,7 +193,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -226,15 +226,35 @@
 <li class="toctree-l2"><a class="reference internal" href="build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1"><a class="reference internal" href="executors.html">Executor</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="vectors/dim.html"><code class="docutils literal notranslate"><span class="pre">gko::dim&lt;N&gt;</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Matrices</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Matrices</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Matrices</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="matrices/csr.html"><code class="docutils literal notranslate"><span class="pre">gko::matrix::Csr</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="linear-solvers.html">Linear Solvers</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="distributed.html">Distributed Computations</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Distributed Computations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="distributed/communicator.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::mpi::communicator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/communicator.html#mpi-environment">MPI Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/partition.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Partition</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/vectors.html">Distributed Vectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/matrices.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Matrix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/solvers.html">Distributed Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/preconditioners.html">Distributed Preconditioners</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="object-configuration.html">Object Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixed-precision.html">Mixed Precision</a></li>
 </ul>
 
 </div>
@@ -269,7 +289,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -278,16 +298,65 @@
           <section class="tex2jax_ignore mathjax_ignore" id="matrices">
 <h1>Matrices<a class="headerlink" href="#matrices" title="Link to this heading">¶</a></h1>
 <ul class="simple">
-<li><p>getting data into matrices</p></li>
-<li><p>special cases:</p>
+<li><p>matrices created with <code class="docutils literal notranslate"><span class="pre">gko::matrix::&lt;format&gt;::create(...)</span></code></p></li>
+<li><p>sets executor</p></li>
+<li><p>may provide dimensions</p></li>
+<li><p>additional settings, e.g. Csr strategy, or max number of elements per row</p></li>
+<li><p>fill matrix entries with <code class="docutils literal notranslate"><span class="pre">read</span></code></p>
 <ul>
-<li><p>matrix * matrix</p></li>
-<li><p>identity + matrix</p></li>
-<li><p>diagonal matrix * matrix</p></li>
+<li><p>dimensions set by create will be overriden</p></li>
+<li><p>ref <a class="reference internal" href="matrices/matrix_data.html"><span class="std std-doc">gko::matrix_data</span></a></p></li>
 </ul>
 </li>
-<li><p>only discuss csr here</p></li>
+<li><p>alternative provide already filled arrays to <code class="docutils literal notranslate"><span class="pre">create</span></code></p>
+<ul>
+<li><p>arrays depend on format</p></li>
 </ul>
+</li>
+<li><p>matrices can be applied to vectors by <code class="docutils literal notranslate"><span class="pre">apply</span></code></p></li>
+</ul>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Dense</span><span class="o">&lt;&gt;&gt;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Dense</span><span class="o">&lt;&gt;&gt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Dense</span><span class="o">&lt;&gt;&gt;</span><span class="w"> </span><span class="n">alpha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span><span class="w"> </span><span class="c1">// 1x1 vector</span>
+<span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Dense</span><span class="o">&lt;&gt;&gt;</span><span class="w"> </span><span class="n">beta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span><span class="w"> </span><span class="c1">// 1x1 vector</span>
+<span class="n">gko</span><span class="o">::</span><span class="n">matrix_data</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">md</span><span class="p">(...);</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Csr</span><span class="o">&lt;&gt;::</span><span class="n">create</span><span class="p">(</span><span class="n">exec</span><span class="p">);</span>
+<span class="n">A</span><span class="o">-&gt;</span><span class="n">read</span><span class="p">(</span><span class="n">md</span><span class="p">);</span>
+
+<span class="n">A</span><span class="o">-&gt;</span><span class="n">apply</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">               </span><span class="c1">// x = A * b</span>
+<span class="n">A</span><span class="o">-&gt;</span><span class="n">apply</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">beta</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">  </span><span class="c1">// x = alpha * A * b + beta * x</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>dimension checking in apply</p></li>
+</ul>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Dense</span><span class="o">&lt;&gt;::</span><span class="n">create</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">dim</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Dense</span><span class="o">&lt;&gt;::</span><span class="n">create</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">dim</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Csr</span><span class="o">&lt;&gt;::</span><span class="n">create</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">dim</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">});</span>
+<span class="n">A</span><span class="o">-&gt;</span><span class="n">apply</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">   </span><span class="c1">// works</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">b2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">matrix</span><span class="o">::</span><span class="n">Dense</span><span class="o">&lt;&gt;::</span><span class="n">create</span><span class="p">(</span><span class="n">exec</span><span class="p">,</span><span class="w"> </span><span class="n">gko</span><span class="o">::</span><span class="n">dim</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">});</span>
+<span class="n">A</span><span class="o">-&gt;</span><span class="n">apply</span><span class="p">(</span><span class="n">b2</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">  </span><span class="c1">// throws exception</span>
+</pre></div>
+</div>
+<section id="matrix-formats">
+<h2>Matrix Formats<a class="headerlink" href="#matrix-formats" title="Link to this heading">¶</a></h2>
+<p>The format with the most features is <a class="reference internal" href="matrices/csr.html"><span class="std std-doc">gko::matrix::Csr</span></a>.
+Almost all other formats can be converted to and from Csr.
+Many algorithms also require their input as Csr matrices, so if a matrix in a different format is provided,
+it might get converted to Csr beforehand.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="matrices/csr.html"><code class="docutils literal notranslate"><span class="pre">gko::matrix::Csr</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="matrices/csr.html#creating">Creating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrices/csr.html#supported-operations">Supported Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrices/csr.html#strategies">Strategies</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 </section>
 
         </article>
@@ -295,12 +364,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="arrays.html">
+          <a class="next-page" href="matrices/coo.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title"><code class="docutils literal notranslate"><span class="pre">gko::array</span></code></div>
+                <div class="title">&lt;no title&gt;</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -333,8 +402,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Matrices</a><ul>
+<li><a class="reference internal" href="#matrix-formats">Matrix Formats</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

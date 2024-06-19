@@ -3,11 +3,11 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Distributed Solvers" href="solvers.html" /><link rel="prev" title="Distributed Vectors" href="vectors.html" />
         <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/distributed/matrices.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>&lt;no title&gt; - Ginkgo 1.9.0 documentation</title>
+        <title>gko::experimental::distributed::Matrix - Ginkgo 1.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
@@ -193,7 +193,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -214,7 +214,7 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../getting-started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
@@ -226,15 +226,35 @@
 <li class="toctree-l2"><a class="reference internal" href="../build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1"><a class="reference internal" href="../executors.html">Executor</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../vectors/dim.html"><code class="docutils literal notranslate"><span class="pre">gko::dim&lt;N&gt;</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../matrices.html">Matrices</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../arrays/ownership.html">Ownership</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../matrices.html">Matrices</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Matrices</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../matrices/csr.html"><code class="docutils literal notranslate"><span class="pre">gko::matrix::Csr</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../linear-solvers.html">Linear Solvers</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../distributed.html">Distributed Computations</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Distributed Computations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="communicator.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::mpi::communicator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="communicator.html#mpi-environment">MPI Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="partition.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Partition</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectors.html">Distributed Vectors</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Matrix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Distributed Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preconditioners.html">Distributed Preconditioners</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../linear-operators.html">Linear Operators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../object-configuration.html">Object Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../extensions.html">Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mixed-precision.html">Mixed Precision</a></li>
 </ul>
 
 </div>
@@ -269,20 +289,96 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          
+          <section class="tex2jax_ignore mathjax_ignore" id="gko-experimental-distributed-matrix">
+<h1><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Matrix</span></code><a class="headerlink" href="#gko-experimental-distributed-matrix" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>template parameters</p></li>
+</ul>
+<section id="distribution-pattern">
+<h2>Distribution Pattern<a class="headerlink" href="#distribution-pattern" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>row-wise distributed</p></li>
+<li><p>local rows are split by column distribution</p>
+<ul>
+<li><p>column distribution may be different than row distribution</p></li>
+</ul>
+</li>
+<li><p>matrix entries with row and column index owned by the current process are called local</p>
+<ul>
+<li><p>if column index owned by other processes non-local</p></li>
+</ul>
+</li>
+<li><p>local and non-local entries are stored separately</p></li>
+<li><p>local in local matrix</p></li>
+<li><p>non-local in non-local matrix</p></li>
+<li><p>picture to show</p></li>
+<li><p>non-local matrix is compressed</p>
+<ul>
+<li><p>no column is completely zero</p></li>
+<li><p>requires reordering of columns</p></li>
+<li><p>can’t be inferred just by row and column partition</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="creating">
+<h2>Creating<a class="headerlink" href="#creating" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>default create + read</p>
+<ul>
+<li><p>changing matrix format</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="applying">
+<h2>Applying<a class="headerlink" href="#applying" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>apply to distr vectors</p></li>
+<li><p>collective communication</p></li>
+<li><p>has to be called on all processes in the communicator</p></li>
+<li><p>try to overlap comm with computation</p></li>
+</ul>
+</section>
+<section id="accessing-local-data">
+<h2>Accessing Local Data<a class="headerlink" href="#accessing-local-data" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>read only access to local + non-local</p></li>
+</ul>
+</section>
+</section>
+
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="solvers.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Distributed Solvers</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="vectors.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Distributed Vectors</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -301,8 +397,30 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Matrix</span></code></a><ul>
+<li><a class="reference internal" href="#distribution-pattern">Distribution Pattern</a></li>
+<li><a class="reference internal" href="#creating">Creating</a></li>
+<li><a class="reference internal" href="#applying">Applying</a></li>
+<li><a class="reference internal" href="#accessing-local-data">Accessing Local Data</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

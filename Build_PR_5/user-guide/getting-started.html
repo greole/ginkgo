@@ -226,15 +226,35 @@
 <li class="toctree-l2"><a class="reference internal" href="build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1"><a class="reference internal" href="executors.html">Executor</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="vectors/dim.html"><code class="docutils literal notranslate"><span class="pre">gko::dim&lt;N&gt;</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="matrices.html">Matrices</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Matrices</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="matrices/csr.html"><code class="docutils literal notranslate"><span class="pre">gko::matrix::Csr</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="linear-solvers.html">Linear Solvers</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="distributed.html">Distributed Computations</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Distributed Computations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="distributed/communicator.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::mpi::communicator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/communicator.html#mpi-environment">MPI Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/partition.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Partition</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/vectors.html">Distributed Vectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/matrices.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Matrix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/solvers.html">Distributed Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/preconditioners.html">Distributed Preconditioners</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="object-configuration.html">Object Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixed-precision.html">Mixed Precision</a></li>
 </ul>
 
 </div>
@@ -277,6 +297,9 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="getting-started">
 <h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>package manager</p></li>
+</ul>
 <section id="backends">
 <h2>Backends<a class="headerlink" href="#backends" title="Link to this heading">¶</a></h2>
 <p>Ginkgo supports running on the following architectures:</p>
@@ -301,7 +324,7 @@ The following backends are provided in Ginkgo:</p>
 </dd>
 </dl>
 <p>Multiple backends can be used at the same time.
-Which backends can be used only depends on the system, see <a class="reference internal" href="#build-install.system-requirements.md"><code class="xref myst docutils literal notranslate"><span class="pre">build-install.system-requirements.md</span></code></a> for more details.</p>
+Which backends can be used only depends on the system, see <a class="reference internal" href="build-install/system-requirements.html"><span class="std std-doc">System Requirements</span></a> for more details.</p>
 <p>The particular backend Ginkgo code runs on is chosen at runtime through an implementation of the <code class="docutils literal notranslate"><span class="pre">Executor</span></code> interface.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>

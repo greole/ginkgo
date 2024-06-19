@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Distributed Vectors" href="vectors.html" /><link rel="prev" title="gko::experimental::mpi::communicator" href="communicator.html" />
         <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/distributed/partition.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
@@ -193,7 +193,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -214,7 +214,7 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../getting-started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
@@ -226,15 +226,35 @@
 <li class="toctree-l2"><a class="reference internal" href="../build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1"><a class="reference internal" href="../executors.html">Executor</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../vectors.html">Vectors</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../vectors/dim.html"><code class="docutils literal notranslate"><span class="pre">gko::dim&lt;N&gt;</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../matrices.html">Matrices</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../arrays/ownership.html">Ownership</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../matrices.html">Matrices</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Matrices</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../matrices/csr.html"><code class="docutils literal notranslate"><span class="pre">gko::matrix::Csr</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../linear-solvers.html">Linear Solvers</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../distributed.html">Distributed Computations</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Distributed Computations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="communicator.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::mpi::communicator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="communicator.html#mpi-environment">MPI Environment</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Partition</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectors.html">Distributed Vectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrices.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Matrix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Distributed Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preconditioners.html">Distributed Preconditioners</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../linear-operators.html">Linear Operators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../object-configuration.html">Object Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../extensions.html">Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mixed-precision.html">Mixed Precision</a></li>
 </ul>
 
 </div>
@@ -269,7 +289,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -288,21 +308,20 @@
 <li><p>stored as collection of half-open intervals called ranges</p></li>
 <li><p>each range belongs to a part, i.e. process</p></li>
 </ul>
-</section>
-<section class="tex2jax_ignore mathjax_ignore" id="creating">
-<h1>Creating<a class="headerlink" href="#creating" title="Link to this heading">¶</a></h1>
+<section id="creating">
+<h2>Creating<a class="headerlink" href="#creating" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>partition can’t be changed after created</p></li>
 </ul>
 <section id="helper-functions">
-<h2>Helper Functions<a class="headerlink" href="#helper-functions" title="Link to this heading">¶</a></h2>
+<h3>Helper Functions<a class="headerlink" href="#helper-functions" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>create from local sizes/ranges</p></li>
 </ul>
 </section>
 </section>
-<section class="tex2jax_ignore mathjax_ignore" id="accessing">
-<h1>Accessing<a class="headerlink" href="#accessing" title="Link to this heading">¶</a></h1>
+<section id="accessing">
+<h2>Accessing<a class="headerlink" href="#accessing" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>only const accessors</p></li>
 <li><p>scalar query functions</p>
@@ -323,14 +342,33 @@
 </li>
 </ul>
 </section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="vectors.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Distributed Vectors</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="communicator.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title"><code class="docutils literal notranslate"><span class="pre">gko::experimental::mpi::communicator</span></code></div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -349,8 +387,31 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Partition</span></code></a><ul>
+<li><a class="reference internal" href="#creating">Creating</a><ul>
+<li><a class="reference internal" href="#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#accessing">Accessing</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

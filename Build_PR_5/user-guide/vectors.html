@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="&lt;no title&gt;" href="vectors/user-data.html" /><link rel="prev" title="Building Ginkgo in Windows" href="build-install/windows.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="gko::dim&lt;N&gt;" href="vectors/dim.html" /><link rel="prev" title="Executor" href="executors.html" />
         <link rel="canonical" href="https://greole.github.io/ginkgo/user-guide/vectors.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
@@ -226,15 +226,35 @@
 <li class="toctree-l2"><a class="reference internal" href="build-install/windows.html">Building Ginkgo in Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Vectors</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1"><a class="reference internal" href="executors.html">Executor</a></li>
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Vectors</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Vectors</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="vectors/dim.html"><code class="docutils literal notranslate"><span class="pre">gko::dim&lt;N&gt;</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="matrices.html">Matrices</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="matrices.html">Matrices</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Matrices</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="matrices/csr.html"><code class="docutils literal notranslate"><span class="pre">gko::matrix::Csr</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="linear-solvers.html">Linear Solvers</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="distributed.html">Distributed Computations</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Distributed Computations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="distributed/communicator.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::mpi::communicator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/communicator.html#mpi-environment">MPI Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/partition.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Partition</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/vectors.html">Distributed Vectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/matrices.html"><code class="docutils literal notranslate"><span class="pre">gko::experimental::distributed::Matrix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/solvers.html">Distributed Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed/preconditioners.html">Distributed Preconditioners</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="linear-operators.html">Linear Operators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="object-configuration.html">Object Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="arrays.html">Arrays</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Arrays</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="arrays/ownership.html">Ownership</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixed-precision.html">Mixed Precision</a></li>
 </ul>
 
 </div>
@@ -281,6 +301,9 @@
 <p>Objects of type <code class="docutils literal notranslate"><span class="pre">gko::matrix::Dense&lt;T&gt;</span></code> are managed through smart pointers.
 These behave like ‘normal’ pointers, except that they automatically manage the lifetime of the object.
 For more details on how Ginkgo uses smart pointers please refer to <a class="reference internal" href="#lifetime"><code class="xref myst docutils literal notranslate"><span class="pre">lifetime</span></code></a>.</p>
+<ul class="simple">
+<li><p>row-major storage format</p></li>
+</ul>
 <section id="creating">
 <h2>Creating<a class="headerlink" href="#creating" title="Link to this heading">¶</a></h2>
 <ul class="simple">
@@ -316,7 +339,7 @@ For more details on how Ginkgo uses smart pointers please refer to <a class="ref
 <section id="io">
 <h2>IO<a class="headerlink" href="#io" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>read/write from/to matrix data</p></li>
+<li><p>read/write from/to matrix data <a class="reference internal" href="matrices/matrix_data.html"><span class="std std-doc">gko::matrix_data</span></a></p></li>
 <li><p>mtx format for multiple columns is a single list, which has all entries in column major order</p></li>
 </ul>
 </section>
@@ -338,23 +361,23 @@ For more details on how Ginkgo uses smart pointers please refer to <a class="ref
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="vectors/user-data.html">
+          <a class="next-page" href="vectors/dim.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">&lt;no title&gt;</div>
+                <div class="title"><code class="docutils literal notranslate"><span class="pre">gko::dim&lt;N&gt;</span></code></div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="build-install/windows.html">
+          <a class="prev-page" href="executors.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Building Ginkgo in Windows</div>
+                <div class="title">Executor</div>
                 
               </div>
             </a>
