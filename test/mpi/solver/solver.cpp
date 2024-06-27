@@ -109,6 +109,64 @@ struct Cg : SimpleSolverTest<gko::solver::Cg<solver_value_type>> {
     }
 };
 
+struct Multigrid {
+    using solver_type = gko::solver::Multigrid;
+    using value_type = double;
+    using mixed_value_type = gko::next_precision<value_type>;
+    using local_index_type = gko::int32;
+    using global_index_type = gko::int64;
+    using dist_matrix_type =
+        gko::experimental::distributed::Matrix<value_type, local_index_type,
+                                               gko::int64>;
+    using non_dist_matrix_type =
+        gko::matrix::Csr<value_type, global_index_type>;
+    using dist_vector_type = gko::experimental::distributed::Vector<value_type>;
+    using non_dist_vector_type = gko::matrix::Dense<value_type>;
+    using mixed_dist_vector_type =
+        gko::experimental::distributed::Vector<mixed_value_type>;
+    using mixed_non_dist_vector_type = gko::matrix::Dense<mixed_value_type>;
+    using partition_type =
+        gko::experimental::distributed::Partition<local_index_type,
+                                                  global_index_type>;
+
+    static constexpr double tolerance() { return 10 * reduction_factor(); }
+
+    static constexpr gko::size_type iteration_count() { return 200u; }
+
+    static constexpr value_type reduction_factor() { return 1e-4; }
+
+    static void preprocess(
+        gko::matrix_data<value_type, global_index_type>& data)
+    {
+        gko::utils::make_diag_dominant(data, 1.5);
+    }
+
+    static void assert_empty_state(const solver_type* mtx)
+    {
+        ASSERT_FALSE(mtx->get_size());
+        ASSERT_EQ(mtx->get_system_matrix(), nullptr);
+    }
+
+    static bool blacklisted(const std::string& test) { return false; }
+
+    static typename solver_type::parameters_type build(
+        std::shared_ptr<const gko::Executor> exec)
+    {
+        auto mg =
+            gko::solver::Multigrid::build()
+                .with_mg_level(gko::multigrid::Pgm<solver_value_type>::build()
+                                   .with_deterministic(false))
+                .with_min_coarse_rows(
+                    16u)  // necessary since the test matrices have less
+                          // rows than the default value
+                .with_criteria(
+                    gko::stop::Iteration::build().with_max_iters(
+                        iteration_count()),
+                    gko::stop::ResidualNorm<value_type>::build()
+                        .with_baseline(gko::stop::mode::absolute)
+                        .with_reduction_factor(2 * reduction_factor()));
+    }
+};
 
 struct CgWithMg : SimpleSolverTest<gko::solver::Cg<solver_value_type>> {
     static void preprocess(
@@ -534,7 +592,7 @@ protected:
 
 using SolverTypes =
     ::testing::Types<Cg, CgWithMg, Cgs, Fcg, Bicgstab, Ir, Gcr<10u>, Gcr<100u>,
-                     Gmres<10u>, Gmres<100u>>;
+                     Gmres<10u>, Gmres<100u>, Multigrid>;
 
 TYPED_TEST_SUITE(Solver, SolverTypes, TypenameNameGenerator);
 
